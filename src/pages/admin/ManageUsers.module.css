@@ -1,0 +1,464 @@
+/* ManageUsers.module.css - Using YOUR color scheme */
+.manageUsers {
+  padding: 1.5rem;
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+/* Header - Using your green colors */
+.header {
+  background: linear-gradient(135deg, var(--dark-green), var(--green));
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.headerLeft {
+  position: relative;
+  z-index: 1;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: white;
+}
+
+.titleIcon {
+  background: rgba(255, 255, 255, 0.2);
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  backdrop-filter: blur(10px);
+}
+
+.subtitle {
+  font-size: 16px;
+  opacity: 0.9;
+  font-weight: 400;
+  margin: 0;
+}
+
+/* Control Panel */
+.controlPanel {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.panelTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--dark-green);
+  margin: 0;
+}
+
+.panelActions {
+  display: flex;
+  gap: 12px;
+}
+
+.panelBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: 1px solid var(--border-color);
+  background: white;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--gray);
+}
+
+.panelBtn:hover {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.panelBtn.primary {
+  background: var(--green);
+  border-color: var(--green);
+  color: white;
+}
+
+.panelBtn.primary:hover {
+  background: var(--dark-green);
+}
+
+/* Control Cards Grid */
+.controlGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.controlCard {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.controlCard:hover {
+  border-color: var(--green);
+  background: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(16, 185, 129, 0.1);
+}
+
+.controlCard.active {
+  border-color: var(--green);
+  background: white;
+}
+
+.controlIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-bottom: 1rem;
+  color: white;
+}
+
+.controlIcon.user {
+  background: linear-gradient(135deg, var(--green), var(--dark-green));
+}
+
+.controlIcon.lock {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.controlIcon.mail {
+  background: linear-gradient(135deg, var(--orange), #d97706);
+}
+
+.controlIcon.notification {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+.controlIcon.security {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.controlIcon.export {
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+}
+
+.controlTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--dark-green);
+  margin: 0 0 0.5rem 0;
+}
+
+.controlDescription {
+  font-size: 14px;
+  color: var(--gray);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Settings Section */
+.settingsSection {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  border: 1px solid var(--border-color);
+  margin-bottom: 2rem;
+}
+
+.settingsHeader {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--dark-green);
+  margin: 0 0 1.5rem 0;
+}
+
+.settingsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.settingGroup {
+  margin-bottom: 1.5rem;
+}
+
+.settingLabel {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dark-green);
+  margin-bottom: 0.5rem;
+}
+
+.settingInput {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--dark-green);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.settingInput:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.settingSelect {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--dark-green);
+  background: white;
+  cursor: pointer;
+  outline: none;
+}
+
+.settingSelect:focus {
+  border-color: var(--green);
+}
+
+.toggleSwitch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 30px;
+}
+
+.toggleSwitch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggleSlider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--border-color);
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+.toggleSlider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .toggleSlider {
+  background-color: var(--green);
+}
+
+input:checked + .toggleSlider:before {
+  transform: translateX(30px);
+}
+
+.settingRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.settingRow:last-child {
+  border-bottom: none;
+}
+
+.settingText {
+  flex: 1;
+}
+
+.settingName {
+  font-weight: 600;
+  color: var(--dark-green);
+  margin-bottom: 0.25rem;
+}
+
+.settingDescription {
+  font-size: 14px;
+  color: var(--gray);
+}
+
+/* Recent Activity */
+.activitySection {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  border: 1px solid var(--border-color);
+}
+
+.activityList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.activityItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 10px;
+  border-left: 4px solid var(--green);
+}
+
+.activityIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.activityContent {
+  flex: 1;
+}
+
+.activityTitle {
+  font-weight: 600;
+  color: var(--dark-green);
+  margin-bottom: 0.25rem;
+}
+
+.activityTime {
+  font-size: 14px;
+  color: var(--gray);
+}
+
+/* Action Buttons */
+.actionButtons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.actionBtn {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.actionBtn.save {
+  background: linear-gradient(135deg, var(--green), var(--dark-green));
+  color: white;
+}
+
+.actionBtn.save:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(6, 78, 59, 0.2);
+}
+
+.actionBtn.reset {
+  background: #f3f4f6;
+  color: var(--gray);
+  border: 1px solid var(--border-color);
+}
+
+.actionBtn.reset:hover {
+  background: #e5e7eb;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .controlGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .settingsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .controlGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .panelHeader {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .panelActions {
+    flex-direction: column;
+  }
+
+  .actionButtons {
+    flex-direction: column;
+  }
+}

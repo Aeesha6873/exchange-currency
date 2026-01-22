@@ -1,0 +1,336 @@
+/* FlightCard.module.css - Clean & Balanced */
+.flightCard {
+  --dark-green: #064e3b;
+  --green: #10b981;
+  --orange: #f97316;
+  --white: #ffffff;
+  --gray: #64748b;
+  --gray-light: #f1f5f9;
+  --border: #e2e8f0;
+}
+
+.flightCard {
+  /* background: var(--white); */
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: all 0.2s ease;
+}
+
+.flightCard:hover {
+  border-color: var(--green);
+}
+
+/* Header - Reduced spacing */
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.airlineInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.airlineLogo {
+  width: 36px;
+  height: 36px;
+  background: var(--dark-green);
+  color: var(--white);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.airlineDetails h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dark-green);
+  margin: 0;
+}
+
+.flightMeta {
+  font-size: 11px;
+  color: var(--gray);
+  margin-top: 2px;
+}
+
+.flightNumber {
+  color: var(--green);
+  font-weight: 500;
+}
+
+.quickInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.duration {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dark-green);
+}
+
+.stops {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.stops.direct {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--green);
+}
+
+.stops.withStops {
+  background: rgba(249, 115, 22, 0.1);
+  color: #f97316;
+}
+
+/* Route Info - Reduced spacing */
+.routeInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 12px;
+  background: rgba(16, 185, 129, 0.02);
+  border-radius: 6px;
+}
+
+.departure,
+.arrival {
+  flex: 1;
+}
+
+.time {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--dark-green);
+  margin-bottom: 2px;
+}
+
+.airportCode {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--green);
+}
+
+.city {
+  font-size: 11px;
+  color: var(--gray);
+}
+
+.routeCenter {
+  padding: 0 12px;
+  color: var(--green);
+  font-weight: bold;
+  font-size: 14px;
+}
+
+/* Features - Tighter grid */
+.features {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.featureItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: rgba(16, 185, 129, 0.02);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.featureIcon {
+  width: 24px;
+  height: 24px;
+  background: var(--white);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--green);
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.featureDetails {
+  flex: 1;
+}
+
+.featureLabel {
+  font-size: 10px;
+  color: var(--gray);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 1px;
+}
+
+.featureValue {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dark-green);
+}
+
+/* Footer - Reduced spacing */
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.seatStatus {
+  display: flex;
+  align-items: center;
+}
+
+.seatIndicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.seatIndicator.good {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--green);
+}
+
+.seatIndicator.limited {
+  background: rgba(249, 115, 22, 0.1);
+  color: #f97316;
+}
+
+.seatIndicator.scarce {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.seatDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* Price & Action */
+.priceAction {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.priceSection {
+  text-align: right;
+}
+
+.priceLabel {
+  font-size: 11px;
+  color: var(--gray);
+  margin-bottom: 1px;
+}
+
+.priceValue {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--dark-green);
+  margin-bottom: 1px;
+}
+
+.priceNote {
+  font-size: 10px;
+  color: var(--gray);
+}
+
+.selectButton {
+  background: var(--dark-green);
+  color: var(--white);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.selectButton:hover {
+  background: var(--green);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .features {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .priceAction {
+    gap: 12px;
+  }
+
+  .priceValue {
+    font-size: 14px;
+  }
+
+  .selectButton {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cardHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .quickInfo {
+    flex-direction: row;
+    align-self: flex-start;
+  }
+
+  .routeInfo {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .routeCenter {
+    padding: 0;
+    transform: rotate(90deg);
+  }
+
+  .features {
+    grid-template-columns: 1fr;
+  }
+
+  .cardFooter {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .priceAction {
+    justify-content: space-between;
+  }
+}

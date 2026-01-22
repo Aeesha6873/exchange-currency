@@ -1,0 +1,65 @@
+:root {
+  --dark-green: #064e3b;
+  --green: #10b981;
+  --orange: #f97316;
+  --white: #ffffff;
+  --light-gray: #f8fafc;
+  --gray: #64748b;
+  --border-color: rgba(16, 185, 129, 0.1);
+  --shadow-sm: 0 2px 8px rgba(6, 78, 59, 0.08);
+  --shadow-md: 0 4px 20px rgba(6, 78, 59, 0.12);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--white) !important;
+  color: var(--white);
+  position: relative;
+}
+
+:global(.navbar) {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  width: 100%;
+}
+
+/* Ensure all direct children of body take full width */
+body > * {
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (max-width: 768px) {
+  body {
+    width: 100vw;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* Reset any container padding */
+  .container,
+  .container-fluid,
+  [class*="container"] {
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+  }
+}

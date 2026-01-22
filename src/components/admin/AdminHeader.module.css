@@ -1,0 +1,363 @@
+/* components/admin/AdminHeader.module.css */
+.adminHeader {
+  background: var(--white);
+  padding: 0 24px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.sidebarToggle {
+  background: none;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--dark-green);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.sidebarToggle:hover {
+  background: rgba(6, 78, 59, 0.1);
+}
+
+.searchForm {
+  position: relative;
+  width: 400px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gray);
+}
+
+.searchInput {
+  width: 100%;
+  padding: 12px 20px 12px 44px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  font-size: 14px;
+  background: var(--light-gray);
+  transition: var(--transition);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--green);
+  background: var(--white);
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Notifications */
+.notificationWrapper {
+  position: relative;
+}
+
+.notificationBtn {
+  position: relative;
+  background: none;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--dark-green);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.notificationBtn:hover {
+  background: rgba(6, 78, 59, 0.1);
+}
+
+.notificationBadge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--orange);
+  color: var(--white);
+  font-size: 10px;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notificationDropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 320px;
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+  margin-top: 8px;
+  z-index: 1000;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.notificationHeader {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notificationHeader h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--dark-green);
+  margin: 0;
+}
+
+.notificationCount {
+  background: var(--green);
+  color: var(--white);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.notificationList {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.notificationItem {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.notificationItem:hover {
+  background: var(--light-gray);
+}
+
+.notificationItem.unread {
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.notificationItem:last-child {
+  border-bottom: none;
+}
+
+.notificationContent h5 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dark-green);
+  margin: 0 0 4px 0;
+}
+
+.notificationContent p {
+  font-size: 13px;
+  color: var(--gray);
+  margin: 0 0 8px 0;
+}
+
+.notificationTime {
+  font-size: 12px;
+  color: var(--gray);
+}
+
+.viewAllBtn {
+  width: 100%;
+  padding: 12px;
+  background: var(--light-gray);
+  border: none;
+  border-top: 1px solid var(--border-color);
+  color: var(--dark-green);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  border-radius: 0 0 12px 12px;
+}
+
+.viewAllBtn:hover {
+  background: var(--green);
+  color: var(--white);
+}
+
+/* User Menu */
+.userMenuWrapper {
+  position: relative;
+}
+
+.userMenuBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  padding: 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.userMenuBtn:hover {
+  background: rgba(6, 78, 59, 0.1);
+}
+
+.userAvatar {
+  width: 36px;
+  height: 36px;
+  background: var(--green);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  font-weight: 600;
+}
+
+.userAvatar.large {
+  width: 48px;
+  height: 48px;
+  font-size: 20px;
+}
+
+.userName {
+  font-weight: 500;
+  color: var(--dark-green);
+}
+
+.chevron {
+  color: var(--gray);
+  transition: var(--transition);
+}
+
+.userMenuBtn:hover .chevron {
+  color: var(--dark-green);
+}
+
+.userDropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 280px;
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+  margin-top: 8px;
+  z-index: 1000;
+  animation: slideDown 0.2s ease-out;
+}
+
+.userInfo {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.userInfo h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--dark-green);
+  margin: 0 0 4px 0;
+}
+
+.userInfo p {
+  font-size: 13px;
+  color: var(--gray);
+  margin: 0;
+}
+
+.userMenuList {
+  padding: 8px;
+}
+
+.userMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  color: var(--dark-green);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.userMenuItem:hover {
+  background: var(--light-gray);
+}
+
+.userMenuItem svg {
+  width: 18px;
+  height: 18px;
+}
+
+.userMenuItem span {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .searchForm {
+    width: 200px;
+  }
+
+  .userName {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .adminHeader {
+    padding: 0 16px;
+  }
+
+  .searchForm {
+    display: none;
+  }
+}

@@ -1,0 +1,558 @@
+.itineraryContainer {
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+}
+
+.itineraryHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.headerInfo h2 {
+  font-size: 1.8rem;
+  color: #1f2937;
+  margin: 0 0 15px 0;
+}
+
+.headerMeta {
+  display: flex;
+  gap: 25px;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.metaItem svg {
+  color: #3b82f6;
+}
+
+.headerActions {
+  display: flex;
+  gap: 10px;
+}
+
+.actionBtn {
+  padding: 10px 20px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  background: white;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.actionBtn:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+  background: #eff6ff;
+  transform: translateY(-2px);
+}
+
+.itineraryContent {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+}
+
+.daysNavigation {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 15px;
+}
+
+.dayTab {
+  padding: 15px 25px;
+  border: 2px solid #f3f4f6;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 150px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.dayTab:hover {
+  border-color: #d1d5db;
+  transform: translateY(-2px);
+}
+
+.dayTab.active {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  border-color: transparent;
+  color: white;
+  box-shadow: 0 5px 20px rgba(59, 130, 246, 0.3);
+}
+
+.dayNumber {
+  display: block;
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 5px;
+}
+
+.dayDate {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.dayOverview {
+  background: #f9fafb;
+  border-radius: 15px;
+  padding: 25px;
+}
+
+.dayHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.dayHeader h3 {
+  font-size: 1.4rem;
+  color: #1f2937;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.dayHeader .dayDate {
+  font-size: 1rem;
+  color: #6b7280;
+  font-weight: normal;
+}
+
+.dayStats {
+  display: flex;
+  gap: 25px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.statLabel {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-bottom: 5px;
+}
+
+.statValue {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.timeline {
+  position: relative;
+  padding-left: 30px;
+}
+
+.timelineItem {
+  display: flex;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.timelineConnector {
+  position: relative;
+  width: 30px;
+  margin-right: 20px;
+  flex-shrink: 0;
+}
+
+.timelineDot {
+  width: 16px;
+  height: 16px;
+  background: #3b82f6;
+  border-radius: 50%;
+  position: absolute;
+  left: 0;
+  top: 10px;
+  z-index: 2;
+  border: 3px solid white;
+  box-shadow: 0 0 0 4px #dbeafe;
+}
+
+.timelineLine {
+  position: absolute;
+  left: 7px;
+  top: 26px;
+  width: 2px;
+  height: calc(100% + 30px);
+  background: #dbeafe;
+  z-index: 1;
+}
+
+.timelineItem:last-child .timelineLine {
+  display: none;
+}
+
+.activityCard {
+  flex: 1;
+  background: white;
+  border: 2px solid #f3f4f6;
+  border-radius: 15px;
+  padding: 20px;
+  display: flex;
+  gap: 20px;
+  transition: all 0.3s ease;
+}
+
+.activityCard:hover {
+  border-color: #3b82f6;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.1);
+}
+
+.activityIcon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.activityIcon.flight {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+.activityIcon.accommodation {
+  background: #d1fae5;
+  color: #065f46;
+}
+.activityIcon.dining {
+  background: #fef3c7;
+  color: #92400e;
+}
+.activityIcon.sightseeing {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+.activityIcon.shopping {
+  background: #fce7f3;
+  color: #9d174d;
+}
+.activityIcon.transport {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.activityContent {
+  flex: 1;
+}
+
+.activityHeader {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.activityTime {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 0.95rem;
+  background: #f3f4f6;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.activityHeader h4 {
+  margin: 0;
+  color: #1f2937;
+  flex: 1;
+  font-size: 1.1rem;
+}
+
+.activityDuration {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #6b7280;
+  font-size: 0.9rem;
+  background: #f8fafc;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.activityDescription {
+  color: #6b7280;
+  margin: 0 0 15px 0;
+  line-height: 1.5;
+}
+
+.activityNotes {
+  background: #eff6ff;
+  border-left: 3px solid #3b82f6;
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+  color: #1e40af;
+}
+
+.activityNotes strong {
+  color: #1e40af;
+}
+
+.activityActions {
+  display: flex;
+  gap: 10px;
+}
+
+.detailsBtn,
+.mapBtn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.detailsBtn {
+  background: #f3f4f6;
+  color: #4b5563;
+  border: none;
+}
+
+.detailsBtn:hover {
+  background: #e5e7eb;
+}
+
+.mapBtn {
+  background: white;
+  color: #3b82f6;
+  border: 2px solid #dbeafe;
+}
+
+.mapBtn:hover {
+  background: #eff6ff;
+  border-color: #3b82f6;
+}
+
+.tripSummary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.summaryCard,
+.weatherCard,
+.budgetCard {
+  background: white;
+  border: 2px solid #f3f4f6;
+  border-radius: 15px;
+  padding: 20px;
+}
+
+.summaryCard h4,
+.weatherCard h4,
+.budgetCard h4 {
+  margin: 0 0 20px 0;
+  color: #1f2937;
+  font-size: 1.1rem;
+}
+
+.summaryStats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.summaryStat {
+  text-align: center;
+  padding: 15px;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+
+.statNumber {
+  display: block;
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #3b82f6;
+  margin-bottom: 5px;
+}
+
+.statLabel {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.weatherInfo {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.weatherIcon {
+  font-size: 2.5rem;
+}
+
+.weatherDetails {
+  display: flex;
+  flex-direction: column;
+}
+
+.weatherTemp {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.weatherCondition {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.weatherNote {
+  margin: 0;
+  color: #059669;
+  font-size: 0.9rem;
+  background: #d1fae5;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.budgetMeter {
+  height: 8px;
+  background: #f3f4f6;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.budgetProgress {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #3b82f6);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.budgetInfo {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.mapPreview {
+  background: white;
+  border: 2px solid #f3f4f6;
+  border-radius: 15px;
+  padding: 20px;
+}
+
+.mapPreview h4 {
+  margin: 0 0 20px 0;
+  color: #1f2937;
+  font-size: 1.1rem;
+}
+
+.mapContainer {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+}
+
+.mapPlaceholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.mapPlaceholder svg {
+  color: #6b7280;
+  opacity: 0.5;
+}
+
+.mapPlaceholder p {
+  color: #6b7280;
+  margin: 0;
+}
+
+.viewMapBtn {
+  padding: 10px 20px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.viewMapBtn:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .tripSummary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .itineraryHeader {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .headerMeta {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .dayHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .dayStats {
+    align-self: flex-start;
+  }
+
+  .activityCard {
+    flex-direction: column;
+  }
+
+  .tripSummary {
+    grid-template-columns: 1fr;
+  }
+}

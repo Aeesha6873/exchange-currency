@@ -1,0 +1,593 @@
+/* PackageCustomizer.module.css */
+
+.packageCustomizer {
+  padding: 32px 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Header */
+.customizerHeader {
+  margin-bottom: 48px;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--dark-green);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 24px;
+}
+
+.backButton:hover {
+  background: rgba(16, 185, 129, 0.05);
+  border-color: var(--green);
+  transform: translateX(-4px);
+}
+
+.backButton svg {
+  width: 16px;
+  height: 16px;
+}
+
+.headerContent {
+  text-align: center;
+}
+
+.headerContent h1 {
+  font-size: 40px;
+  font-weight: 800;
+  color: var(--dark-green);
+  margin-bottom: 12px;
+}
+
+.headerContent p {
+  font-size: 18px;
+  color: var(--gray);
+}
+
+/* Customizer Grid */
+.customizerGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 40px;
+}
+
+/* Upgrade Options */
+.upgradeSection {
+  margin-bottom: 48px;
+  padding-bottom: 32px;
+  border-bottom: 2px solid rgba(16, 185, 129, 0.1);
+}
+
+.upgradeSection:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.sectionTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--dark-green);
+  margin: 0 0 24px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sectionTitle svg {
+  width: 24px;
+  height: 24px;
+  color: var(--green);
+}
+
+.upgradeCards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.upgradeCard {
+  background: var(--white);
+  border: 2px solid rgba(16, 185, 129, 0.1);
+  border-radius: 16px;
+  padding: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.upgradeCard:hover {
+  border-color: var(--green);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.upgradeCard.selected {
+  border-color: var(--green);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), transparent);
+}
+
+.upgradeCard.selected::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--green), var(--dark-green));
+}
+
+.upgradeHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.upgradeHeader h4 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--dark-green);
+  margin: 0;
+}
+
+.upgradePrice {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--orange);
+}
+
+.featuresList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.featuresList li {
+  padding: 8px 0;
+  font-size: 14px;
+  color: var(--gray);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.featuresList li svg {
+  width: 16px;
+  height: 16px;
+  color: var(--green);
+  flex-shrink: 0;
+}
+
+.includedBadge {
+  display: inline-block;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--dark-green);
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 16px;
+}
+
+/* Activity Grid */
+.activityGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.activityCard {
+  background: var(--white);
+  border: 2px solid rgba(16, 185, 129, 0.1);
+  border-radius: 16px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.activityCard:hover {
+  border-color: var(--green);
+  transform: translateY(-2px);
+}
+
+.activityCard.selected {
+  border-color: var(--green);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), transparent);
+}
+
+.activityHeader {
+  margin-bottom: 12px;
+}
+
+.activityHeader h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--dark-green);
+  margin: 0 0 4px 0;
+}
+
+.activityPrice {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--orange);
+}
+
+.activityFeatures {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px 0;
+  font-size: 13px;
+  color: var(--gray);
+  line-height: 1.5;
+}
+
+.activityFeatures li {
+  padding: 4px 0;
+}
+
+.selectActivity {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--green);
+}
+
+.activityCard.selected .selectActivity {
+  color: var(--dark-green);
+}
+
+/* Insurance Cards */
+.insuranceCards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.insuranceCard {
+  background: var(--white);
+  border: 2px solid rgba(16, 185, 129, 0.1);
+  border-radius: 16px;
+  padding: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.insuranceCard:hover {
+  border-color: var(--green);
+  transform: translateY(-2px);
+}
+
+.insuranceCard.selected {
+  border-color: var(--green);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), transparent);
+}
+
+.insuranceHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.insuranceHeader h4 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--dark-green);
+  margin: 0;
+}
+
+.insurancePrice {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--orange);
+}
+
+.coverageList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px 0;
+}
+
+.coverageList li {
+  padding: 8px 0;
+  font-size: 14px;
+  color: var(--gray);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.coverageList li svg {
+  width: 16px;
+  height: 16px;
+  color: var(--green);
+  flex-shrink: 0;
+}
+
+.recommendation {
+  font-size: 12px;
+  color: var(--orange);
+  font-weight: 600;
+  padding: 8px 12px;
+  background: rgba(249, 115, 22, 0.1);
+  border-radius: 8px;
+  text-align: center;
+}
+
+/* Special Requests */
+.specialRequests textarea {
+  width: 100%;
+  padding: 16px;
+  border: 2px solid rgba(16, 185, 129, 0.1);
+  border-radius: 12px;
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--dark-green);
+  background: var(--white);
+  resize: vertical;
+  min-height: 120px;
+  transition: all 0.3s ease;
+}
+
+.specialRequests textarea:focus {
+  outline: none;
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.specialRequests textarea::placeholder {
+  color: var(--gray);
+}
+
+.requestNote {
+  font-size: 12px;
+  color: var(--gray);
+  margin: 8px 0 0 0;
+  text-align: right;
+}
+
+/* Summary Column */
+.summaryColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.summaryCard {
+  background: var(--white);
+  border: 2px solid rgba(16, 185, 129, 0.1);
+  border-radius: 20px;
+  padding: 32px;
+  position: sticky;
+  top: 100px;
+}
+
+.summaryTitle {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--dark-green);
+  margin: 0 0 24px 0;
+  text-align: center;
+}
+
+.packageDetails {
+  text-align: center;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid rgba(16, 185, 129, 0.1);
+}
+
+.packageDetails h4 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--dark-green);
+  margin: 0 0 8px 0;
+}
+
+.packageDetails p {
+  font-size: 14px;
+  color: var(--gray);
+  margin: 0;
+}
+
+.priceBreakdown {
+  margin-bottom: 32px;
+}
+
+.priceRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.1);
+  font-size: 14px;
+  color: var(--gray);
+}
+
+.priceRow:last-child {
+  border-bottom: none;
+}
+
+.priceRowTotal {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px 0 0 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--dark-green);
+  border-top: 2px solid rgba(16, 185, 129, 0.1);
+  margin-top: 12px;
+}
+
+.totalPrice {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--orange);
+}
+
+.upgradeSummary {
+  margin-bottom: 32px;
+}
+
+.upgradeSummary h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--dark-green);
+  margin: 0 0 16px 0;
+}
+
+.upgradeList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.upgradeList li {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.1);
+  font-size: 14px;
+  color: var(--dark-green);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.upgradeList li:last-child {
+  border-bottom: none;
+}
+
+.upgradeList li svg {
+  width: 16px;
+  height: 16px;
+  color: var(--green);
+  flex-shrink: 0;
+}
+
+.continueButton {
+  width: 100%;
+  padding: 18px 32px;
+  background: linear-gradient(135deg, var(--orange), var(--green));
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.continueButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(249, 115, 22, 0.3);
+}
+
+.supportCard {
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.05) 0%,
+    rgba(6, 78, 59, 0.05) 100%
+  );
+  border: 2px solid rgba(16, 185, 129, 0.1);
+  border-radius: 20px;
+  padding: 24px;
+  text-align: center;
+}
+
+.supportCard h4 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--dark-green);
+  margin: 0 0 8px 0;
+}
+
+.supportCard p {
+  font-size: 14px;
+  color: var(--gray);
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+.supportButton {
+  width: 100%;
+  padding: 12px 24px;
+  background: transparent;
+  color: var(--dark-green);
+  border: 2px solid rgba(16, 185, 129, 0.2);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.supportButton:hover {
+  background: rgba(16, 185, 129, 0.05);
+  border-color: var(--green);
+  transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .customizerGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .summaryCard {
+    position: static;
+  }
+
+  .activityGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .packageCustomizer {
+    padding: 24px 16px;
+  }
+
+  .headerContent h1 {
+    font-size: 32px;
+  }
+
+  .activityGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .upgradeCards,
+  .insuranceCards {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerContent h1 {
+    font-size: 24px;
+  }
+
+  .sectionTitle {
+    font-size: 18px;
+  }
+
+  .upgradeHeader {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

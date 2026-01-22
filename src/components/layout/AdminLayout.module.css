@@ -1,0 +1,36 @@
+/* components/admin/AdminLayout.module.css */
+.adminLayout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--light-gray);
+}
+
+.mainContent {
+  flex: 1;
+  margin-left: 280px;
+  transition: var(--transition);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.mainContent.expanded {
+  margin-left: 70px;
+}
+
+.contentArea {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .mainContent {
+    margin-left: 0;
+  }
+
+  .mainContent.expanded {
+    margin-left: 0;
+  }
+}

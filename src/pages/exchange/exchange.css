@@ -1,0 +1,1119 @@
+/* exchange.css - Updated to match flight booking structure */
+
+:root {
+  --dark-green: #064e3b;
+  --green: #10b981;
+  --orange: #f97316;
+  --white: #ffffff;
+  --light-gray: #f8fafc;
+  --gray: #64748b;
+  /* --shadow: 0 20px 40px rgba(6, 78, 59, 0.1); */
+  --transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  --gradient-primary: linear-gradient(135deg, var(--orange) 0%, #fd8c27 100%);
+  --gradient-success: linear-gradient(135deg, var(--green) 0%, #0ea5e9 100%);
+  --gradient-dark: linear-gradient(135deg, var(--dark-green) 0%, #065f46 100%);
+}
+
+/* Main Page Structure - Match Flight Booking */
+.exchangePage {
+  min-height: 100vh;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--gray);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Container */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 32px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Main Content */
+.main {
+  padding: 100px 0 60px;
+}
+
+/* Step Navigation - Match Flight Booking */
+.stepNavigation {
+  margin-bottom: 20px;
+}
+
+.stepProgress {
+  height: 2px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 1px;
+  margin-bottom: 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.progressLine {
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border-radius: 1px;
+}
+
+.stepIndicators {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+}
+
+.stepIndicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+  flex: 1;
+}
+
+.indicatorRing {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px solid rgba(16, 185, 129, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.indicatorDot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: var(--step-color);
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.stepIcon {
+  font-size: 24px;
+  color: var(--gray);
+  transition: all 0.4s ease;
+}
+
+.stepName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.4s ease;
+}
+
+/* Active State */
+.stepIndicator.active .indicatorRing {
+  background: var(--white);
+  border-color: var(--step-color);
+  transform: scale(1.1);
+}
+
+.stepIndicator.active .indicatorDot {
+  opacity: 1;
+}
+
+.stepIndicator.active .stepIcon {
+  color: var(--step-color);
+}
+
+.stepIndicator.active .stepName {
+  color: var(--step-color);
+  font-weight: 600;
+}
+
+/* Completed State */
+.stepIndicator.completed .indicatorRing {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: var(--step-color);
+}
+
+.stepIndicator.completed .stepIcon {
+  color: var(--step-color);
+}
+
+.stepIndicator.completed .stepName {
+  color: var(--dark-green);
+}
+
+.activePulse {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border: 2px solid var(--step-color);
+  border-radius: 50%;
+  top: -8px;
+  opacity: 0.3;
+}
+
+/* Content Area - Match Flight Booking */
+.contentArea {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 40px;
+  min-height: 600px;
+  align-items: start;
+}
+
+/* Side Panel */
+.sidePanel {
+  position: relative;
+}
+
+.sidePanelSticky {
+  position: sticky;
+  top: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.currentStepInfo {
+  background: var(--white);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(16, 185, 129, 0.1);
+  border-radius: 20px;
+  padding: 30px;
+  animation: slideInLeft 0.6s ease;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.stepNumber {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  color: var(--dark-green);
+  background: linear-gradient(135deg, var(--step-color), var(--dark-green));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.stepNumber span {
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.stepInfo {
+  margin-bottom: 30px;
+}
+
+.stepTitle {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--dark-green);
+}
+
+.stepDescription {
+  font-size: 14px;
+  color: var(--gray);
+  line-height: 1.6;
+}
+
+.progressDots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.progressDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.progressDot.active {
+  background: var(--step-color);
+  transform: scale(1.2);
+}
+
+.progressDot.completed {
+  background: var(--green);
+}
+
+/* Quick Help */
+.quickHelp {
+  background: var(--white);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(16, 185, 129, 0.1);
+  border-radius: 20px;
+  padding: 25px;
+  animation: slideInLeft 0.6s ease 0.2s both;
+}
+
+.helpHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--dark-green);
+}
+
+.helpIcon {
+  font-size: 20px;
+  color: var(--green);
+}
+
+.tipsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tipsList li {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  font-size: 14px;
+  color: var(--gray);
+  position: relative;
+  padding-left: 20px;
+}
+
+.tipsList li:before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: var(--green);
+}
+
+/* Main Card */
+.mainCard {
+  /* backdrop-filter: blur(20px); */
+  overflow: hidden;
+  position: relative;
+  animation: slideInRight 0.6s ease;
+  min-height: 600px;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.cardHeader {
+  /* padding: 40px 40px 30px; */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+
+  position: relative;
+  /* background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), transparent); */
+}
+
+.cardGlow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--green) 50%,
+    transparent 100%
+  );
+  filter: blur(10px);
+}
+
+.cardTitle {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, var(--dark-green) 0%, var(--green) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.cardSubtitle {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.subtitleLine {
+  width: 40px;
+  height: 2px;
+  background: var(--green);
+  border-radius: 1px;
+}
+
+.subtitleText {
+  font-size: 16px;
+  color: var(--gray);
+}
+
+.cardContent {
+  min-height: 400px;
+}
+
+.contentWrapper {
+  min-height: 400px;
+}
+
+/* Loading State - Match Flight Booking */
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.neonSpinner {
+  width: 80px;
+  height: 80px;
+  position: relative;
+  margin-bottom: 30px;
+}
+
+.spinnerCore {
+  width: 100%;
+  height: 100%;
+  background: conic-gradient(from 0deg, transparent, var(--green), transparent);
+  border-radius: 50%;
+  animation: spin 1.5s linear infinite;
+}
+
+.spinnerRing {
+  position: absolute;
+  inset: 8px;
+  background: var(--white);
+  border-radius: 50%;
+  border: 2px solid rgba(16, 185, 129, 0.1);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingText {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 20px;
+  color: var(--dark-green);
+}
+
+.loadingDots {
+  display: flex;
+  gap: 8px;
+}
+
+.loadingDots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: bounce 1.4s infinite ease-in-out;
+}
+
+.loadingDots span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+.loadingDots span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes bounce {
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+/* Card Footer - Match Flight Booking */
+.cardFooter {
+  padding: 30px 40px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(16, 185, 129, 0.02);
+}
+
+.footerStats {
+  display: flex;
+  gap: 30px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.statLabel {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--gray);
+}
+
+.statValue {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--dark-green);
+}
+
+.assistButton {
+  background: linear-gradient(135deg, var(--green), var(--dark-green));
+  border: none;
+  border-radius: 12px;
+  padding: 14px 24px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.assistButton:hover {
+  transform: translateY(-2px);
+}
+
+.assistIcon {
+  font-size: 18px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Success Container - Exchange Specific */
+.successContainer {
+  position: relative;
+  width: 100%;
+}
+
+.successCard {
+  background: var(--white);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(16, 185, 129, 0.1);
+  border-radius: 24px;
+  padding: 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+.successCardGlow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--green) 50%,
+    transparent 100%
+  );
+  filter: blur(10px);
+}
+
+.successIcon {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 32px;
+}
+
+.successIconInner {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--green), var(--dark-green));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.successIconRing {
+  position: absolute;
+  inset: -4px;
+  border: 2px solid var(--green);
+  border-radius: 50%;
+  filter: blur(4px);
+  opacity: 0.6;
+}
+
+.successCheck {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.successTitle {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--dark-green);
+  text-align: center;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, var(--dark-green) 0%, var(--green) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.successSubtitle {
+  font-size: 16px;
+  color: var(--gray);
+  text-align: center;
+  max-width: 500px;
+  margin: 0 auto 40px;
+  line-height: 1.5;
+}
+
+/* Transaction Card */
+.transactionCard {
+  background: rgba(16, 185, 129, 0.03);
+  border-radius: 20px;
+  padding: 32px;
+  border: 1px solid rgba(16, 185, 129, 0.1);
+  margin-bottom: 40px;
+  position: relative;
+}
+
+.transactionCardGlow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--green) 50%,
+    transparent 100%
+  );
+  filter: blur(10px);
+  opacity: 0.5;
+}
+
+.transactionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.1);
+}
+
+.transactionIdSection {
+  flex: 1;
+}
+
+.transactionLabel {
+  font-size: 12px;
+  color: var(--gray);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.transactionId {
+  font-family: "Courier New", monospace;
+  font-weight: 800;
+  color: var(--dark-green);
+  font-size: 20px;
+  letter-spacing: 0.5px;
+}
+
+.copyButton {
+  background: transparent;
+  color: var(--green);
+  border: 2px solid rgba(16, 185, 129, 0.2);
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 100px;
+  justify-content: center;
+}
+
+.copyButton:hover {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: var(--green);
+}
+
+.currencyExchangeDisplay {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 40px;
+}
+
+.currencyBox {
+  flex: 1;
+  padding: 32px;
+  border-radius: 20px;
+  text-align: center;
+  min-width: 200px;
+}
+
+.fromCurrency {
+  background: linear-gradient(
+    135deg,
+    rgba(249, 115, 22, 0.1),
+    rgba(249, 115, 22, 0.05)
+  );
+  border: 2px solid rgba(249, 115, 22, 0.2);
+}
+
+.toCurrency {
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.1),
+    rgba(16, 185, 129, 0.05)
+  );
+  border: 2px solid rgba(16, 185, 129, 0.2);
+}
+
+.currencyLabel {
+  font-size: 14px;
+  color: var(--gray);
+  margin-bottom: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.currencyAmount {
+  font-size: 36px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  line-height: 1;
+}
+
+.fromCurrency .currencyAmount {
+  color: var(--orange);
+}
+
+.toCurrency .currencyAmount {
+  color: var(--green);
+}
+
+.currencyCode {
+  font-size: 16px;
+  font-weight: 600;
+  padding: 6px 16px;
+  border-radius: 20px;
+  display: inline-block;
+}
+
+.fromCurrency .currencyCode {
+  color: var(--dark-green);
+  background: rgba(249, 115, 22, 0.1);
+}
+
+.toCurrency .currencyCode {
+  color: var(--dark-green);
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.exchangeArrow {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--green);
+  width: 64px;
+  height: 64px;
+  background: var(--white);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(16, 185, 129, 0.2);
+}
+
+.transactionDetailsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(16, 185, 129, 0.1);
+}
+
+.detailItem {
+  text-align: center;
+}
+
+.detailLabel {
+  font-size: 12px;
+  color: var(--gray);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.detailValue {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--dark-green);
+}
+
+.statusBadge {
+  display: inline-block;
+  color: var(--green);
+  font-weight: 700;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+}
+
+/* Action Buttons */
+.actionButtons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.primaryButton,
+.secondaryButton {
+  padding: 18px 32px;
+  border-radius: 16px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: var(--transition);
+  border: none;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-width: 180px;
+}
+
+.primaryButton {
+  background: linear-gradient(135deg, var(--orange) 0%, #fd8c27 100%);
+  color: var(--white);
+}
+
+.primaryButton:hover {
+  transform: translateY(-4px);
+}
+
+.secondaryButton {
+  background: transparent;
+  color: var(--dark-green);
+  border: 2px solid rgba(6, 78, 59, 0.1);
+}
+
+.secondaryButton:hover {
+  background: rgba(6, 78, 59, 0.05);
+  border-color: var(--dark-green);
+  transform: translateY(-4px);
+}
+
+/* Success Particles */
+.successParticles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.successParticle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  opacity: 0.6;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .contentArea {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .sidePanelSticky {
+    position: static;
+  }
+
+  .sidePanel {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 20px;
+  }
+
+  .main {
+    padding: 80px 0 40px;
+  }
+
+  .stepNavigation {
+    margin-bottom: 40px;
+  }
+
+  .indicatorRing {
+    width: 48px;
+    height: 48px;
+  }
+
+  .stepName {
+    font-size: 12px;
+  }
+
+  /* .cardHeader {
+    padding: 30px 25px 20px;
+  } */
+
+  .cardTitle {
+    font-size: 24px;
+  }
+
+  .cardContent {
+    padding: 25px;
+    min-height: 300px;
+  }
+
+  .footerStats {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .assistButton {
+    padding: 12px 20px;
+    font-size: 13px;
+  }
+
+  .successCard {
+    padding: 32px 24px;
+  }
+
+  .currencyExchangeDisplay {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .currencyBox {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .exchangeArrow {
+    transform: rotate(90deg);
+  }
+
+  .transactionDetailsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .actionButtons {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    width: 100%;
+    min-width: unset;
+  }
+}
+
+@media (max-width: 640px) {
+  .sidePanel {
+    grid-template-columns: 1fr;
+  }
+
+  .stepIndicators {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .stepIndicator {
+    flex-direction: row;
+    gap: 15px;
+    width: 100%;
+  }
+
+  .stepName {
+    font-size: 14px;
+  }
+
+  .currentStepInfo,
+  .quickHelp {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .exchangePage {
+    padding: 20px 16px;
+  }
+
+  .successCard {
+    padding: 24px 20px;
+  }
+
+  .successTitle {
+    font-size: 24px;
+  }
+
+  .successSubtitle {
+    font-size: 14px;
+  }
+
+  .currencyAmount {
+    font-size: 28px;
+  }
+}
+/* Additional styles for new components */
+
+.currency-dropdown {
+  margin-top: 16px;
+}
+
+.currency-dropdown select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--white);
+  color: var(--dark-green);
+  font-size: 14px;
+  transition: var(--transition);
+}
+
+.currency-dropdown select:focus {
+  outline: none;
+  border-color: var(--green);
+}
+
+.digit-count {
+  font-size: 12px;
+  color: var(--gray);
+  margin-top: 4px;
+  text-align: right;
+}
+
+.processing-note {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 20px;
+  margin-top: 32px;
+}
+
+.processing-note .note-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.processing-note .note-icon {
+  font-size: 24px;
+  color: var(--green);
+}
+
+.processing-note strong {
+  display: block;
+  color: var(--dark-green);
+  margin-bottom: 4px;
+}
+
+.processing-note .note-subtext {
+  font-size: 13px;
+  color: var(--gray);
+}
+
+/* Success state styles */
+.success-check {
+  width: 64px;
+  height: 64px;
+  background: var(--green);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  color: var(--white);
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.success-message {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.success-message h3 {
+  font-size: 24px;
+  color: var(--dark-green);
+  margin-bottom: 8px;
+}
+
+.success-message p {
+  color: var(--gray);
+  font-size: 16px;
+  line-height: 1.5;
+}

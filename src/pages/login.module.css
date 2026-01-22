@@ -1,0 +1,477 @@
+/* Login Page - Professional & Beautiful Design */
+.loginPage {
+  min-height: 100vh;
+  background: var(--light-gray);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
+    sans-serif;
+  padding-top: 76px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.loginContainer {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 0;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.loginCard {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.02);
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+  overflow: hidden;
+}
+
+.loginCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--green), var(--dark-green));
+}
+
+.cardHeader {
+  text-align: center;
+  margin-bottom: 1.75rem;
+}
+
+.cardHeader h1 {
+  font-size: 1.75rem;
+  color: var(--dark-green);
+  margin: 0 0 0.375rem 0;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.subtitle {
+  color: var(--gray);
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* Form - Compact & Elegant */
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.formGroup label {
+  font-weight: 600;
+  color: var(--dark-green);
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.formGroup label svg {
+  color: var(--green);
+  font-size: 0.875rem;
+}
+
+.formInput {
+  /* width: 100%; */
+  padding: 0.6875rem 0.875rem;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  color: #1f2937;
+  background: var(--white);
+  transition: all 0.2s ease;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.formInput:hover {
+  border-color: #9ca3af;
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.formInput.error {
+  border-color: #ef4444;
+}
+
+.formInput.error:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.formInput::placeholder {
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+
+/* Password Input - Compact */
+.passwordInput {
+  position: relative;
+}
+
+.passwordInput .formInput {
+  padding-right: 2.5rem;
+}
+
+.togglePassword {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.25rem;
+  transition: color 0.2s ease;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.togglePassword:hover {
+  color: var(--green);
+}
+
+/* Forgot Password - Subtle Link */
+.forgotPassword {
+  text-align: right;
+  margin-top: -0.25rem;
+}
+
+.forgotPasswordLink {
+  color: var(--green);
+  text-decoration: none;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.forgotPasswordLink:hover {
+  color: var(--dark-green);
+  text-decoration: underline;
+}
+
+/* Primary Button - Professional */
+.submitBtn {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--dark-green);
+  border: none;
+  border-radius: 8px;
+  color: var(--white);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  margin-top: 0.25rem;
+  letter-spacing: 0.025em;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: #065f46;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(6, 78, 59, 0.15);
+}
+
+.submitBtn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Divider - Clean */
+.loginOptions {
+  margin: 1.25rem 0;
+  text-align: center;
+  position: relative;
+}
+
+.loginOptions::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #e5e7eb;
+}
+
+.loginOptions span {
+  background: var(--white);
+  padding: 0 0.75rem;
+  color: #6b7280;
+  font-size: 0.8125rem;
+  position: relative;
+  z-index: 2;
+  font-weight: 500;
+}
+
+/* Google Button - Official Google Colors */
+.googleBtn {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  background: var(--white);
+  color: #3c4043;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  font-family: inherit;
+}
+
+.googleBtn:hover {
+  background: #f8f9fa;
+  border-color: #d2e3fc;
+  box-shadow: 0 1px 3px rgba(66, 133, 244, 0.1);
+}
+
+.googleBtn:active {
+  background: #f1f3f4;
+}
+
+.googleIcon {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Official Google Icon */
+.googleIcon svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Register Link - Professional */
+.registerLink {
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #f3f4f6;
+}
+
+.registerLink a {
+  color: var(--green);
+  text-decoration: none;
+  font-weight: 600;
+  margin-left: 0.25rem;
+  transition: color 0.2s ease;
+}
+
+.registerLink a:hover {
+  color: var(--dark-green);
+  text-decoration: underline;
+}
+
+/* Error Messages - Professional */
+.errorMessage {
+  color: #dc2626;
+  font-size: 0.8125rem;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.errorMessage svg {
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.globalError {
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: #dc2626;
+}
+
+.globalError svg {
+  color: #dc2626;
+  font-size: 0.875rem;
+}
+
+.successMessage {
+  background: #f0fdf4;
+  border: 1px solid #dcfce7;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: #166534;
+}
+
+.successMessage svg {
+  color: #16a34a;
+  font-size: 0.875rem;
+}
+
+/* Loading State */
+.loading {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--white);
+  animation: spin 0.8s linear infinite;
+  margin-right: 0.5rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Focus States for Accessibility */
+.formInput:focus,
+.submitBtn:focus,
+.googleBtn:focus {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+
+/* Responsive Design - Balanced */
+@media (max-width: 640px) {
+  .loginPage {
+    padding-top: 68px;
+  }
+
+  .loginContainer {
+    padding: 1rem;
+  }
+
+  .loginCard {
+    padding: 2rem 1.5rem;
+    max-width: 100%;
+    border-radius: 12px;
+  }
+
+  .cardHeader h1 {
+    font-size: 1.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .loginPage {
+    padding-top: 64px;
+  }
+
+  .loginContainer {
+    padding: 0.75rem;
+  }
+
+  .loginCard {
+    padding: 1.75rem 1.25rem;
+    border-radius: 10px;
+  }
+
+  .cardHeader h1 {
+    font-size: 1.375rem;
+  }
+
+  .loginForm {
+    gap: 1rem;
+  }
+
+  .formInput {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  .submitBtn,
+  .googleBtn {
+    padding: 0.6875rem;
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .loginCard {
+    padding: 1.5rem 1rem;
+  }
+
+  .cardHeader h1 {
+    font-size: 1.25rem;
+  }
+
+  .formInput {
+    padding: 0.5625rem 0.6875rem;
+  }
+
+  .submitBtn,
+  .googleBtn {
+    padding: 0.625rem;
+  }
+}
+/* Add to login.module.css */
+.adminHint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  color: #1e40af;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.adminHint svg {
+  flex-shrink: 0;
+  color: #1e40af;
+}

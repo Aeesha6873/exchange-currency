@@ -1,0 +1,653 @@
+/* ExchangeComponents.css - Modern Professional Design */
+
+:root {
+  --dark-green: #064e3b;
+  --green: #10b981;
+  --orange: #f97316;
+  --white: #ffffff;
+  --light-gray: #f8fafc;
+  --gray: #64748b;
+  --border-color: rgba(16, 185, 129, 0.1);
+  --shadow-sm: 0 2px 8px rgba(6, 78, 59, 0.08);
+  --shadow-md: 0 4px 20px rgba(6, 78, 59, 0.12);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Base Layout */
+.exchange-component {
+  padding-bottom: 32px;
+}
+
+/* Converter Card */
+.converter-wrapper {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.currency-selector-wrapper {
+  position: relative;
+  margin-bottom: 32px;
+}
+
+.currency-cards {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.currency-card {
+  flex: 1;
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 24px;
+  position: relative;
+  transition: var(--transition);
+}
+
+.currency-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.currency-card.active {
+  border-color: rgba(16, 185, 129, 0.3);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.03), transparent);
+}
+
+.currency-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.currency-flag {
+  font-size: 32px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.currency-info h4 {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--dark-green);
+}
+
+.currency-info p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--gray);
+}
+
+.currency-input {
+  position: relative;
+}
+
+.currency-input input {
+  width: 100%;
+  padding: 20px 20px 20px 60px;
+  font-size: 32px;
+  font-weight: 700;
+  border: 2px solid transparent;
+  background: rgba(16, 185, 129, 0.02);
+  border-radius: 16px;
+  color: var(--dark-green);
+  transition: var(--transition);
+  font-family: "Inter", -apple-system, sans-serif;
+}
+
+.currency-input input:focus {
+  outline: none;
+  border-color: var(--green);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.currency-symbol {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--green);
+}
+
+.currency-swap-btn {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 56px;
+  height: 56px;
+  background: var(--white);
+  border: 2px solid var(--border-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--green);
+  font-size: 24px;
+  cursor: pointer;
+  transition: var(--transition);
+  z-index: 10;
+  box-shadow: var(--shadow-md);
+}
+
+.currency-swap-btn:hover {
+  background: var(--green);
+  color: var(--white);
+  transform: translate(-50%, -50%) rotate(180deg);
+  border-color: var(--green);
+}
+
+/* Amount Display */
+.amount-display {
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.05) 0%,
+    rgba(6, 78, 59, 0.05) 100%
+  );
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 32px;
+  margin-bottom: 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+.amount-display::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--green), var(--dark-green));
+}
+
+.amount-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gray);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.amount-value {
+  font-size: 48px;
+  font-weight: 800;
+  text-align: center;
+  background: linear-gradient(135deg, var(--green) 0%, var(--dark-green) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.exchange-details {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-color);
+}
+
+.detail-item {
+  text-align: center;
+}
+
+.detail-label {
+  display: block;
+  font-size: 12px;
+  color: var(--gray);
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.detail-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--dark-green);
+}
+
+/* Continue Button */
+.continue-btn {
+  width: 100%;
+  padding: 20px 32px;
+  background: linear-gradient(135deg, var(--green), var(--dark-green));
+  color: var(--white);
+  border: none;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.continue-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+}
+
+.continue-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Payment Account */
+.payment-wrapper {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.payment-amount-display {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.payment-amount-display h3 {
+  font-size: 18px;
+  color: var(--gray);
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.payment-total {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--orange);
+  background: linear-gradient(135deg, var(--orange), #fd8c27);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.account-details-card {
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 32px;
+  margin-bottom: 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+.account-details-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--orange), var(--green));
+}
+
+.account-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.account-row:last-child {
+  border-bottom: none;
+}
+
+.account-label {
+  font-size: 14px;
+  color: var(--gray);
+  font-weight: 500;
+}
+
+.account-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--dark-green);
+}
+
+.account-value.highlight {
+  font-size: 28px;
+  font-weight: 800;
+  font-family: "Space Mono", monospace;
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, var(--dark-green), var(--green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.currency-tag {
+  padding: 8px 16px;
+  background: rgba(249, 115, 22, 0.1);
+  color: var(--orange);
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Payment Status */
+.status-wrapper {
+  max-width: 500px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.status-spinner {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 32px;
+  position: relative;
+}
+
+.status-spinner-inner {
+  width: 100%;
+  height: 100%;
+  border: 3px solid transparent;
+  border-top: 3px solid var(--green);
+  border-right: 3px solid var(--orange);
+  border-radius: 50%;
+  animation: spin 1.2s linear infinite;
+}
+
+.status-text {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--dark-green);
+  margin-bottom: 24px;
+}
+
+.status-progress {
+  margin-bottom: 32px;
+}
+
+.progress-bar {
+  height: 6px;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--green), var(--dark-green));
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: var(--gray);
+}
+
+.status-details {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.status-card {
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+}
+
+.status-card.orange {
+  border-color: rgba(249, 115, 22, 0.2);
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.05), transparent);
+}
+
+.status-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--dark-green);
+  margin-top: 8px;
+}
+
+.status-card.orange .status-value {
+  color: var(--orange);
+}
+
+/* Bank Form */
+.bank-form-wrapper {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.receive-summary {
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.08) 0%,
+    rgba(6, 78, 59, 0.08) 100%
+  );
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 32px;
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.receive-label {
+  font-size: 14px;
+  color: var(--gray);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.receive-amount {
+  font-size: 40px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--green), var(--dark-green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0;
+}
+
+.form-field {
+  margin-bottom: 24px;
+}
+
+.form-field label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dark-green);
+  margin-bottom: 8px;
+}
+
+.form-field select,
+.form-field input {
+  width: 100%;
+  padding: 16px 20px;
+  font-size: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--white);
+  color: var(--dark-green);
+  transition: var(--transition);
+}
+
+.form-field select:focus,
+.form-field input:focus {
+  outline: none;
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.form-field input[readonly] {
+  background: rgba(16, 185, 129, 0.05);
+  border-color: rgba(16, 185, 129, 0.2);
+  color: var(--dark-green);
+}
+
+.account-verified {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--green);
+  font-weight: 500;
+}
+
+/* Buttons */
+.button-group {
+  display: flex;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.btn {
+  flex: 1;
+  padding: 16px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--green), var(--dark-green));
+  color: var(--white);
+  border: none;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+}
+
+.btn-secondary {
+  background: var(--white);
+  color: var(--dark-green);
+  border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.05);
+  border-color: var(--green);
+  transform: translateY(-2px);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Loading States */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--gray);
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid transparent;
+  border-top: 2px solid var(--green);
+  border-right: 2px solid var(--orange);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Animations */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .exchange-component {
+    padding: 20px;
+  }
+
+  .currency-cards {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .currency-swap-btn {
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    margin: 16px auto;
+    order: 1;
+  }
+
+  .currency-swap-btn:hover {
+    transform: rotate(180deg);
+  }
+
+  .amount-value {
+    font-size: 36px;
+  }
+
+  .exchange-details {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .status-details {
+    grid-template-columns: 1fr;
+  }
+
+  .receive-amount {
+    font-size: 32px;
+  }
+}

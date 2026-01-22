@@ -1,0 +1,53 @@
+.adminLayout {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  overflow-y: hidden; /* Prevent horizontal scroll */
+  background-color: var(--light-gray);
+  position: relative;
+}
+
+.mainContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: 250px; /* Sidebar width */
+  min-width: 0; /* Critical: Allows flex item to shrink */
+  width: calc(100vw - 250px); /* Constrain width */
+  max-width: calc(100vw - 250px); /* Prevent overflow */
+  position: relative;
+}
+
+.contentArea {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  overflow-x: hidden; /* Prevent horizontal scroll */
+  background-color: var(--light-gray);
+  min-height: calc(100vh - 64px);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Force all children to respect container width */
+.contentArea > * {
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .mainContent {
+    margin-left: 0;
+    width: 100vw;
+    max-width: 100vw;
+  }
+}
+
+@media (max-width: 768px) {
+  .contentArea {
+    padding: 16px;
+  }
+}

@@ -1,0 +1,577 @@
+/* components/admin/AdminNavbar.module.css */
+
+.adminNavbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
+  height: 80px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  gap: 2rem;
+}
+
+/* Brand Section */
+.brandSection {
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  padding: 0 1rem;
+}
+
+.brandLogo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.logoIcon {
+  font-size: 24px;
+}
+
+.brandName {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--dark-green), var(--green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.brandTagline {
+  font-size: 11px;
+  color: var(--gray);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Search Section */
+.searchSection {
+  flex: 1;
+  max-width: 600px;
+}
+
+.searchWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gray);
+  font-size: 20px;
+}
+
+.searchInput {
+  width: 80%;
+  padding: 14px 20px 14px 50px;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  font-size: 15px;
+  background: var(--light-gray);
+  color: var(--dark-green);
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--green);
+  background: var(--white);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+}
+
+.searchInput::placeholder {
+  color: var(--gray);
+  font-weight: 400;
+}
+
+.clearSearch {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(100, 116, 139, 0.2);
+  border: none;
+  font-size: 20px;
+  color: var(--gray);
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: var(--transition);
+}
+
+.clearSearch:hover {
+  background: var(--gray);
+  color: var(--white);
+}
+
+/* Actions Section */
+.actionsSection {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  min-width: 200px;
+  justify-content: flex-end;
+}
+
+/* Notifications */
+.notificationContainer {
+  position: relative;
+}
+
+.actionBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  padding: 8px;
+  border-radius: 10px;
+  transition: var(--transition);
+}
+
+.notificationBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notificationBtn:hover,
+.notificationBtn.active {
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.notificationIcon {
+  font-size: 24px;
+  color: var(--dark-green);
+  transition: var(--transition);
+}
+
+.notificationBtn:hover .notificationIcon {
+  color: var(--green);
+  transform: scale(1.1);
+}
+
+.notificationBadge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: var(--orange);
+  color: var(--white);
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--white);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.notificationDropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 380px;
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+  z-index: 1000;
+  animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.dropdownHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.dropdownHeader h3 {
+  margin: 0;
+  font-size: 17px;
+  color: var(--dark-green);
+  font-weight: 600;
+}
+
+.markAllRead {
+  background: none;
+  border: none;
+  color: var(--green);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: var(--transition);
+}
+
+.markAllRead:hover {
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.notificationList {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.notificationItem {
+  display: flex;
+  align-items: flex-start;
+  padding: 1rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+  gap: 14px;
+  margin-bottom: 4px;
+}
+
+.notificationItem:hover {
+  background: rgba(16, 185, 129, 0.05);
+  transform: translateX(4px);
+}
+
+.notificationItem.unread {
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.notificationTypeIcon {
+  min-width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--dark-green);
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.notificationContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.notificationTitle {
+  margin: 0 0 6px 0;
+  font-size: 15px;
+  color: var(--dark-green);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.notificationMeta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.notificationType {
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.notificationTime {
+  color: var(--gray);
+}
+
+.unreadDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 6px;
+  animation: pulse 2s infinite;
+}
+
+.dropdownFooter {
+  padding: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.viewAllBtn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, var(--green), var(--dark-green));
+  border: none;
+  border-radius: 10px;
+  color: var(--white);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.viewAllBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+}
+
+/* User Profile */
+.userProfileContainer {
+  position: relative;
+}
+
+.userProfileBtn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 2px solid transparent;
+  border-radius: 14px;
+  padding: 8px 16px 8px 12px;
+  cursor: pointer;
+  transition: var(--transition);
+  min-width: 180px;
+}
+
+.userProfileBtn:hover,
+.userProfileBtn.active {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: var(--green);
+  transform: translateY(-2px);
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--green), var(--dark-green));
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  font-weight: 700;
+  font-size: 18px;
+  box-shadow: 0 4px 12px rgba(6, 78, 59, 0.2);
+}
+
+.userInfo {
+  text-align: left;
+  flex: 1;
+}
+
+.userName {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--dark-green);
+  margin-bottom: 2px;
+}
+
+.userRole {
+  display: block;
+  font-size: 12px;
+  color: var(--gray);
+  font-weight: 500;
+  background: rgba(100, 116, 139, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.chevron {
+  color: var(--gray);
+  font-size: 18px;
+  transition: var(--transition);
+}
+
+.chevron.rotated {
+  transform: rotate(180deg);
+  color: var(--green);
+}
+
+.userDropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 280px;
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+  /* z-index: 1000; */
+  animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.userDropdownHeader {
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 1px solid var(--border-color);
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.1),
+    rgba(6, 78, 59, 0.05)
+  );
+  border-radius: 16px 16px 0 0;
+}
+
+.dropdownAvatar {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, var(--green), var(--dark-green));
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  font-weight: 700;
+  font-size: 22px;
+  box-shadow: 0 6px 16px rgba(6, 78, 59, 0.2);
+}
+
+.dropdownUserInfo h4 {
+  margin: 0 0 6px 0;
+  font-size: 16px;
+  color: var(--dark-green);
+  font-weight: 700;
+}
+
+.dropdownUserInfo p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--gray);
+}
+
+.userDropdownMenu {
+  padding: 0.75rem;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0.875rem 1rem;
+  text-decoration: none;
+  color: var(--dark-green);
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 10px;
+  transition: var(--transition);
+}
+
+.dropdownItem:hover {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--green);
+  transform: translateX(4px);
+}
+
+.dropdownIcon {
+  font-size: 18px;
+  opacity: 0.7;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .adminNavbar {
+    padding: 0 1rem;
+    gap: 1rem;
+  }
+
+  .brandSection {
+    min-width: 160px;
+  }
+
+  .brandName {
+    font-size: 20px;
+  }
+
+  .brandTagline {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .adminNavbar {
+    height: 70px;
+    padding: 0 1rem;
+  }
+
+  .brandSection {
+    min-width: auto;
+  }
+
+  .brandTagline {
+    display: none;
+  }
+
+  .searchSection {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .searchInput {
+    padding: 12px 16px 12px 42px;
+    font-size: 14px;
+  }
+
+  .userProfileBtn {
+    min-width: auto;
+    padding: 6px 10px 6px 6px;
+  }
+
+  .userName,
+  .userRole {
+    display: none;
+  }
+
+  .notificationDropdown {
+    width: 320px;
+    right: -50px;
+  }
+
+  .chevron {
+    display: none;
+  }
+}

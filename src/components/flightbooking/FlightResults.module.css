@@ -1,0 +1,610 @@
+.flightResults {
+  --dark-green: #064e3b;
+  --green: #10b981;
+  --orange: #f97316;
+  --white: #ffffff;
+  --gray: #64748b;
+  --gray-light: #f1f5f9;
+  --border: #e2e8f0;
+}
+
+.flightResults {
+  min-height: 100vh;
+
+  font-family: "Inter", -apple-system, sans-serif;
+  padding: 20px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--dark-green);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: all 0.2s ease;
+}
+
+.backButton:hover {
+  background: rgba(16, 185, 129, 0.05);
+  border-color: var(--green);
+}
+
+.resultsHeader {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.headerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.routeSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.routeDisplay {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--dark-green);
+}
+
+.routeArrow {
+  color: var(--green);
+  font-weight: bold;
+}
+
+.tripDetails {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.detailItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--gray);
+  padding: 5px 10px;
+  background: rgba(16, 185, 129, 0.05);
+  border-radius: 6px;
+}
+
+.mainContent {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.filtersSidebar {
+  position: sticky;
+  top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  height: auto;
+  max-height: 950px;
+  overflow-y: auto;
+}
+
+.filtersSidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.filtersSidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.filtersSidebar::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.filterCard {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.filterHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.filterIcon {
+  width: 28px;
+  height: 28px;
+  background: var(--dark-green);
+  color: var(--white);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.filterTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dark-green);
+}
+
+/* .priceFilter {
+  margin-bottom: 20px;
+} */
+
+.priceHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.priceLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dark-green);
+}
+
+.priceValue {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--green);
+}
+
+.priceSlider {
+  width: 90%;
+  height: 4px;
+  color: var(--dark-green);
+  border-radius: 2px;
+  outline: none;
+  margin: 10px 0;
+  background: var(--dark-green);
+  background-color: var(--dark-green);
+}
+
+.priceSlider::-webkit-slider-thumb {
+  width: 16px;
+  height: 16px;
+  background: var(--green);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.filterGroup {
+  margin-bottom: 16px;
+}
+
+.filterGroupTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dark-green);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filterOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filterOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(16, 185, 129, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--dark-green);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filterOption:hover {
+  border-color: var(--green);
+  background: rgba(16, 185, 129, 0.06);
+}
+
+.filterOption.active {
+  background: var(--green);
+  color: var(--white);
+  border-color: var(--green);
+}
+
+/* Stats */
+.statsCard {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.statsHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.statItem {
+  text-align: center;
+  padding: 10px;
+  background: rgba(16, 185, 129, 0.03);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.statValue {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--green);
+  margin-bottom: 2px;
+}
+
+.statLabel {
+  font-size: 11px;
+  color: var(--gray);
+}
+
+/* Clear Filters Button */
+.clearFiltersBtn {
+  width: 100%;
+  padding: 10px;
+  background: transparent;
+  color: var(--green);
+  border: 1px solid var(--green);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+}
+
+.clearFiltersBtn:hover {
+  background: rgba(16, 185, 129, 0.05);
+}
+
+/* Results Area */
+.resultsArea {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 600px; /* Set minimum height */
+}
+
+.resultsToolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.resultsCount {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dark-green);
+}
+
+.resultsCount span {
+  color: var(--green);
+}
+
+.sortContainer {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.sortLabel {
+  font-size: 13px;
+  color: var(--gray);
+}
+
+.sortSelect {
+  /* padding: 6px 10px; */
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--dark-green);
+  background: var(--white);
+  cursor: pointer;
+  min-width: 140px;
+}
+
+/* Loading State */
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  min-height: 400px;
+}
+
+.loadingText {
+  font-size: 14px;
+  color: var(--dark-green);
+  margin-top: 12px;
+}
+
+/* No Results */
+.noResults {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  text-align: center;
+  min-height: 400px;
+}
+
+.noResultsTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--dark-green);
+  margin: 12px 0 6px;
+}
+
+.noResultsText {
+  font-size: 13px;
+  color: var(--gray);
+  margin-bottom: 16px;
+  max-width: 280px;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 10px;
+}
+
+.primaryButton {
+  padding: 8px 16px;
+  background: var(--dark-green);
+  color: var(--white);
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.primaryButton:hover {
+  background: var(--green);
+}
+
+.secondaryButton {
+  padding: 8px 16px;
+  background: transparent;
+  color: var(--green);
+  border: 1px solid var(--green);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.secondaryButton:hover {
+  background: rgba(16, 185, 129, 0.05);
+}
+
+/* Flights List */
+.flightsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 400px; /* Ensure consistent height */
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-top: 16px;
+}
+
+.paginationLeft,
+.paginationRight {
+  flex: 1;
+}
+
+.paginationCenter {
+  flex: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+}
+
+.pageButton {
+  padding: 6px 12px;
+  background: transparent;
+  color: var(--dark-green);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.pageButton:hover:not(.disabled) {
+  background: rgba(16, 185, 129, 0.05);
+  border-color: var(--green);
+}
+
+.pageButton.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pageNumber {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--dark-green);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pageNumber:hover {
+  border-color: var(--green);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.pageNumber.active {
+  background: var(--green);
+  color: var(--white);
+  border-color: var(--green);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .mainContent {
+    grid-template-columns: 240px 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .mainContent {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .filtersSidebar {
+    position: static;
+    max-height: none;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .filterCard {
+    margin-bottom: 0;
+  }
+
+  .statsCard {
+    grid-column: 1 / -1;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .resultsToolbar {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .sortContainer {
+    width: 100%;
+  }
+
+  .sortSelect {
+    flex: 1;
+  }
+
+  .pagination {
+    /* flex-direction: column;
+    gap: 12px; */
+  }
+
+  .paginationLeft,
+  .paginationRight,
+  .paginationCenter {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  /* .flightResults {
+    padding: 16px;
+  } */
+
+  .filtersSidebar {
+    grid-template-columns: 1fr;
+  }
+
+  .actionButtons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    width: 100%;
+  }
+
+  .pageButton {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .pageNumber {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+}
