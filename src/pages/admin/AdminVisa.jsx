@@ -73,7 +73,6 @@ const AdminVisa = () => {
     monthlyRevenue: 0,
   });
 
-  // Colors matching your VisaService
   const colors = {
     green: "#10b981",
     orange: "#f59e0b",
@@ -87,7 +86,6 @@ const AdminVisa = () => {
   // Initialize with sample data
   useEffect(() => {
     const loadData = () => {
-      // Sample countries data
       const sampleCountries = [
         {
           id: "uk",
@@ -99,7 +97,6 @@ const AdminVisa = () => {
           isActive: true,
           visaTypes: ["tourist", "business", "student"],
           requirements: ["Valid passport", "Financial proof", "Accommodation"],
-          color: colors.green,
         },
         {
           id: "china",
@@ -111,7 +108,6 @@ const AdminVisa = () => {
           isActive: true,
           visaTypes: ["business", "tourist", "work"],
           requirements: ["Passport photo", "Invitation letter"],
-          color: colors.orange,
         },
         {
           id: "umarah",
@@ -123,7 +119,6 @@ const AdminVisa = () => {
           isActive: true,
           visaTypes: ["tourist", "business", "religious"],
           requirements: ["Passport copy", "Hotel booking"],
-          color: colors.green,
         },
         {
           id: "qatar",
@@ -135,7 +130,6 @@ const AdminVisa = () => {
           isActive: true,
           visaTypes: ["tourist", "business"],
           requirements: ["Passport valid 6 months"],
-          color: colors.orange,
         },
         {
           id: "dubai",
@@ -147,7 +141,6 @@ const AdminVisa = () => {
           isActive: true,
           visaTypes: ["tourist", "transit", "work"],
           requirements: ["Passport", "Photo"],
-          color: colors.green,
         },
         {
           id: "algeria",
@@ -159,11 +152,9 @@ const AdminVisa = () => {
           isActive: true,
           visaTypes: ["tourist", "business"],
           requirements: ["Valid passport", "Return ticket"],
-          color: colors.orange,
         },
       ];
 
-      // Sample pricing tiers
       const samplePricing = [
         {
           id: 1,
@@ -197,7 +188,6 @@ const AdminVisa = () => {
         },
       ];
 
-      // Sample applications
       const sampleApplications = [
         {
           id: "VISA-" + Date.now().toString().slice(-8).toUpperCase(),
@@ -222,20 +212,6 @@ const AdminVisa = () => {
           notes: "All documents verified",
           assignedOfficer: "Admin User",
           priority: "standard",
-          reviewHistory: [
-            {
-              date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-              action: "Document Review",
-              officer: "Admin User",
-              status: "processing",
-            },
-            {
-              date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-              action: "Approved",
-              officer: "Admin User",
-              status: "approved",
-            },
-          ],
         },
         {
           id: "VISA-" + (Date.now() + 1).toString().slice(-8).toUpperCase(),
@@ -312,19 +288,18 @@ const AdminVisa = () => {
         },
       ];
 
-      // Calculate stats
       const totalApps = sampleApplications.length;
       const pending = sampleApplications.filter(
-        (app) => app.status === "pending"
+        (app) => app.status === "pending",
       ).length;
       const approved = sampleApplications.filter(
-        (app) => app.status === "approved"
+        (app) => app.status === "approved",
       ).length;
       const rejected = sampleApplications.filter(
-        (app) => app.status === "rejected"
+        (app) => app.status === "rejected",
       ).length;
       const processing = sampleApplications.filter(
-        (app) => app.status === "processing"
+        (app) => app.status === "processing",
       ).length;
       const totalRevenue = sampleApplications
         .filter((app) => app.paymentStatus === "paid")
@@ -375,7 +350,6 @@ const AdminVisa = () => {
       return 0;
     });
 
-  // Status options
   const statusOptions = [
     { id: "all", label: "All Status", color: "#6b7280" },
     { id: "pending", label: "Pending", color: colors.orange },
@@ -384,12 +358,10 @@ const AdminVisa = () => {
     { id: "rejected", label: "Rejected", color: colors.red },
   ];
 
-  // Format currency
   const formatCurrency = (amount, currency) => {
     return `${currency}${amount.toLocaleString()}`;
   };
 
-  // Format date
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString("en-US", {
       year: "numeric",
@@ -398,142 +370,20 @@ const AdminVisa = () => {
     });
   };
 
-  // Get status badge
-  const getStatusBadge = (status) => {
-    const config = {
-      pending: {
-        icon: <FaClock />,
-        color: colors.orange,
-        bgColor: `rgba(${parseInt(colors.orange.slice(1, 3), 16)}, ${parseInt(
-          colors.orange.slice(3, 5),
-          16
-        )}, ${parseInt(colors.orange.slice(5, 7), 16)}, 0.1)`,
-        label: "Pending",
-      },
-      processing: {
-        icon: <FaClock />,
-        color: colors.blue,
-        bgColor: `rgba(${parseInt(colors.blue.slice(1, 3), 16)}, ${parseInt(
-          colors.blue.slice(3, 5),
-          16
-        )}, ${parseInt(colors.blue.slice(5, 7), 16)}, 0.1)`,
-        label: "Processing",
-      },
-      approved: {
-        icon: <FaCheckCircle />,
-        color: colors.green,
-        bgColor: `rgba(${parseInt(colors.green.slice(1, 3), 16)}, ${parseInt(
-          colors.green.slice(3, 5),
-          16
-        )}, ${parseInt(colors.green.slice(5, 7), 16)}, 0.1)`,
-        label: "Approved",
-      },
-      rejected: {
-        icon: <FaTimesCircle />,
-        color: colors.red,
-        bgColor: `rgba(${parseInt(colors.red.slice(1, 3), 16)}, ${parseInt(
-          colors.red.slice(3, 5),
-          16
-        )}, ${parseInt(colors.red.slice(5, 7), 16)}, 0.1)`,
-        label: "Rejected",
-      },
-    };
-
-    const { icon, color, bgColor, label } = config[status] || config.pending;
-
-    return (
-      <span
-        className="status-badge"
-        style={{ color, backgroundColor: bgColor }}>
-        {icon}
-        {label}
-      </span>
-    );
+  const getSortIcon = (field) => {
+    if (sortField !== field) return <FaSort />;
+    return sortOrder === "asc" ? <FaSortUp /> : <FaSortDown />;
   };
 
-  // Get payment status badge
-  const getPaymentBadge = (status) => {
-    const config = {
-      paid: {
-        color: colors.green,
-        bgColor: `rgba(${parseInt(colors.green.slice(1, 3), 16)}, ${parseInt(
-          colors.green.slice(3, 5),
-          16
-        )}, ${parseInt(colors.green.slice(5, 7), 16)}, 0.1)`,
-        label: "Paid",
-      },
-      pending: {
-        color: colors.orange,
-        bgColor: `rgba(${parseInt(colors.orange.slice(1, 3), 16)}, ${parseInt(
-          colors.orange.slice(3, 5),
-          16
-        )}, ${parseInt(colors.orange.slice(5, 7), 16)}, 0.1)`,
-        label: "Pending",
-      },
-      refunded: {
-        color: "#6b7280",
-        bgColor: "rgba(107, 114, 128, 0.1)",
-        label: "Refunded",
-      },
-    };
-
-    const { color, bgColor, label } = config[status] || config.pending;
-
-    return (
-      <span
-        className="payment-badge"
-        style={{ color, backgroundColor: bgColor }}>
-        {label}
-      </span>
-    );
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortOrder("asc");
+    }
   };
 
-  // Get priority badge
-  const getPriorityBadge = (priority) => {
-    const config = {
-      urgent: {
-        color: colors.red,
-        bgColor: `rgba(${parseInt(colors.red.slice(1, 3), 16)}, ${parseInt(
-          colors.red.slice(3, 5),
-          16
-        )}, ${parseInt(colors.red.slice(5, 7), 16)}, 0.1)`,
-        label: "Urgent",
-      },
-      express: {
-        color: colors.purple,
-        bgColor: `rgba(${parseInt(colors.purple.slice(1, 3), 16)}, ${parseInt(
-          colors.purple.slice(3, 5),
-          16
-        )}, ${parseInt(colors.purple.slice(5, 7), 16)}, 0.1)`,
-        label: "Express",
-      },
-      standard: {
-        color: colors.blue,
-        bgColor: `rgba(${parseInt(colors.blue.slice(1, 3), 16)}, ${parseInt(
-          colors.blue.slice(3, 5),
-          16
-        )}, ${parseInt(colors.blue.slice(5, 7), 16)}, 0.1)`,
-        label: "Standard",
-      },
-      regular: {
-        color: "#6b7280",
-        bgColor: "rgba(107, 114, 128, 0.1)",
-        label: "Regular",
-      },
-    };
-
-    const { color, bgColor, label } = config[priority] || config.standard;
-
-    return (
-      <span
-        className="priority-badge"
-        style={{ color, backgroundColor: bgColor }}>
-        {label}
-      </span>
-    );
-  };
-
-  // Handle application actions
   const handleViewApplication = (app) => {
     setSelectedApplication(app);
     setShowApplicationModal(true);
@@ -545,8 +395,8 @@ const AdminVisa = () => {
     ) {
       setApplications(
         applications.map((app) =>
-          app.id === appId ? { ...app, status: newStatus } : app
-        )
+          app.id === appId ? { ...app, status: newStatus } : app,
+        ),
       );
       alert("Status updated successfully!");
     }
@@ -557,8 +407,8 @@ const AdminVisa = () => {
     if (officerName) {
       setApplications(
         applications.map((app) =>
-          app.id === appId ? { ...app, assignedOfficer: officerName } : app
-        )
+          app.id === appId ? { ...app, assignedOfficer: officerName } : app,
+        ),
       );
       alert(`Assigned to ${officerName}`);
     }
@@ -577,7 +427,6 @@ const AdminVisa = () => {
     alert(`Exporting data in ${format.toUpperCase()} format...`);
   };
 
-  // Country management
   const handleAddCountry = () => {
     setEditingCountry(null);
     setShowCountryModal(true);
@@ -588,30 +437,14 @@ const AdminVisa = () => {
     setShowCountryModal(true);
   };
 
-  const handleSaveCountry = (countryData) => {
-    if (editingCountry) {
-      setCountries(
-        countries.map((c) => (c.id === editingCountry.id ? countryData : c))
-      );
-    } else {
-      setCountries([
-        ...countries,
-        { ...countryData, id: Date.now().toString() },
-      ]);
-    }
-    setShowCountryModal(false);
-    setEditingCountry(null);
-  };
-
   const handleToggleCountryActive = (countryId) => {
     setCountries(
       countries.map((c) =>
-        c.id === countryId ? { ...c, isActive: !c.isActive } : c
-      )
+        c.id === countryId ? { ...c, isActive: !c.isActive } : c,
+      ),
     );
   };
 
-  // Pricing management
   const handleAddPricing = () => {
     setEditingPrice(null);
     setShowPricingModal(true);
@@ -622,38 +455,10 @@ const AdminVisa = () => {
     setShowPricingModal(true);
   };
 
-  const handleSavePricing = (priceData) => {
-    if (editingPrice) {
-      setPricing(
-        pricing.map((p) => (p.id === editingPrice.id ? priceData : p))
-      );
-    } else {
-      setPricing([...pricing, { ...priceData, id: Date.now() }]);
-    }
-    setShowPricingModal(false);
-    setEditingPrice(null);
-  };
-
   const handleDeletePricing = (priceId) => {
     if (window.confirm("Are you sure you want to delete this pricing?")) {
       setPricing(pricing.filter((p) => p.id !== priceId));
     }
-  };
-
-  // Sort handler
-  const handleSort = (field) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortOrder("asc");
-    }
-  };
-
-  // Get sort icon
-  const getSortIcon = (field) => {
-    if (sortField !== field) return <FaSort />;
-    return sortOrder === "asc" ? <FaSortUp /> : <FaSortDown />;
   };
 
   if (loading) {
@@ -669,14 +474,12 @@ const AdminVisa = () => {
     <div className="admin-visa-manager">
       {/* Header */}
       <div className="admin-header">
-        <div className="admin-header-content">
-          <h1 className="admin-title">
-            <FaPassport /> Visa Management Admin
-          </h1>
-          <p className="admin-subtitle">
-            Manage visa applications, pricing, and countries
-          </p>
-        </div>
+        <h1 className="admin-title">
+          <FaPassport /> Visa Management Admin
+        </h1>
+        <p className="admin-subtitle">
+          Manage visa applications, pricing, and countries
+        </p>
         <div className="admin-header-actions">
           <button
             className="btn-refresh"
@@ -694,19 +497,6 @@ const AdminVisa = () => {
       {/* Stats Cards */}
       <div className="stats-grid">
         <div className="stat-card">
-          <div
-            className="stat-icon"
-            style={{
-              background: `rgba(${parseInt(
-                colors.blue.slice(1, 3),
-                16
-              )}, ${parseInt(colors.blue.slice(3, 5), 16)}, ${parseInt(
-                colors.blue.slice(5, 7),
-                16
-              )}, 0.1)`,
-            }}>
-            <FaFileInvoiceDollar style={{ color: colors.blue }} />
-          </div>
           <div className="stat-content">
             <div className="stat-number">{stats.totalApplications}</div>
             <div className="stat-label">Total Applications</div>
@@ -714,19 +504,6 @@ const AdminVisa = () => {
         </div>
 
         <div className="stat-card">
-          <div
-            className="stat-icon"
-            style={{
-              background: `rgba(${parseInt(
-                colors.orange.slice(1, 3),
-                16
-              )}, ${parseInt(colors.orange.slice(3, 5), 16)}, ${parseInt(
-                colors.orange.slice(5, 7),
-                16
-              )}, 0.1)`,
-            }}>
-            <FaUserClock style={{ color: colors.orange }} />
-          </div>
           <div className="stat-content">
             <div className="stat-number">{stats.pending}</div>
             <div className="stat-label">Pending Review</div>
@@ -734,19 +511,6 @@ const AdminVisa = () => {
         </div>
 
         <div className="stat-card">
-          <div
-            className="stat-icon"
-            style={{
-              background: `rgba(${parseInt(
-                colors.purple.slice(1, 3),
-                16
-              )}, ${parseInt(colors.purple.slice(3, 5), 16)}, ${parseInt(
-                colors.purple.slice(5, 7),
-                16
-              )}, 0.1)`,
-            }}>
-            <FaChartLine style={{ color: colors.purple }} />
-          </div>
           <div className="stat-content">
             <div className="stat-number">{stats.processing}</div>
             <div className="stat-label">Processing</div>
@@ -754,19 +518,6 @@ const AdminVisa = () => {
         </div>
 
         <div className="stat-card">
-          <div
-            className="stat-icon"
-            style={{
-              background: `rgba(${parseInt(
-                colors.green.slice(1, 3),
-                16
-              )}, ${parseInt(colors.green.slice(3, 5), 16)}, ${parseInt(
-                colors.green.slice(5, 7),
-                16
-              )}, 0.1)`,
-            }}>
-            <FaUserCheck style={{ color: colors.green }} />
-          </div>
           <div className="stat-content">
             <div className="stat-number">{stats.approved}</div>
             <div className="stat-label">Approved</div>
@@ -774,39 +525,13 @@ const AdminVisa = () => {
         </div>
 
         <div className="stat-card">
-          <div
-            className="stat-icon"
-            style={{
-              background: `rgba(${parseInt(
-                colors.red.slice(1, 3),
-                16
-              )}, ${parseInt(colors.red.slice(3, 5), 16)}, ${parseInt(
-                colors.red.slice(5, 7),
-                16
-              )}, 0.1)`,
-            }}>
-            <FaTimesCircle style={{ color: colors.red }} />
-          </div>
           <div className="stat-content">
-            <div className="statNumber">{stats.rejected}</div>
+            <div className="stat-number">{stats.rejected}</div>
             <div className="stat-label">Rejected</div>
           </div>
         </div>
 
         <div className="stat-card">
-          <div
-            className="stat-icon"
-            style={{
-              background: `rgba(${parseInt(
-                colors.blue.slice(1, 3),
-                16
-              )}, ${parseInt(colors.blue.slice(3, 5), 16)}, ${parseInt(
-                colors.blue.slice(5, 7),
-                16
-              )}, 0.1)`,
-            }}>
-            <FaMoneyBillWave style={{ color: colors.blue }} />
-          </div>
           <div className="stat-content">
             <div className="stat-number">
               ${stats.totalRevenue.toLocaleString()}
@@ -819,120 +544,89 @@ const AdminVisa = () => {
       {/* Main Content Area */}
       <div className="admin-main-content">
         {/* Tabs Navigation */}
-        <div className="admin-tabs-container">
-          <div className="admin-tabs">
-            {[
-              {
-                id: "applications",
-                label: "Applications",
-                icon: <FaUsers />,
-                count: applications.length,
-              },
-              {
-                id: "countries",
-                label: "Countries",
-                icon: <FaGlobe />,
-                count: countries.length,
-              },
-              {
-                id: "pricing",
-                label: "Pricing",
-                icon: <FaMoneyBillWave />,
-                count: pricing.length,
-              },
-              { id: "analytics", label: "Analytics", icon: <FaChartLine /> },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                className={`admin-tab ${activeTab === tab.id ? "active" : ""}`}
-                onClick={() => setActiveTab(tab.id)}
-                style={{
-                  borderBottomColor:
-                    activeTab === tab.id
-                      ? tab.id === "applications"
-                        ? colors.blue
-                        : tab.id === "countries"
-                        ? colors.green
-                        : tab.id === "pricing"
-                        ? colors.orange
-                        : colors.purple
-                      : "transparent",
-                }}>
-                <span className="tab-icon">{tab.icon}</span>
-                <span className="tab-label">{tab.label}</span>
-                {tab.count !== undefined && (
-                  <span className="tab-badge">{tab.count}</span>
-                )}
-              </button>
-            ))}
+        <div className="admin-tabs">
+          {[
+            {
+              id: "applications",
+              label: "Applications",
+              icon: <FaUsers />,
+              count: applications.length,
+            },
+            {
+              id: "countries",
+              label: "Countries",
+              icon: <FaGlobe />,
+              count: countries.length,
+            },
+            {
+              id: "pricing",
+              label: "Pricing",
+              icon: <FaMoneyBillWave />,
+              count: pricing.length,
+            },
+            { id: "analytics", label: "Analytics", icon: <FaChartLine /> },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              className={`admin-tab ${activeTab === tab.id ? "active" : ""}`}
+              onClick={() => setActiveTab(tab.id)}>
+              <span className="tab-icon">{tab.icon}</span>
+              <span className="tab-label">{tab.label}</span>
+              {tab.count !== undefined && (
+                <span className="tab-badge">{tab.count}</span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Search and Filters */}
+        <div className="search-filters">
+          <div className="search-container">
+            <div className="search-box">
+              <FaSearch className="search-icon" />
+              <input
+                type="text"
+                placeholder="Search by name, email, reference, or passport..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+              />
+            </div>
           </div>
 
-          {/* Search and Filters */}
-          <div className="search-filters-card">
-            <div className="search-container">
-              <div className="search-box">
-                <FaSearch className="search-icon" />
-                <input
-                  type="text"
-                  placeholder="Search by name, email, reference, or passport..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="search-input"
-                />
-              </div>
+          <div className="filter-container">
+            <div className="filter-chips">
+              {statusOptions.map((status) => (
+                <button
+                  key={status.id}
+                  className={`filter-chip ${
+                    statusFilter === status.id ? "active" : ""
+                  }`}
+                  onClick={() => setStatusFilter(status.id)}>
+                  {status.label}
+                </button>
+              ))}
             </div>
 
-            <div className="filters-container">
-              <div className="filter-group">
-                <label>Status</label>
-                <div className="filter-chips">
-                  {statusOptions.map((status) => (
-                    <button
-                      key={status.id}
-                      className={`filter-chip ${
-                        statusFilter === status.id ? "active" : ""
-                      }`}
-                      onClick={() => setStatusFilter(status.id)}
-                      style={{
-                        backgroundColor:
-                          statusFilter === status.id ? status.color : "",
-                        borderColor: status.color,
-                      }}>
-                      {status.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="filter-group">
-                <label>Destination Country</label>
-                <div className="filter-chips">
-                  <button
-                    className={`filter-chip ${
-                      countryFilter === "all" ? "active" : ""
-                    }`}
-                    onClick={() => setCountryFilter("all")}
-                    style={{ borderColor: colors.green }}>
-                    All Countries
-                  </button>
-                  {countries.map((country) => (
-                    <button
-                      key={country.id}
-                      className={`filter-chip ${
-                        countryFilter === country.id ? "active" : ""
-                      }`}
-                      onClick={() => setCountryFilter(country.id)}
-                      style={{
-                        backgroundColor:
-                          countryFilter === country.id ? country.color : "",
-                        borderColor: country.color,
-                      }}>
-                      <span className="country-flag">{country.flag}</span>
-                      {country.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
+            <div className="filter-chips" style={{ marginTop: "0.75rem" }}>
+              <button
+                className={`filter-chip ${
+                  countryFilter === "all" ? "active" : ""
+                }`}
+                onClick={() => setCountryFilter("all")}>
+                All Countries
+              </button>
+              {countries.map((country) => (
+                <button
+                  key={country.id}
+                  className={`filter-chip ${
+                    countryFilter === country.id ? "active" : ""
+                  }`}
+                  onClick={() => setCountryFilter(country.id)}>
+                  <span className="country-flag-small">{country.flag}</span>
+                  {country.name}
+                </button>
+              ))}
             </div>
           </div>
         </div>
@@ -943,203 +637,163 @@ const AdminVisa = () => {
           {activeTab === "applications" && (
             <div className="applications-section">
               <div className="table-container">
-                <div className="table-header">
-                  <div className="table-row header-row">
-                    <div
-                      className="table-cell"
-                      onClick={() => handleSort("applicantName")}>
-                      <div className="sort-header">
-                        Applicant {getSortIcon("applicantName")}
-                      </div>
-                    </div>
-                    <div
-                      className="table-cell"
-                      onClick={() => handleSort("destination")}>
-                      <div className="sort-header">
-                        Destination {getSortIcon("destination")}
-                      </div>
-                    </div>
-                    <div
-                      className="table-cell"
-                      onClick={() => handleSort("applicationDate")}>
-                      <div className="sort-header">
-                        Applied {getSortIcon("applicationDate")}
-                      </div>
-                    </div>
-                    <div
-                      className="table-cell"
-                      onClick={() => handleSort("status")}>
-                      <div className="sort-header">
-                        Status {getSortIcon("status")}
-                      </div>
-                    </div>
-                    <div
-                      className="table-cell"
-                      onClick={() => handleSort("amountPaid")}>
-                      <div className="sort-header">
-                        Amount {getSortIcon("amountPaid")}
-                      </div>
-                    </div>
-                    <div className="table-cell">Actions</div>
-                  </div>
-                </div>
-
-                <div className="table-body">
-                  {filteredApplications.map((app) => (
-                    <div key={app.id} className="table-row">
-                      <div className="table-cell">
-                        <div className="applicant-info">
-                          <div className="applicant-name">
-                            {app.applicantName}
-                          </div>
-                          <div className="applicant-details">
-                            <span className="applicant-email">
-                              <FaEnvelope /> {app.applicantEmail}
-                            </span>
-                            <span className="applicant-phone">
-                              <FaPhone /> {app.applicantPhone}
-                            </span>
-                          </div>
-                          <div className="applicant-reference">
-                            <FaPassport /> {app.reference}
-                          </div>
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th onClick={() => handleSort("applicantName")}>
+                        <div className="sort-header">
+                          Applicant {getSortIcon("applicantName")}
                         </div>
-                      </div>
-
-                      <div className="table-cell">
-                        <div className="destination-info">
-                          <div className="destination-flag">
-                            {countries.find((c) => c.id === app.destinationCode)
-                              ?.flag || "🌍"}
-                          </div>
-                          <div className="destination-details">
-                            <div className="destination-name">
-                              {app.destination}
+                      </th>
+                      <th onClick={() => handleSort("destination")}>
+                        <div className="sort-header">
+                          Destination {getSortIcon("destination")}
+                        </div>
+                      </th>
+                      <th onClick={() => handleSort("status")}>
+                        <div className="sort-header">
+                          Status {getSortIcon("status")}
+                        </div>
+                      </th>
+                      <th onClick={() => handleSort("applicationDate")}>
+                        <div className="sort-header">
+                          Date {getSortIcon("applicationDate")}
+                        </div>
+                      </th>
+                      <th onClick={() => handleSort("amountPaid")}>
+                        <div className="sort-header">
+                          Amount {getSortIcon("amountPaid")}
+                        </div>
+                      </th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredApplications.map((app) => (
+                      <tr key={app.id}>
+                        <td className="applicant-cell">
+                          <div className="applicant-info">
+                            <strong className="applicant-name">
+                              {app.applicantName}
+                            </strong>
+                            <div className="applicant-details">
+                              <span className="applicant-email">
+                                <FaEnvelope size={10} /> {app.applicantEmail}
+                              </span>
                             </div>
-                            <div className="visa-type">
-                              <span className="type-badge">{app.visaType}</span>
-                              <span className="duration">
-                                {app.duration} days
+                            <div className="applicant-reference">
+                              <FaPassport size={10} /> {app.reference}
+                            </div>
+                          </div>
+                        </td>
+
+                        <td className="destination-cell">
+                          <div className="destination-info">
+                            <div className="destination-flag">
+                              {countries.find(
+                                (c) => c.id === app.destinationCode,
+                              )?.flag || "🌍"}
+                            </div>
+                            <div className="destination-details">
+                              <div className="destination-name">
+                                {app.destination}
+                              </div>
+                              <div className="visa-type">{app.visaType}</div>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td className="status-cell">
+                          <span className={`status-badge ${app.status}`}>
+                            {app.status === "pending" && <FaClock size={10} />}
+                            {app.status === "processing" && (
+                              <FaClock size={10} />
+                            )}
+                            {app.status === "approved" && (
+                              <FaCheckCircle size={10} />
+                            )}
+                            {app.status === "rejected" && (
+                              <FaTimesCircle size={10} />
+                            )}
+                            {app.status.charAt(0).toUpperCase() +
+                              app.status.slice(1)}
+                          </span>
+                        </td>
+
+                        <td className="date-cell">
+                          <div className="date-info">
+                            <div className="date-item">
+                              <span className="date-label">Applied</span>
+                              <span className="date-value">
+                                {formatDate(app.applicationDate)}
                               </span>
                             </div>
                           </div>
-                        </div>
-                      </div>
+                        </td>
 
-                      <div className="table-cell">
-                        <div className="date-info">
-                          <div className="date-item">
-                            <span className="date-label">Applied:</span>
-                            <span className="date-value">
-                              {formatDate(app.applicationDate)}
-                            </span>
+                        <td className="amount-cell">
+                          <div className="amount-info">
+                            <div className="amount">
+                              {formatCurrency(app.amountPaid, app.currency)}
+                            </div>
+                            <div
+                              className={`payment-status ${
+                                app.paymentStatus === "paid" ?
+                                  "paid"
+                                : "pending"
+                              }`}>
+                              {app.paymentStatus === "paid" ?
+                                "Paid"
+                              : app.paymentStatus === "pending" ?
+                                "Pending"
+                              : "Refunded"}
+                            </div>
                           </div>
-                          <div className="date-item">
-                            <span className="date-label">Departure:</span>
-                            <span className="date-value">
-                              {formatDate(app.departureDate)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
+                        </td>
 
-                      <div className="table-cell">
-                        <div className="status-container">
-                          {getStatusBadge(app.status)}
-                          {getPaymentBadge(app.paymentStatus)}
-                          {getPriorityBadge(app.priority)}
-                        </div>
-                      </div>
-
-                      <div className="table-cell">
-                        <div className="amount-info">
-                          <div className="amount">
-                            {formatCurrency(app.amountPaid, app.currency)}
-                          </div>
-                          <div className="payment-status">
-                            {app.paymentStatus === "paid" ? (
-                              <span className="payment-paid">Paid</span>
-                            ) : app.paymentStatus === "pending" ? (
-                              <span className="payment-pending">Pending</span>
-                            ) : (
-                              <span className="payment-refunded">Refunded</span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="table-cell">
-                        <div className="action-buttons">
-                          <button
-                            className="action-btn view-btn"
-                            onClick={() => handleViewApplication(app)}
-                            title="View Details">
-                            <FaEye />
-                          </button>
-                          <button
-                            className="action-btn email-btn"
-                            onClick={() => handleSendEmail(app)}
-                            title="Send Email">
-                            <FaEnvelope />
-                          </button>
-                          <button
-                            className="action-btn edit-btn"
-                            onClick={() => handleAssignOfficer(app.id)}
-                            title="Assign Officer">
-                            <FaEdit />
-                          </button>
-                          {app.status === "pending" && (
+                        <td className="actions-cell">
+                          <div className="action-buttons">
                             <button
-                              className="action-btn process-btn"
-                              onClick={() =>
-                                handleUpdateStatus(app.id, "processing")
-                              }
-                              title="Start Processing">
-                              <FaArrowRight />
+                              className="action-btn view"
+                              onClick={() => handleViewApplication(app)}
+                              title="View Details">
+                              <FaEye />
                             </button>
-                          )}
-                          {app.status === "processing" && (
-                            <>
-                              <button
-                                className="action-btn approve-btn"
-                                onClick={() =>
-                                  handleUpdateStatus(app.id, "approved")
-                                }
-                                title="Approve">
-                                <FaCheckCircle />
-                              </button>
-                              <button
-                                className="action-btn reject-btn"
-                                onClick={() =>
-                                  handleUpdateStatus(app.id, "rejected")
-                                }
-                                title="Reject">
-                                <FaTimesCircle />
-                              </button>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                            <button
+                              className="action-btn email"
+                              onClick={() => handleSendEmail(app)}
+                              title="Send Email">
+                              <FaEnvelope />
+                            </button>
+                            <button
+                              className="action-btn edit"
+                              onClick={() => handleAssignOfficer(app.id)}
+                              title="Assign Officer">
+                              <FaEdit />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
 
-                  {filteredApplications.length === 0 && (
-                    <div className="empty-state">
-                      <FaSearch className="empty-icon" />
-                      <h3>No applications found</h3>
-                      <p>Try adjusting your search or filters</p>
-                      <button
-                        className="clear-filters-btn"
-                        onClick={() => {
-                          setSearchTerm("");
-                          setStatusFilter("all");
-                          setCountryFilter("all");
-                        }}>
-                        Clear All Filters
-                      </button>
-                    </div>
-                  )}
-                </div>
+                {filteredApplications.length === 0 && (
+                  <div className="empty-state">
+                    <FaSearch className="empty-icon" />
+                    <h3>No applications found</h3>
+                    <p>Try adjusting your search or filters</p>
+                    <button
+                      className="clear-filters-btn"
+                      onClick={() => {
+                        setSearchTerm("");
+                        setStatusFilter("all");
+                        setCountryFilter("all");
+                      }}>
+                      Clear All Filters
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -1179,7 +833,7 @@ const AdminVisa = () => {
                         </span>
                       </div>
                       <div className="country-processing">
-                        <FaClock /> {country.processingTime}
+                        <FaClock /> {country.processingTime} processing
                       </div>
                       <div className="country-visa-types">
                         {country.visaTypes.map((type, index) => (
@@ -1198,7 +852,7 @@ const AdminVisa = () => {
                       </button>
                       <button
                         className={`btn-toggle-status ${
-                          country.isActive ? "deactivate" : "activate"
+                          country.isActive ? "deactivate" : ""
                         }`}
                         onClick={() => handleToggleCountryActive(country.id)}>
                         {country.isActive ? "Deactivate" : "Activate"}
@@ -1238,7 +892,7 @@ const AdminVisa = () => {
                   <tbody>
                     {pricing.map((price) => {
                       const country = countries.find(
-                        (c) => c.id === price.countryId
+                        (c) => c.id === price.countryId,
                       );
                       const totalPrice = price.price + price.processingFee;
 
@@ -1360,13 +1014,13 @@ const AdminVisa = () => {
                   <div className="country-stats">
                     {countries.slice(0, 5).map((country) => {
                       const countryApps = applications.filter(
-                        (app) => app.destinationCode === country.id
+                        (app) => app.destinationCode === country.id,
                       ).length;
                       const countryRevenue = applications
                         .filter(
                           (app) =>
                             app.destinationCode === country.id &&
-                            app.paymentStatus === "paid"
+                            app.paymentStatus === "paid",
                         )
                         .reduce((sum, app) => sum + app.amountPaid, 0);
 
@@ -1398,13 +1052,11 @@ const AdminVisa = () => {
                     {applications.slice(0, 5).map((app) => (
                       <div key={app.id} className="activity-item">
                         <div className="activity-icon">
-                          {app.status === "approved" ? (
+                          {app.status === "approved" ?
                             <FaCheckCircle style={{ color: colors.green }} />
-                          ) : app.status === "rejected" ? (
+                          : app.status === "rejected" ?
                             <FaTimesCircle style={{ color: colors.red }} />
-                          ) : (
-                            <FaClock style={{ color: colors.orange }} />
-                          )}
+                          : <FaClock style={{ color: colors.orange }} />}
                         </div>
                         <div className="activity-content">
                           <div className="activity-title">
@@ -1506,7 +1158,7 @@ const AdminVisa = () => {
                         <span className="detail-label">Destination:</span>
                         <span className="detail-value">
                           {countries.find(
-                            (c) => c.id === selectedApplication.destinationCode
+                            (c) => c.id === selectedApplication.destinationCode,
                           )?.flag || "🌍"}{" "}
                           {selectedApplication.destination}
                         </span>
@@ -1562,7 +1214,7 @@ const AdminVisa = () => {
                         if (reason) {
                           handleUpdateStatus(
                             selectedApplication.id,
-                            "rejected"
+                            "rejected",
                           );
                           setShowApplicationModal(false);
                         }

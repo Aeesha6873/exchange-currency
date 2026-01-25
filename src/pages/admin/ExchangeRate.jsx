@@ -153,7 +153,7 @@ const ExchangeRates = () => {
 
   const handleSaveRate = () => {
     console.log(
-      `Updated ${editingRate.currency} ${editingRate.type} rate to ${editedValue}`
+      `Updated ${editingRate.currency} ${editingRate.type} rate to ${editedValue}`,
     );
     setEditingRate(null);
     setEditedValue("");
@@ -284,8 +284,10 @@ const ExchangeRates = () => {
                 </div>
 
                 <div>
-                  {editingRate?.currency === currency.code &&
-                  editingRate?.type === "buy" ? (
+                  {(
+                    editingRate?.currency === currency.code &&
+                    editingRate?.type === "buy"
+                  ) ?
                     <div className={styles.editContainer}>
                       <input
                         type="number"
@@ -309,20 +311,21 @@ const ExchangeRates = () => {
                         </button>
                       </div>
                     </div>
-                  ) : (
-                    <div
+                  : <div
                       className={styles.rateValue}
                       onClick={() => handleEditRate(currency, "buy")}
                       title="Click to edit">
                       {currency.buyRate.toFixed(4)}
                       <FiEdit2 className={styles.editIcon} />
                     </div>
-                  )}
+                  }
                 </div>
 
                 <div>
-                  {editingRate?.currency === currency.code &&
-                  editingRate?.type === "sell" ? (
+                  {(
+                    editingRate?.currency === currency.code &&
+                    editingRate?.type === "sell"
+                  ) ?
                     <div className={styles.editContainer}>
                       <input
                         type="number"
@@ -346,15 +349,14 @@ const ExchangeRates = () => {
                         </button>
                       </div>
                     </div>
-                  ) : (
-                    <div
+                  : <div
                       className={styles.rateValue}
                       onClick={() => handleEditRate(currency, "sell")}
                       title="Click to edit">
                       {currency.sellRate.toFixed(4)}
                       <FiEdit2 className={styles.editIcon} />
                     </div>
-                  )}
+                  }
                 </div>
 
                 <div>
@@ -368,25 +370,24 @@ const ExchangeRates = () => {
 
                 <div>
                   <div className={styles.changeIndicator}>
-                    {currency.change > 0 ? (
+                    {currency.change > 0 ?
                       <>
                         <FiTrendingUp className={styles.changeIconUp} />
                         <span className={styles.changePositive}>
                           +{currency.change.toFixed(2)}%
                         </span>
                       </>
-                    ) : currency.change < 0 ? (
+                    : currency.change < 0 ?
                       <>
                         <FiTrendingDown className={styles.changeIconDown} />
                         <span className={styles.changeNegative}>
                           {currency.change.toFixed(2)}%
                         </span>
                       </>
-                    ) : (
-                      <span className={styles.changeNeutral}>
+                    : <span className={styles.changeNeutral}>
                         {currency.change.toFixed(2)}%
                       </span>
-                    )}
+                    }
                   </div>
                 </div>
 
@@ -395,17 +396,13 @@ const ExchangeRates = () => {
                     className={styles.statusBadge}
                     style={{
                       background:
-                        currency.status === "up"
-                          ? "rgba(16, 185, 129, 0.1)"
-                          : currency.status === "down"
-                          ? "rgba(239, 68, 68, 0.1)"
-                          : "rgba(107, 114, 128, 0.1)",
+                        currency.status === "up" ? "rgba(16, 185, 129, 0.1)"
+                        : currency.status === "down" ? "rgba(239, 68, 68, 0.1)"
+                        : "rgba(107, 114, 128, 0.1)",
                       color:
-                        currency.status === "up"
-                          ? "var(--green)"
-                          : currency.status === "down"
-                          ? "#ef4444"
-                          : "var(--gray)",
+                        currency.status === "up" ? "var(--green)"
+                        : currency.status === "down" ? "#ef4444"
+                        : "var(--gray)",
                     }}>
                     {currency.status.charAt(0).toUpperCase() +
                       currency.status.slice(1)}

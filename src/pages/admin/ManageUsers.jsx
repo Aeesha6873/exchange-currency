@@ -1,474 +1,648 @@
 import React, { useState } from "react";
 import {
   FiUser,
-  FiSettings,
   FiLock,
   FiMail,
   FiBell,
   FiShield,
   FiDownload,
-  FiUpload,
   FiSave,
   FiRefreshCw,
-  FiCheck,
-  FiX,
   FiKey,
   FiUsers,
-  FiGlobe,
-  FiCalendar,
+  FiTrash2,
+  FiEdit2,
   FiEye,
+  FiCheck,
+  FiX,
+  FiSettings,
+  FiUpload,
+  FiFilter,
+  FiSearch,
 } from "react-icons/fi";
 import styles from "./ManageUsers.module.css";
 
 const ManageUsers = () => {
-  // Control panel states
-  const [activeControl, setActiveControl] = useState("account");
-  const [userSettings, setUserSettings] = useState({
-    // Account settings
-    allowNewRegistrations: true,
-    requireEmailVerification: true,
-    allowProfileUpdates: true,
+  const [activeSection, setActiveSection] = useState("users");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedUsers, setSelectedUsers] = useState([]);
 
-    // Security settings
-    twoFactorAuth: false,
-    sessionTimeout: "30",
-    passwordStrength: "medium",
-
-    // Notification settings
-    emailNotifications: true,
-    pushNotifications: false,
-    marketingEmails: false,
-
-    // Privacy settings
-    profileVisibility: "public",
-    dataSharing: false,
-    deleteInactiveAccounts: "90",
-
-    // System settings
-    defaultUserRole: "user",
-    maxLoginAttempts: "5",
-    autoLockoutDuration: "30",
-  });
-
-  const handleSettingChange = (setting, value) => {
-    setUserSettings((prev) => ({
-      ...prev,
-      [setting]: value,
-    }));
-  };
-
-  const controlCards = [
-    {
-      id: "account",
-      title: "Account Management",
-      description:
-        "Control user registration, verification, and profile settings",
-      icon: <FiUser />,
-      className: "user",
-    },
-    {
-      id: "security",
-      title: "Security Settings",
-      description: "Configure password policies, 2FA, and session management",
-      icon: <FiLock />,
-      className: "lock",
-    },
-    {
-      id: "notifications",
-      title: "Notifications",
-      description: "Manage email, push, and system notifications",
-      icon: <FiBell />,
-      className: "notification",
-    },
-    {
-      id: "privacy",
-      title: "Privacy Controls",
-      description: "Configure user privacy and data sharing settings",
-      icon: <FiShield />,
-      className: "security",
-    },
-    {
-      id: "communication",
-      title: "Communication",
-      description: "Email templates, bulk messaging, and announcement settings",
-      icon: <FiMail />,
-      className: "mail",
-    },
-    {
-      id: "export",
-      title: "Data Management",
-      description: "Export user data, backups, and data retention policies",
-      icon: <FiDownload />,
-      className: "export",
-    },
-  ];
-
-  const recentActivities = [
+  // User data
+  const [users, setUsers] = useState([
     {
       id: 1,
-      title: "Password policy updated",
-      time: "2 hours ago",
-      icon: <FiKey />,
+      name: "John Smith",
+      email: "john@travel.com",
+      role: "user",
+      status: "active",
+      lastActive: "2 hours ago",
     },
     {
       id: 2,
-      title: "New registration settings applied",
-      time: "Yesterday",
-      icon: <FiUsers />,
+      name: "Emma Wilson",
+      email: "emma@travel.com",
+      role: "admin",
+      status: "active",
+      lastActive: "Today",
     },
     {
       id: 3,
-      title: "Email verification required enabled",
-      time: "2 days ago",
-      icon: <FiMail />,
+      name: "David Chen",
+      email: "david@flight.com",
+      role: "user",
+      status: "pending",
+      lastActive: "Yesterday",
     },
     {
       id: 4,
-      title: "Session timeout increased to 60 minutes",
-      time: "1 week ago",
-      icon: <FiGlobe />,
+      name: "Sarah Johnson",
+      email: "sarah@travel.com",
+      role: "vip",
+      status: "active",
+      lastActive: "Today",
     },
-  ];
+    {
+      id: 5,
+      name: "Michael Brown",
+      email: "michael@exchange.com",
+      role: "user",
+      status: "inactive",
+      lastActive: "1 week ago",
+    },
+  ]);
+
+  // System settings
+  const [systemSettings, setSystemSettings] = useState({
+    allowNewRegistrations: true,
+    requireEmailVerification: true,
+    requireAdminApproval: false,
+    twoFactorAuth: false,
+    sessionTimeout: "30",
+    passwordStrength: "medium",
+    maxLoginAttempts: "5",
+    autoLockoutDuration: "30",
+    profileVisibility: "public",
+    deleteInactiveAccounts: "90",
+    defaultUserRole: "user",
+  });
+
+  // Role management
+  const [roles, setRoles] = useState([
+    { id: "admin", name: "Administrator", permissions: ["all"], userCount: 1 },
+    {
+      id: "vip",
+      name: "VIP User",
+      permissions: ["premium_access", "priority_support"],
+      userCount: 1,
+    },
+    {
+      id: "user",
+      name: "Regular User",
+      permissions: ["basic_access"],
+      userCount: 3,
+    },
+    { id: "viewer", name: "Viewer", permissions: ["read_only"], userCount: 0 },
+  ]);
+
+  const [newRole, setNewRole] = useState({ name: "", permissions: [] });
+
+  // Filtered users
+  const filteredUsers = users.filter(
+    (user) =>
+      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.role.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
+  // Handlers
+  const handleUserSelection = (userId) => {
+    setSelectedUsers((prev) =>
+      prev.includes(userId) ?
+        prev.filter((id) => id !== userId)
+      : [...prev, userId],
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (selectedUsers.length === filteredUsers.length) {
+      setSelectedUsers([]);
+    } else {
+      setSelectedUsers(filteredUsers.map((user) => user.id));
+    }
+  };
+
+  const handleDeleteUsers = () => {
+    if (selectedUsers.length === 0) return;
+    if (window.confirm(`Delete ${selectedUsers.length} selected user(s)?`)) {
+      setUsers((prev) =>
+        prev.filter((user) => !selectedUsers.includes(user.id)),
+      );
+      setSelectedUsers([]);
+    }
+  };
+
+  const handleChangeUserRole = (userId, newRole) => {
+    setUsers((prev) =>
+      prev.map((user) =>
+        user.id === userId ? { ...user, role: newRole } : user,
+      ),
+    );
+  };
+
+  const handleToggleUserStatus = (userId) => {
+    setUsers((prev) =>
+      prev.map((user) =>
+        user.id === userId ?
+          { ...user, status: user.status === "active" ? "inactive" : "active" }
+        : user,
+      ),
+    );
+  };
+
+  const handleAddRole = () => {
+    if (!newRole.name.trim()) return;
+    const roleId = newRole.name.toLowerCase().replace(/\s+/g, "_");
+    setRoles((prev) => [
+      ...prev,
+      {
+        id: roleId,
+        name: newRole.name,
+        permissions: newRole.permissions,
+        userCount: 0,
+      },
+    ]);
+    setNewRole({ name: "", permissions: [] });
+  };
+
+  const handleDeleteRole = (roleId) => {
+    if (roles.find((r) => r.id === roleId).userCount > 0) {
+      alert("Cannot delete role with assigned users");
+      return;
+    }
+    setRoles((prev) => prev.filter((role) => role.id !== roleId));
+  };
+
+  const handleSettingChange = (setting, value) => {
+    setSystemSettings((prev) => ({ ...prev, [setting]: value }));
+  };
 
   const handleSaveSettings = () => {
-    console.log("Saving user settings:", userSettings);
-    alert("User management settings saved successfully!");
+    // Save settings to backend
+    console.log("Saving settings:", systemSettings);
+    alert("Settings saved successfully!");
   };
 
   const handleResetSettings = () => {
     if (window.confirm("Reset all settings to default?")) {
-      setUserSettings({
+      setSystemSettings({
         allowNewRegistrations: true,
         requireEmailVerification: true,
-        allowProfileUpdates: true,
+        requireAdminApproval: false,
         twoFactorAuth: false,
         sessionTimeout: "30",
         passwordStrength: "medium",
-        emailNotifications: true,
-        pushNotifications: false,
-        marketingEmails: false,
-        profileVisibility: "public",
-        dataSharing: false,
-        deleteInactiveAccounts: "90",
-        defaultUserRole: "user",
         maxLoginAttempts: "5",
         autoLockoutDuration: "30",
+        profileVisibility: "public",
+        deleteInactiveAccounts: "90",
+        defaultUserRole: "user",
       });
     }
   };
 
-  const renderSettings = () => {
-    switch (activeControl) {
-      case "account":
-        return (
-          <div className={styles.settingsGrid}>
-            <div className={styles.settingGroup}>
-              <label className={styles.settingLabel}>
-                Allow New User Registrations
-              </label>
-              <div className={styles.toggleSwitch}>
-                <input
-                  type="checkbox"
-                  checked={userSettings.allowNewRegistrations}
-                  onChange={(e) =>
-                    handleSettingChange(
-                      "allowNewRegistrations",
-                      e.target.checked
-                    )
-                  }
-                />
-                <span className={styles.toggleSlider}></span>
-              </div>
-            </div>
+  const handleExportUsers = () => {
+    const dataStr = JSON.stringify(users, null, 2);
+    const dataUri =
+      "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+    const exportFileDefaultName = "users_export.json";
 
-            <div className={styles.settingGroup}>
-              <label className={styles.settingLabel}>
-                Require Email Verification
-              </label>
-              <div className={styles.toggleSwitch}>
-                <input
-                  type="checkbox"
-                  checked={userSettings.requireEmailVerification}
-                  onChange={(e) =>
-                    handleSettingChange(
-                      "requireEmailVerification",
-                      e.target.checked
-                    )
-                  }
-                />
-                <span className={styles.toggleSlider}></span>
-              </div>
-            </div>
-
-            <div className={styles.settingGroup}>
-              <label className={styles.settingLabel}>
-                Allow Profile Updates
-              </label>
-              <div className={styles.toggleSwitch}>
-                <input
-                  type="checkbox"
-                  checked={userSettings.allowProfileUpdates}
-                  onChange={(e) =>
-                    handleSettingChange("allowProfileUpdates", e.target.checked)
-                  }
-                />
-                <span className={styles.toggleSlider}></span>
-              </div>
-            </div>
-
-            <div className={styles.settingGroup}>
-              <label className={styles.settingLabel}>Default User Role</label>
-              <select
-                value={userSettings.defaultUserRole}
-                onChange={(e) =>
-                  handleSettingChange("defaultUserRole", e.target.value)
-                }
-                className={styles.settingSelect}>
-                <option value="user">Regular User</option>
-                <option value="vip">VIP User</option>
-                <option value="premium">Premium User</option>
-              </select>
-            </div>
-          </div>
-        );
-
-      case "security":
-        return (
-          <div className={styles.settingsGrid}>
-            <div className={styles.settingGroup}>
-              <label className={styles.settingLabel}>
-                Enable Two-Factor Authentication
-              </label>
-              <div className={styles.toggleSwitch}>
-                <input
-                  type="checkbox"
-                  checked={userSettings.twoFactorAuth}
-                  onChange={(e) =>
-                    handleSettingChange("twoFactorAuth", e.target.checked)
-                  }
-                />
-                <span className={styles.toggleSlider}></span>
-              </div>
-            </div>
-
-            <div className={styles.settingGroup}>
-              <label className={styles.settingLabel}>
-                Session Timeout (minutes)
-              </label>
-              <input
-                type="number"
-                value={userSettings.sessionTimeout}
-                onChange={(e) =>
-                  handleSettingChange("sessionTimeout", e.target.value)
-                }
-                className={styles.settingInput}
-                min="5"
-                max="1440"
-              />
-            </div>
-
-            <div className={styles.settingGroup}>
-              <label className={styles.settingLabel}>Password Strength</label>
-              <select
-                value={userSettings.passwordStrength}
-                onChange={(e) =>
-                  handleSettingChange("passwordStrength", e.target.value)
-                }
-                className={styles.settingSelect}>
-                <option value="low">Low (6+ characters)</option>
-                <option value="medium">
-                  Medium (8+ with letters & numbers)
-                </option>
-                <option value="high">High (12+ with special characters)</option>
-              </select>
-            </div>
-
-            <div className={styles.settingGroup}>
-              <label className={styles.settingLabel}>
-                Maximum Login Attempts
-              </label>
-              <input
-                type="number"
-                value={userSettings.maxLoginAttempts}
-                onChange={(e) =>
-                  handleSettingChange("maxLoginAttempts", e.target.value)
-                }
-                className={styles.settingInput}
-                min="1"
-                max="10"
-              />
-            </div>
-          </div>
-        );
-
-      case "notifications":
-        return (
-          <div className={styles.settingsGrid}>
-            <div className={styles.settingRow}>
-              <div className={styles.settingText}>
-                <div className={styles.settingName}>Email Notifications</div>
-                <div className={styles.settingDescription}>
-                  Send system notifications via email
-                </div>
-              </div>
-              <div className={styles.toggleSwitch}>
-                <input
-                  type="checkbox"
-                  checked={userSettings.emailNotifications}
-                  onChange={(e) =>
-                    handleSettingChange("emailNotifications", e.target.checked)
-                  }
-                />
-                <span className={styles.toggleSlider}></span>
-              </div>
-            </div>
-
-            <div className={styles.settingRow}>
-              <div className={styles.settingText}>
-                <div className={styles.settingName}>Push Notifications</div>
-                <div className={styles.settingDescription}>
-                  Enable browser push notifications
-                </div>
-              </div>
-              <div className={styles.toggleSwitch}>
-                <input
-                  type="checkbox"
-                  checked={userSettings.pushNotifications}
-                  onChange={(e) =>
-                    handleSettingChange("pushNotifications", e.target.checked)
-                  }
-                />
-                <span className={styles.toggleSlider}></span>
-              </div>
-            </div>
-
-            <div className={styles.settingRow}>
-              <div className={styles.settingText}>
-                <div className={styles.settingName}>Marketing Emails</div>
-                <div className={styles.settingDescription}>
-                  Send promotional and marketing emails
-                </div>
-              </div>
-              <div className={styles.toggleSwitch}>
-                <input
-                  type="checkbox"
-                  checked={userSettings.marketingEmails}
-                  onChange={(e) =>
-                    handleSettingChange("marketingEmails", e.target.checked)
-                  }
-                />
-                <span className={styles.toggleSlider}></span>
-              </div>
-            </div>
-          </div>
-        );
-
-      default:
-        return (
-          <div className={styles.settingsGrid}>
-            <div className={styles.settingGroup}>
-              <label className={styles.settingLabel}>
-                Select a control panel to manage settings
-              </label>
-              <p className={styles.controlDescription}>
-                Each control panel contains specific settings for managing
-                different aspects of user management.
-              </p>
-            </div>
-          </div>
-        );
-    }
+    const linkElement = document.createElement("a");
+    linkElement.setAttribute("href", dataUri);
+    linkElement.setAttribute("download", exportFileDefaultName);
+    linkElement.click();
   };
 
   return (
     <div className={styles.manageUsers}>
-      {/* Header with your green colors */}
+      {/* Header */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <h1 className={styles.title}>
             <div className={styles.titleIcon}>
-              <FiSettings />
+              <FiUsers />
             </div>
-            Manage User Settings
+            User Management
           </h1>
           <p className={styles.subtitle}>
-            Configure system-wide user management settings and controls
+            Manage users, roles, and system settings
           </p>
         </div>
       </div>
 
-      {/* Control Panel */}
-      <div className={styles.controlPanel}>
-        <div className={styles.panelHeader}>
-          <h2 className={styles.panelTitle}>Control Panels</h2>
-          <div className={styles.panelActions}>
-            <button className={styles.panelBtn}>
-              <FiUpload /> Import Settings
-            </button>
-            <button className={`${styles.panelBtn} ${styles.primary}`}>
-              <FiDownload /> Export All Settings
-            </button>
-          </div>
-        </div>
+      {/* Navigation Tabs */}
+      <div className={styles.navigationTabs}>
+        <button
+          className={`${styles.tab} ${activeSection === "users" ? styles.active : ""}`}
+          onClick={() => setActiveSection("users")}>
+          <FiUsers /> Users ({users.length})
+        </button>
+        <button
+          className={`${styles.tab} ${activeSection === "roles" ? styles.active : ""}`}
+          onClick={() => setActiveSection("roles")}>
+          <FiKey /> Roles & Permissions
+        </button>
+        <button
+          className={`${styles.tab} ${activeSection === "settings" ? styles.active : ""}`}
+          onClick={() => setActiveSection("settings")}>
+          <FiSettings /> System Settings
+        </button>
+      </div>
 
-        {/* Control Cards Grid */}
-        <div className={styles.controlGrid}>
-          {controlCards.map((card) => (
-            <div
-              key={card.id}
-              className={`${styles.controlCard} ${
-                activeControl === card.id ? styles.active : ""
-              }`}
-              onClick={() => setActiveControl(card.id)}>
-              <div
-                className={`${styles.controlIcon} ${styles[card.className]}`}>
-                {card.icon}
-              </div>
-              <h3 className={styles.controlTitle}>{card.title}</h3>
-              <p className={styles.controlDescription}>{card.description}</p>
+      {/* Users Management Section */}
+      {activeSection === "users" && (
+        <div className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <div className={styles.searchBox}>
+              <FiSearch className={styles.searchIcon} />
+              <input
+                type="text"
+                placeholder="Search users..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className={styles.searchInput}
+              />
             </div>
-          ))}
-        </div>
+            <div className={styles.sectionActions}>
+              {selectedUsers.length > 0 && (
+                <button
+                  className={styles.dangerBtn}
+                  onClick={handleDeleteUsers}>
+                  <FiTrash2 /> Delete ({selectedUsers.length})
+                </button>
+              )}
+              <button
+                className={styles.secondaryBtn}
+                onClick={handleExportUsers}>
+                <FiDownload /> Export
+              </button>
+              <button className={styles.primaryBtn}>
+                <FiUser /> Add User
+              </button>
+            </div>
+          </div>
 
-        {/* Settings Section */}
-        <div className={styles.settingsSection}>
-          <h3 className={styles.settingsHeader}>
-            {controlCards.find((c) => c.id === activeControl)?.title ||
-              "Settings"}
-          </h3>
-          {renderSettings()}
-        </div>
+          <div className={styles.tableContainer}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th style={{ width: "50px" }}>
+                    <input
+                      type="checkbox"
+                      checked={
+                        selectedUsers.length === filteredUsers.length &&
+                        filteredUsers.length > 0
+                      }
+                      onChange={handleSelectAll}
+                      className={styles.checkbox}
+                    />
+                  </th>
+                  <th>User</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Last Active</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredUsers.map((user) => (
+                  <tr key={user.id}>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={selectedUsers.includes(user.id)}
+                        onChange={() => handleUserSelection(user.id)}
+                        className={styles.checkbox}
+                      />
+                    </td>
+                    <td>
+                      <div className={styles.userCell}>
+                        <div className={styles.userAvatar}>
+                          {user.name.charAt(0)}
+                        </div>
+                        <div className={styles.userInfo}>
+                          <div className={styles.userName}>{user.name}</div>
+                          <div className={styles.userEmail}>{user.email}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <select
+                        value={user.role}
+                        onChange={(e) =>
+                          handleChangeUserRole(user.id, e.target.value)
+                        }
+                        className={styles.roleSelect}>
+                        {roles.map((role) => (
+                          <option key={role.id} value={role.id}>
+                            {role.name}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td>
+                      <span
+                        className={`${styles.statusBadge} ${styles[user.status]}`}>
+                        {user.status.charAt(0).toUpperCase() +
+                          user.status.slice(1)}
+                      </span>
+                    </td>
+                    <td>
+                      <div className={styles.lastActive}>{user.lastActive}</div>
+                    </td>
+                    <td>
+                      <div className={styles.actionButtons}>
+                        <button
+                          className={`${styles.actionBtn} ${user.status === "active" ? styles.warning : styles.success}`}
+                          onClick={() => handleToggleUserStatus(user.id)}
+                          title={
+                            user.status === "active" ? "Deactivate" : "Activate"
+                          }>
+                          {user.status === "active" ?
+                            <FiX />
+                          : <FiCheck />}
+                        </button>
+                        <button className={styles.actionBtn} title="Edit">
+                          <FiEdit2 />
+                        </button>
+                        <button className={styles.actionBtn} title="View">
+                          <FiEye />
+                        </button>
+                        <button className={styles.actionBtn} title="Delete">
+                          <FiTrash2 />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-        {/* Recent Activity */}
-        <div className={styles.activitySection}>
-          <h3 className={styles.settingsHeader}>Recent Changes</h3>
-          <div className={styles.activityList}>
-            {recentActivities.map((activity) => (
-              <div key={activity.id} className={styles.activityItem}>
-                <div className={styles.activityIcon}>{activity.icon}</div>
-                <div className={styles.activityContent}>
-                  <div className={styles.activityTitle}>{activity.title}</div>
-                  <div className={styles.activityTime}>{activity.time}</div>
+          {filteredUsers.length === 0 && (
+            <div className={styles.emptyState}>
+              <FiUsers className={styles.emptyIcon} />
+              <h3>No users found</h3>
+              <p>Try adjusting your search terms</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Roles & Permissions Section */}
+      {activeSection === "roles" && (
+        <div className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>Roles & Permissions</h2>
+            <div className={styles.sectionActions}>
+              <button className={styles.primaryBtn} onClick={handleAddRole}>
+                + Add New Role
+              </button>
+            </div>
+          </div>
+
+          <div className={styles.rolesGrid}>
+            {roles.map((role) => (
+              <div key={role.id} className={styles.roleCard}>
+                <div className={styles.roleHeader}>
+                  <h3 className={styles.roleName}>{role.name}</h3>
+                  <span className={styles.userCount}>
+                    {role.userCount} users
+                  </span>
+                </div>
+                <div className={styles.permissions}>
+                  {role.permissions.map((perm, index) => (
+                    <span key={index} className={styles.permissionBadge}>
+                      {perm}
+                    </span>
+                  ))}
+                </div>
+                <div className={styles.roleActions}>
+                  <button className={styles.secondaryBtn}>
+                    <FiEdit2 /> Edit
+                  </button>
+                  <button
+                    className={styles.dangerBtn}
+                    onClick={() => handleDeleteRole(role.id)}
+                    disabled={role.userCount > 0}>
+                    <FiTrash2 /> Delete
+                  </button>
                 </div>
               </div>
             ))}
           </div>
-        </div>
 
-        {/* Action Buttons */}
-        <div className={styles.actionButtons}>
-          <button
-            className={`${styles.actionBtn} ${styles.reset}`}
-            onClick={handleResetSettings}>
-            <FiRefreshCw /> Reset to Default
-          </button>
-          <button
-            className={`${styles.actionBtn} ${styles.save}`}
-            onClick={handleSaveSettings}>
-            <FiSave /> Save All Settings
-          </button>
+          <div className={styles.addRoleSection}>
+            <h3 className={styles.sectionTitle}>Add New Role</h3>
+            <div className={styles.addRoleForm}>
+              <input
+                type="text"
+                placeholder="Role name"
+                value={newRole.name}
+                onChange={(e) =>
+                  setNewRole({ ...newRole, name: e.target.value })
+                }
+                className={styles.input}
+              />
+              <button className={styles.primaryBtn} onClick={handleAddRole}>
+                Add Role
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* System Settings Section */}
+      {activeSection === "settings" && (
+        <div className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>System Settings</h2>
+            <div className={styles.sectionActions}>
+              <button
+                className={styles.secondaryBtn}
+                onClick={handleResetSettings}>
+                <FiRefreshCw /> Reset to Default
+              </button>
+              <button
+                className={styles.primaryBtn}
+                onClick={handleSaveSettings}>
+                <FiSave /> Save Settings
+              </button>
+            </div>
+          </div>
+
+          <div className={styles.settingsGrid}>
+            {/* Registration Settings */}
+            <div className={styles.settingsGroup}>
+              <h3 className={styles.settingsTitle}>Registration Settings</h3>
+              <div className={styles.settingRow}>
+                <div className={styles.settingLabel}>
+                  Allow New Registrations
+                </div>
+                <label className={styles.toggleSwitch}>
+                  <input
+                    type="checkbox"
+                    checked={systemSettings.allowNewRegistrations}
+                    onChange={(e) =>
+                      handleSettingChange(
+                        "allowNewRegistrations",
+                        e.target.checked,
+                      )
+                    }
+                  />
+                  <span className={styles.toggleSlider}></span>
+                </label>
+              </div>
+              <div className={styles.settingRow}>
+                <div className={styles.settingLabel}>
+                  Require Email Verification
+                </div>
+                <label className={styles.toggleSwitch}>
+                  <input
+                    type="checkbox"
+                    checked={systemSettings.requireEmailVerification}
+                    onChange={(e) =>
+                      handleSettingChange(
+                        "requireEmailVerification",
+                        e.target.checked,
+                      )
+                    }
+                  />
+                  <span className={styles.toggleSlider}></span>
+                </label>
+              </div>
+              <div className={styles.settingRow}>
+                <div className={styles.settingLabel}>Default User Role</div>
+                <select
+                  value={systemSettings.defaultUserRole}
+                  onChange={(e) =>
+                    handleSettingChange("defaultUserRole", e.target.value)
+                  }
+                  className={styles.select}>
+                  {roles.map((role) => (
+                    <option key={role.id} value={role.id}>
+                      {role.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Security Settings */}
+            <div className={styles.settingsGroup}>
+              <h3 className={styles.settingsTitle}>Security Settings</h3>
+              <div className={styles.settingRow}>
+                <div className={styles.settingLabel}>
+                  Two-Factor Authentication
+                </div>
+                <label className={styles.toggleSwitch}>
+                  <input
+                    type="checkbox"
+                    checked={systemSettings.twoFactorAuth}
+                    onChange={(e) =>
+                      handleSettingChange("twoFactorAuth", e.target.checked)
+                    }
+                  />
+                  <span className={styles.toggleSlider}></span>
+                </label>
+              </div>
+              <div className={styles.settingRow}>
+                <div className={styles.settingLabel}>
+                  Session Timeout (minutes)
+                </div>
+                <input
+                  type="number"
+                  value={systemSettings.sessionTimeout}
+                  onChange={(e) =>
+                    handleSettingChange("sessionTimeout", e.target.value)
+                  }
+                  className={styles.numberInput}
+                  min="5"
+                  max="1440"
+                />
+              </div>
+              <div className={styles.settingRow}>
+                <div className={styles.settingLabel}>Max Login Attempts</div>
+                <input
+                  type="number"
+                  value={systemSettings.maxLoginAttempts}
+                  onChange={(e) =>
+                    handleSettingChange("maxLoginAttempts", e.target.value)
+                  }
+                  className={styles.numberInput}
+                  min="1"
+                  max="10"
+                />
+              </div>
+            </div>
+
+            {/* Account Management */}
+            <div className={styles.settingsGroup}>
+              <h3 className={styles.settingsTitle}>Account Management</h3>
+              <div className={styles.settingRow}>
+                <div className={styles.settingLabel}>
+                  Delete Inactive Accounts (days)
+                </div>
+                <input
+                  type="number"
+                  value={systemSettings.deleteInactiveAccounts}
+                  onChange={(e) =>
+                    handleSettingChange(
+                      "deleteInactiveAccounts",
+                      e.target.value,
+                    )
+                  }
+                  className={styles.numberInput}
+                  min="30"
+                  max="365"
+                />
+              </div>
+              <div className={styles.settingRow}>
+                <div className={styles.settingLabel}>Password Strength</div>
+                <select
+                  value={systemSettings.passwordStrength}
+                  onChange={(e) =>
+                    handleSettingChange("passwordStrength", e.target.value)
+                  }
+                  className={styles.select}>
+                  <option value="low">Low (6+ characters)</option>
+                  <option value="medium">
+                    Medium (8+ with letters & numbers)
+                  </option>
+                  <option value="high">High (12+ with special chars)</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Privacy Settings */}
+            <div className={styles.settingsGroup}>
+              <h3 className={styles.settingsTitle}>Privacy Settings</h3>
+              <div className={styles.settingRow}>
+                <div className={styles.settingLabel}>Profile Visibility</div>
+                <select
+                  value={systemSettings.profileVisibility}
+                  onChange={(e) =>
+                    handleSettingChange("profileVisibility", e.target.value)
+                  }
+                  className={styles.select}>
+                  <option value="public">Public</option>
+                  <option value="private">Private</option>
+                  <option value="friends">Friends Only</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

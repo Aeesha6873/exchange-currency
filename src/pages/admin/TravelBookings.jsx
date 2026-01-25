@@ -2,17 +2,14 @@ import React, { useState } from "react";
 import {
   FiGlobe,
   FiSearch,
-  FiFilter,
   FiDownload,
   FiEye,
   FiCheck,
   FiClock,
   FiX,
-  FiUser,
-  FiCalendar,
   FiMapPin,
-  FiPackage,
-  FiDollarSign,
+  FiUsers,
+  FiCalendar,
 } from "react-icons/fi";
 import styles from "./TravelBookings.module.css";
 
@@ -27,90 +24,102 @@ const TravelBookings = () => {
       user: "John Smith",
       tour: "Bali Luxury Retreat",
       destination: "Bali, Indonesia",
-      startDate: "2024-02-15",
-      endDate: "2024-02-22",
+      startDate: "Feb 15, 2024",
+      endDate: "Feb 22, 2024",
+      duration: "7 days",
       travelers: 2,
       totalAmount: 5600,
       paidAmount: 5600,
       status: "confirmed",
-      bookingDate: "2024-01-15",
+      bookingDate: "Jan 15, 2024",
       guide: "Wayan S.",
       contact: "+1234567890",
+      type: "luxury",
     },
     {
       id: "TB-002",
       user: "Emma Wilson",
       tour: "Swiss Alps Adventure",
       destination: "Swiss Alps",
-      startDate: "2024-02-20",
-      endDate: "2024-02-25",
+      startDate: "Feb 20, 2024",
+      endDate: "Feb 25, 2024",
+      duration: "5 days",
       travelers: 4,
       totalAmount: 10000,
       paidAmount: 5000,
       status: "pending",
-      bookingDate: "2024-01-14",
+      bookingDate: "Jan 14, 2024",
       guide: "Hans M.",
       contact: "+1234567891",
+      type: "adventure",
     },
     {
       id: "TB-003",
       user: "David Chen",
       tour: "Greek Island Hopping",
       destination: "Greek Islands",
-      startDate: "2024-03-05",
-      endDate: "2024-03-15",
+      startDate: "Mar 5, 2024",
+      endDate: "Mar 15, 2024",
+      duration: "10 days",
       travelers: 3,
       totalAmount: 11400,
       paidAmount: 11400,
       status: "confirmed",
-      bookingDate: "2024-01-13",
+      bookingDate: "Jan 13, 2024",
       guide: "Maria K.",
       contact: "+1234567892",
+      type: "cultural",
     },
     {
       id: "TB-004",
       user: "Sarah Johnson",
       tour: "Japanese Cherry Blossom",
       destination: "Japan",
-      startDate: "2024-04-01",
-      endDate: "2024-04-09",
+      startDate: "Apr 1, 2024",
+      endDate: "Apr 9, 2024",
+      duration: "8 days",
       travelers: 2,
       totalAmount: 7000,
       paidAmount: 3500,
       status: "pending",
-      bookingDate: "2024-01-12",
+      bookingDate: "Jan 12, 2024",
       guide: "Takashi Y.",
       contact: "+1234567893",
+      type: "cultural",
     },
     {
       id: "TB-005",
       user: "Michael Brown",
       tour: "Safari Expedition",
       destination: "Kenya",
-      startDate: "2024-03-10",
-      endDate: "2024-03-16",
+      startDate: "Mar 10, 2024",
+      endDate: "Mar 16, 2024",
+      duration: "6 days",
       travelers: 2,
       totalAmount: 5400,
       paidAmount: 5400,
       status: "completed",
-      bookingDate: "2023-12-15",
+      bookingDate: "Dec 15, 2023",
       guide: "Joseph K.",
       contact: "+1234567894",
+      type: "adventure",
     },
     {
       id: "TB-006",
       user: "Lisa Wang",
       tour: "Romantic Paris Getaway",
       destination: "Paris, France",
-      startDate: "2024-02-14",
-      endDate: "2024-02-17",
+      startDate: "Feb 14, 2024",
+      endDate: "Feb 17, 2024",
+      duration: "3 days",
       travelers: 2,
       totalAmount: 3000,
       paidAmount: 3000,
       status: "confirmed",
-      bookingDate: "2024-01-10",
+      bookingDate: "Jan 10, 2024",
       guide: "Pierre L.",
       contact: "+1234567895",
+      type: "luxury",
     },
   ];
 
@@ -123,21 +132,54 @@ const TravelBookings = () => {
       .reduce((sum, b) => sum + b.paidAmount, 0),
   };
 
-  const getStatusColor = (status) => {
-    const colors = {
-      confirmed: "var(--green)",
-      pending: "var(--orange)",
-      completed: "#3b82f6",
-      cancelled: "#ef4444",
-    };
-    return colors[status] || colors.confirmed;
-  };
+  const filteredBookings = bookings.filter((booking) => {
+    const matchesSearch =
+      searchTerm === "" ||
+      booking.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.tour.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.destination.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.id.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === "all" || booking.status === statusFilter;
+    const matchesType = typeFilter === "all" || booking.type === typeFilter;
+
+    return matchesSearch && matchesStatus && matchesType;
+  });
 
   const getPaymentStatus = (booking) => {
-    if (booking.paidAmount === 0) return { status: "unpaid", color: "#ef4444" };
+    if (booking.paidAmount === 0) return { status: "unpaid", label: "Unpaid" };
     if (booking.paidAmount < booking.totalAmount)
-      return { status: "partial", color: "var(--orange)" };
-    return { status: "paid", color: "var(--green)" };
+      return { status: "partial", label: "Partial" };
+    return { status: "paid", label: "Paid" };
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const handleViewDetails = (booking) => {
+    alert(`Viewing details for booking ${booking.id}`);
+  };
+
+  const handleConfirm = (booking) => {
+    if (window.confirm(`Confirm booking ${booking.id}?`)) {
+      alert(`Booking ${booking.id} confirmed!`);
+    }
+  };
+
+  const handleCancel = (booking) => {
+    if (window.confirm(`Cancel booking ${booking.id}?`)) {
+      alert(`Booking ${booking.id} cancelled!`);
+    }
+  };
+
+  const handleExport = () => {
+    alert("Exporting bookings data...");
   };
 
   return (
@@ -153,55 +195,33 @@ const TravelBookings = () => {
             Manage and track all tour and travel package bookings
           </p>
         </div>
-        <div className={styles.headerRight}>
-          <button className={styles.exportBtn}>
-            <FiDownload />
-            Export Report
-          </button>
-        </div>
+        <button className={styles.exportBtn} onClick={handleExport}>
+          <FiDownload />
+          Export Report
+        </button>
       </div>
 
       {/* Stats */}
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
-          <div
-            className={styles.statIcon}
-            style={{ background: "rgba(16, 185, 129, 0.1)" }}>
-            <FiGlobe style={{ color: "var(--green)" }} />
-          </div>
           <div className={styles.statContent}>
             <div className={styles.statValue}>{stats.total}</div>
             <div className={styles.statLabel}>Total Bookings</div>
           </div>
         </div>
         <div className={styles.statCard}>
-          <div
-            className={styles.statIcon}
-            style={{ background: "rgba(16, 185, 129, 0.1)" }}>
-            <FiCheck style={{ color: "var(--green)" }} />
-          </div>
           <div className={styles.statContent}>
             <div className={styles.statValue}>{stats.confirmed}</div>
             <div className={styles.statLabel}>Confirmed</div>
           </div>
         </div>
         <div className={styles.statCard}>
-          <div
-            className={styles.statIcon}
-            style={{ background: "rgba(245, 158, 11, 0.1)" }}>
-            <FiClock style={{ color: "var(--orange)" }} />
-          </div>
           <div className={styles.statContent}>
             <div className={styles.statValue}>{stats.pending}</div>
             <div className={styles.statLabel}>Pending</div>
           </div>
         </div>
         <div className={styles.statCard}>
-          <div
-            className={styles.statIcon}
-            style={{ background: "rgba(16, 185, 129, 0.1)" }}>
-            <FiDollarSign style={{ color: "var(--green)" }} />
-          </div>
           <div className={styles.statContent}>
             <div className={styles.statValue}>
               ${(stats.revenue / 1000).toFixed(1)}k
@@ -217,7 +237,7 @@ const TravelBookings = () => {
           <FiSearch className={styles.searchIcon} />
           <input
             type="text"
-            placeholder="Search by user, tour, or destination..."
+            placeholder="Search bookings..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className={styles.searchInput}
@@ -225,169 +245,179 @@ const TravelBookings = () => {
         </div>
 
         <div className={styles.filterControls}>
-          <div className={styles.filterGroup}>
-            <FiFilter className={styles.filterIcon} />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className={styles.filterSelect}>
-              <option value="all">All Status</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="pending">Pending</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-          </div>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className={styles.filterGroup}>
+            <option value="all">All Status</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="pending">Pending</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
 
-          <div className={styles.filterGroup}>
-            <select
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-              className={styles.filterSelect}>
-              <option value="all">All Tours</option>
-              <option value="luxury">Luxury</option>
-              <option value="adventure">Adventure</option>
-              <option value="cultural">Cultural</option>
-            </select>
-          </div>
+          <select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            className={styles.filterGroup}>
+            <option value="all">All Tours</option>
+            <option value="luxury">Luxury</option>
+            <option value="adventure">Adventure</option>
+            <option value="cultural">Cultural</option>
+          </select>
         </div>
       </div>
 
-      {/* Bookings Table */}
+      {/* Bookings Table - PERFECTLY BALANCED */}
       <div className={styles.tableContainer}>
-        <div className={styles.tableHeader}>
-          <div className={styles.tableHeaderRow}>
-            <div className={styles.tableCell}>Booking ID</div>
-            <div className={styles.tableCell}>User</div>
-            <div className={styles.tableCell}>Tour Details</div>
-            <div className={styles.tableCell}>Travel Dates</div>
-            <div className={styles.tableCell}>Travelers</div>
-            <div className={styles.tableCell}>Amount</div>
-            <div className={styles.tableCell}>Payment</div>
-            <div className={styles.tableCell}>Status</div>
-            <div className={styles.tableCellActions}>Actions</div>
-          </div>
-        </div>
+        <table className={styles.table}>
+          {/* Table Header */}
+          <thead className={styles.tableHeader}>
+            <div className={styles.tableHeaderRow}>
+              <div className={styles.tableHeaderCell}>Booking ID</div>
+              <div className={styles.tableHeaderCell}>User</div>
+              <div className={styles.tableHeaderCell}>Tour Details</div>
+              <div className={styles.tableHeaderCell}>Travel Dates</div>
+              <div className={styles.tableHeaderCell}>Amount</div>
+              <div className={styles.tableHeaderCell}>Status & Actions</div>
+            </div>
+          </thead>
 
-        <div className={styles.tableBody}>
-          {bookings.map((booking) => {
-            const payment = getPaymentStatus(booking);
+          {/* Table Body */}
+          <tbody className={styles.tableBody}>
+            {filteredBookings.map((booking) => {
+              const payment = getPaymentStatus(booking);
 
-            return (
-              <div key={booking.id} className={styles.tableRow}>
-                <div className={styles.tableCell}>
-                  <div className={styles.bookingId}>{booking.id}</div>
-                </div>
+              return (
+                <div key={booking.id} className={styles.tableRow}>
+                  {/* Column 1: Booking ID */}
+                  <div className={styles.bookingIdCell}>
+                    <div className={styles.bookingId}>{booking.id}</div>
+                  </div>
 
-                <div className={styles.tableCell}>
-                  <div className={styles.userInfo}>
-                    <div className={styles.userAvatar}>
-                      {booking.user.charAt(0)}
-                    </div>
-                    <div>
-                      <div className={styles.userName}>{booking.user}</div>
-                      <div className={styles.userContact}>
-                        {booking.contact}
+                  {/* Column 2: User Info */}
+                  <div className={styles.userCell}>
+                    <div className={styles.userInfo}>
+                      <div className={styles.userAvatar}>
+                        {booking.user.charAt(0)}
+                      </div>
+                      <div className={styles.userDetails}>
+                        <div className={styles.userName}>{booking.user}</div>
+                        <div className={styles.userContact}>
+                          {booking.contact}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div className={styles.tableCell}>
-                  <div className={styles.tourDetails}>
-                    <div className={styles.tourName}>{booking.tour}</div>
-                    <div className={styles.tourDestination}>
-                      <FiMapPin />
-                      {booking.destination}
-                    </div>
-                    <div className={styles.tourGuide}>
-                      Guide: {booking.guide}
+                  {/* Column 3: Tour Details */}
+                  <div className={styles.tourCell}>
+                    <div className={styles.tourDetails}>
+                      <div className={styles.tourName}>{booking.tour}</div>
+                      <div className={styles.tourMeta}>
+                        <FiMapPin size={12} />
+                        {booking.destination}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className={styles.tableCell}>
-                  <div className={styles.dateInfo}>
-                    <div className={styles.dateRange}>
-                      <FiCalendar />
-                      {booking.startDate} to {booking.endDate}
-                    </div>
-                    <div className={styles.bookingDate}>
-                      Booked: {booking.bookingDate}
-                    </div>
-                  </div>
-                </div>
-
-                <div className={styles.tableCell}>
-                  <div className={styles.travelersInfo}>
-                    <div className={styles.travelersCount}>
-                      {booking.travelers} traveler
-                      {booking.travelers > 1 ? "s" : ""}
+                  {/* Column 4: Dates */}
+                  <div className={styles.datesCell}>
+                    <div className={styles.datesInfo}>
+                      <div className={styles.dateRange}>
+                        {booking.startDate} - {booking.endDate}
+                      </div>
+                      <div className={styles.dateMeta}>
+                        <span>
+                          <FiUsers size={12} />
+                          {booking.travelers}
+                        </span>
+                        <span>
+                          <FiCalendar size={12} />
+                          {booking.duration}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className={styles.tableCell}>
-                  <div className={styles.amountInfo}>
-                    <div className={styles.totalAmount}>
-                      ${booking.totalAmount}
-                    </div>
-                    <div className={styles.paidAmount}>
-                      Paid: ${booking.paidAmount}
+                  {/* Column 5: Amount */}
+                  <div className={styles.amountCell}>
+                    <div className={styles.amountInfo}>
+                      <div className={styles.amount}>
+                        {formatCurrency(booking.totalAmount)}
+                      </div>
+                      <div
+                        className={`${styles.paymentStatus} ${styles[payment.status]}`}>
+                        {payment.label} • {formatCurrency(booking.paidAmount)}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className={styles.tableCell}>
-                  <span
-                    className={styles.paymentBadge}
-                    style={{
-                      background: `${payment.color}15`,
-                      color: payment.color,
-                    }}>
-                    {payment.status.charAt(0).toUpperCase() +
-                      payment.status.slice(1)}
-                  </span>
-                </div>
+                  {/* Column 6: Status & Actions - PERFECTLY BALANCED */}
+                  <div className={styles.statusActionsCell}>
+                    <div className={styles.statusBadgeWrapper}>
+                      <span
+                        className={`${styles.statusBadge} ${styles[booking.status]}`}>
+                        {booking.status === "confirmed" && (
+                          <FiCheck size={12} />
+                        )}
+                        {booking.status === "pending" && <FiClock size={12} />}
+                        {booking.status === "completed" && (
+                          <FiCheck size={12} />
+                        )}
+                        {booking.status.charAt(0).toUpperCase() +
+                          booking.status.slice(1)}
+                      </span>
+                    </div>
 
-                <div className={styles.tableCell}>
-                  <span
-                    className={styles.statusBadge}
-                    style={{
-                      background: `${getStatusColor(booking.status)}15`,
-                      color: getStatusColor(booking.status),
-                    }}>
-                    {booking.status === "confirmed" && <FiCheck />}
-                    {booking.status === "pending" && <FiClock />}
-                    {booking.status === "completed" && <FiCheck />}
-                    {booking.status.charAt(0).toUpperCase() +
-                      booking.status.slice(1)}
-                  </span>
-                </div>
-
-                <div className={styles.tableCellActions}>
-                  <div className={styles.actionButtons}>
-                    <button className={styles.actionBtn} title="View Details">
-                      <FiEye />
-                    </button>
-                    {booking.status === "pending" && (
+                    <div className={styles.actions}>
                       <button
-                        className={styles.actionBtnConfirm}
-                        title="Confirm">
-                        <FiCheck />
+                        className={styles.actionBtn}
+                        onClick={() => handleViewDetails(booking)}
+                        title="View Details">
+                        <FiEye />
                       </button>
-                    )}
-                    {booking.status === "pending" && (
-                      <button className={styles.actionBtnCancel} title="Cancel">
-                        <FiX />
-                      </button>
-                    )}
+
+                      {booking.status === "pending" && (
+                        <>
+                          <button
+                            className={`${styles.actionBtn} ${styles.primary}`}
+                            onClick={() => handleConfirm(booking)}
+                            title="Confirm">
+                            <FiCheck />
+                          </button>
+                          <button
+                            className={`${styles.actionBtn} ${styles.danger}`}
+                            onClick={() => handleCancel(booking)}
+                            title="Cancel">
+                            <FiX />
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
+              );
+            })}
+
+            {filteredBookings.length === 0 && (
+              <div className={styles.emptyState}>
+                <FiSearch className={styles.emptyIcon} />
+                <h3>No bookings found</h3>
+                <p>Try adjusting your search or filters</p>
+                <button
+                  className={styles.clearFiltersBtn}
+                  onClick={() => {
+                    setSearchTerm("");
+                    setStatusFilter("all");
+                    setTypeFilter("all");
+                  }}>
+                  Clear All Filters
+                </button>
               </div>
-            );
-          })}
-        </div>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

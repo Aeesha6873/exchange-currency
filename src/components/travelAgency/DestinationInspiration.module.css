@@ -69,7 +69,8 @@
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.95);
   color: var(--dark-green);
-  box-shadow: 0 10px 40px rgba(6, 78, 59, 0.2),
+  box-shadow:
+    0 10px 40px rgba(6, 78, 59, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.8);
   transition: all 0.3s ease;
 }
@@ -78,7 +79,8 @@
   outline: none;
   border-color: white;
   background: white;
-  box-shadow: 0 15px 50px rgba(6, 78, 59, 0.3),
+  box-shadow:
+    0 15px 50px rgba(6, 78, 59, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
   transform: translateY(-2px);
 }
@@ -357,10 +359,15 @@
 
 /* CTA Section - Compact & Cool */
 .ctaSection {
-  background: linear-gradient(135deg, #085c3a, #06462c),
+  background:
+    linear-gradient(135deg, #085c3a, #06462c),
     url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100"><path fill="rgba(255,255,255,0.03)" d="M0,50 Q250,0 500,50 T1000,50 L1000,100 L0,100 Z"/></svg>');
-  background-size: cover, 1000px 100px;
-  background-position: center, center bottom;
+  background-size:
+    cover,
+    1000px 100px;
+  background-position:
+    center,
+    center bottom;
   background-repeat: no-repeat;
   color: white;
   border-radius: 20px;
@@ -591,12 +598,6 @@
     padding: 40px 15px;
   }
 
-  .ctaStats {
-    grid-template-columns: repeat(2, 1fr);
-    max-width: 300px;
-    gap: 10px;
-  }
-
   .ctaStat {
     padding: 12px;
   }
@@ -618,10 +619,5 @@
 
   .destinationImage {
     height: 180px;
-  }
-
-  .ctaStats {
-    grid-template-columns: 1fr;
-    max-width: 200px;
   }
 }

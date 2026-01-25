@@ -30,12 +30,14 @@ import {
   FiKey,
   FiSmartphone,
   FiAlertCircle,
+  FiX,
 } from "react-icons/fi";
 import {
   MdFlight,
   MdSecurity,
   MdVerifiedUser,
   MdWifiPassword,
+  MdCompareArrows,
 } from "react-icons/md";
 
 function Profile() {
@@ -51,27 +53,26 @@ function Profile() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const userData =
-      JSON.parse(localStorage.getItem("currentUser")) ||
-      JSON.parse(localStorage.getItem("registeredUser")) ||
-      JSON.parse(localStorage.getItem("user"));
+    setTimeout(() => {
+      const userData = JSON.parse(localStorage.getItem("currentUser")) ||
+        JSON.parse(localStorage.getItem("registeredUser")) ||
+        JSON.parse(localStorage.getItem("user")) || {
+          fullName: "Alex Johnson",
+          email: "alex.johnson@example.com",
+          phone: "+1 (555) 123-4567",
+          address: "123 Main Street, New York, NY 10001",
+          dateOfBirth: "1990-05-15",
+          nationality: "United States",
+          profileImage: null,
+          joinDate: "2023-01-15",
+          isVerified: true,
+          isPhoneVerified: true,
+          isEmailVerified: true,
+        };
 
-    if (userData) {
-      setUser({
-        fullName: userData.fullName || "John Doe",
-        email: userData.email || "user@example.com",
-        phone: userData.phone || "+1 (555) 123-4567",
-        address: userData.address || "123 Main St, New York, NY",
-        dateOfBirth: userData.dateOfBirth || "1990-01-01",
-        nationality: userData.nationality || "United States",
-        profileImage: userData.profileImage || null,
-        joinDate: userData.joinDate || new Date().toISOString().split("T")[0],
-        isVerified: userData.isVerified || false,
-        isPhoneVerified: userData.isPhoneVerified || false,
-        isEmailVerified: userData.isEmailVerified || true,
-      });
-    }
-    setLoading(false);
+      setUser(userData);
+      setLoading(false);
+    }, 800);
   }, []);
 
   const [formData, setFormData] = useState({
@@ -100,18 +101,18 @@ function Profile() {
   useEffect(() => {
     if (user) {
       setFormData({
-        fullName: user.fullName,
-        email: user.email,
-        phone: user.phone,
-        address: user.address,
-        dateOfBirth: user.dateOfBirth,
-        nationality: user.nationality,
-        profileImage: user.profileImage,
+        fullName: user.fullName || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        address: user.address || "",
+        dateOfBirth: user.dateOfBirth || "",
+        nationality: user.nationality || "",
+        profileImage: user.profileImage || null,
       });
     }
   }, [user]);
 
-  const [stats] = useState({
+  const stats = {
     totalTrips: 3,
     countriesVisited: 2,
     totalSpent: "$1,850.00",
@@ -119,7 +120,7 @@ function Profile() {
     rank: "Silver",
     exchangeCount: 5,
     bookingCount: 3,
-  });
+  };
 
   const recentActivities = [
     {
@@ -133,7 +134,7 @@ function Profile() {
       id: 2,
       action: "Exchanged $500 to EUR",
       date: "Yesterday",
-      icon: <FiDollarSign />,
+      icon: <MdCompareArrows />,
       color: "#3b82f6",
     },
     {
@@ -149,10 +150,9 @@ function Profile() {
     {
       id: 1,
       label: "Currency Exchange",
-      icon: <FiDollarSign />,
+      icon: <MdCompareArrows />,
       path: "/dashboard/exchange",
-      description: "Best rates, fast transfer",
-      color: "var(--green)",
+      description: "Convert currencies instantly",
     },
     {
       id: 2,
@@ -160,15 +160,13 @@ function Profile() {
       icon: <FiMap />,
       path: "/dashboard/travel-agency",
       description: "Hotels, tours, packages",
-      color: "var(--orange)",
     },
     {
       id: 3,
       label: "Book Flight",
-      icon: <FiSend />,
+      icon: <MdFlight />,
       path: "/dashboard/flight",
       description: "Domestic & international",
-      color: "var(--dark-green)",
     },
   ];
 
@@ -188,7 +186,6 @@ function Profile() {
     };
     setPasswordData(newData);
 
-    // Calculate password strength
     if (name === "new") {
       calculatePasswordStrength(value);
     }
@@ -299,149 +296,214 @@ function Profile() {
     );
   }
 
-  if (!user) {
-    return (
-      <div className={styles.noProfileContainer}>
-        <FiUser className={styles.noProfileIcon} />
-        <h2>No Profile Found</h2>
-        <p>Please register or login to view your profile</p>
-      </div>
-    );
-  }
-
   const getInitials = (name) => {
-    return name
-      ? name
+    return name ?
+        name
           .split(" ")
           .map((n) => n[0])
           .join("")
           .toUpperCase()
-      : "JD";
+      : "AJ";
   };
 
   return (
     <div className={styles.profileContainer}>
-      {/* Hero Section with Gradient */}
-      <div className={styles.heroSection}>
-        <div className={styles.heroContent}>
-          <div className={styles.profileHeader}>
-            <div className={styles.profileImageWrapper}>
-              <div className={styles.profileImageContainer}>
-                {formData.profileImage ? (
-                  <img
-                    src={formData.profileImage}
-                    alt="Profile"
-                    className={styles.profileImage}
-                  />
-                ) : (
-                  <div className={styles.profileInitials}>
-                    {getInitials(user.fullName)}
-                  </div>
-                )}
-                <label className={styles.imageUploadButton}>
-                  <FiCamera />
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className={styles.imageUploadInput}
-                  />
-                </label>
-              </div>
-            </div>
-
-            <div className={styles.profileInfo}>
-              <div className={styles.profileMeta}>
-                <h1 className={styles.profileName}>{user.fullName}</h1>
-                <p className={styles.profileEmail}>{user.email}</p>
-                <div className={styles.profileBadges}>
-                  <span
-                    className={`${styles.verifiedBadge} ${
-                      user.isVerified ? styles.verified : styles.notVerified
-                    }`}>
-                    <MdVerifiedUser />{" "}
-                    {user.isVerified ? "Verified" : "Not Verified"}
-                  </span>
-                  <span className={styles.memberBadge}>
-                    <FiAward /> {stats.rank} Member
-                  </span>
-                  <span className={styles.joinDateBadge}>
-                    <FiCalendar /> Joined {user.joinDate.split("-")[0]}
-                  </span>
-                </div>
-              </div>
-
-              <button
-                className={`${styles.editButton} ${
-                  isEditing ? styles.cancelButton : ""
-                }`}
-                onClick={() => setIsEditing(!isEditing)}>
-                <FiEdit2 /> {isEditing ? "Cancel Editing" : "Edit Profile"}
-              </button>
-            </div>
-          </div>
-
-          {/* Stats Cards */}
-          <div className={styles.statsCards}>
-            <div className={styles.statCard}>
-              <div className={styles.statIcon}>
-                <MdFlight />
-              </div>
-              <div className={styles.statContent}>
-                <div className={styles.statNumber}>{stats.totalTrips}</div>
-                <div className={styles.statLabel}>Total Trips</div>
-              </div>
-              <div className={styles.statTrend}>
-                <FiTrendingUp /> +12%
-              </div>
-            </div>
-
-            <div className={styles.statCard}>
-              <div className={styles.statIcon}>
-                <FiDollarSign />
-              </div>
-              <div className={styles.statContent}>
-                <div className={styles.statNumber}>{stats.exchangeCount}</div>
-                <div className={styles.statLabel}>Exchanges</div>
-              </div>
-            </div>
-
-            <div className={styles.statCard}>
-              <div className={styles.statIcon}>
-                <FiCreditCard />
-              </div>
-              <div className={styles.statContent}>
-                <div className={styles.statNumber}>{stats.bookingCount}</div>
-                <div className={styles.statLabel}>Bookings</div>
-              </div>
-            </div>
-
-            <div className={styles.statCard}>
-              <div className={styles.statIcon}>
-                <FiStar />
-              </div>
-              <div className={styles.statContent}>
-                <div className={styles.statNumber}>{stats.loyaltyPoints}</div>
-                <div className={styles.statLabel}>Loyalty Points</div>
-              </div>
-            </div>
-          </div>
+      {/* Header */}
+      <div className={styles.header}>
+        <div className={styles.headerContent}>
+          <h1 className={styles.title}>My Profile</h1>
+          <p className={styles.subtitle}>
+            Manage your personal information and account settings
+          </p>
+        </div>
+        <div className={styles.headerActions}>
+          <button
+            className={`${styles.editButton} ${
+              isEditing ? styles.cancelButton : ""
+            }`}
+            onClick={() => setIsEditing(!isEditing)}>
+            <FiEdit2 /> {isEditing ? "Cancel Editing" : "Edit Profile"}
+          </button>
         </div>
       </div>
 
-      {/* Main Content Area */}
+      {/* Stats */}
+      <div className={styles.stats}>
+        <div className={`${styles.statItem} ${styles.statTrips}`}>
+          <span className={styles.statNumber}>{stats.totalTrips}</span>
+          <span className={styles.statLabel}>Total Trips</span>
+        </div>
+        <div className={`${styles.statItem} ${styles.statExchange}`}>
+          <span className={styles.statNumber}>{stats.exchangeCount}</span>
+          <span className={styles.statLabel}>Exchanges</span>
+        </div>
+        <div className={`${styles.statItem} ${styles.statBooking}`}>
+          <span className={styles.statNumber}>{stats.bookingCount}</span>
+          <span className={styles.statLabel}>Bookings</span>
+        </div>
+        <div className={`${styles.statItem} ${styles.statPoints}`}>
+          <span className={styles.statNumber}>{stats.loyaltyPoints}</span>
+          <span className={styles.statLabel}>Loyalty Points</span>
+        </div>
+      </div>
+
+      {/* Main Content */}
       <div className={styles.mainContent}>
         <div className={styles.contentWrapper}>
           {/* Left Column - Main Content */}
           <div className={styles.leftColumn}>
-            {/* Navigation Tabs */}
-            <div className={styles.navigationTabs}>
+            {/* Profile Card */}
+            <div className={styles.profileCard}>
+              <div className={styles.cardHeader}>
+                <h3 className={styles.cardTitle}>
+                  <FiUser /> Personal Information
+                </h3>
+                {isEditing && (
+                  <button onClick={handleSave} className={styles.saveButton}>
+                    <FiSave /> Save Changes
+                  </button>
+                )}
+              </div>
+
+              <div className={styles.profileSection}>
+                <div className={styles.profileImageWrapper}>
+                  <div className={styles.profileImageContainer}>
+                    {formData.profileImage ?
+                      <img
+                        src={formData.profileImage}
+                        alt="Profile"
+                        className={styles.profileImage}
+                      />
+                    : <div className={styles.profileInitials}>
+                        {getInitials(user.fullName)}
+                      </div>
+                    }
+                    <label className={styles.imageUploadButton}>
+                      <FiCamera />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className={styles.imageUploadInput}
+                      />
+                    </label>
+                  </div>
+                  <div className={styles.profileStatus}>
+                    <div className={styles.profileStatusItem}>
+                      <FiMail className={styles.statusIcon} />
+                      <div>
+                        <div className={styles.statusLabel}>Email</div>
+                        <div className={styles.statusValue}>{user.email}</div>
+                        <div className={styles.statusVerified}>
+                          <FiCheckCircle /> Verified
+                        </div>
+                      </div>
+                    </div>
+                    <div className={styles.profileStatusItem}>
+                      <FiPhone className={styles.statusIcon} />
+                      <div>
+                        <div className={styles.statusLabel}>Phone</div>
+                        <div className={styles.statusValue}>{user.phone}</div>
+                        <div className={styles.statusVerified}>
+                          <FiCheckCircle /> Verified
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.infoGrid}>
+                  <div className={styles.infoField}>
+                    <label className={styles.fieldLabel}>
+                      <FiUser />
+                      <span>Full Name</span>
+                    </label>
+                    {isEditing ?
+                      <input
+                        type="text"
+                        name="fullName"
+                        value={formData.fullName}
+                        onChange={handleInputChange}
+                        className={styles.fieldInput}
+                        placeholder="Enter your full name"
+                      />
+                    : <div className={styles.fieldValue}>{user.fullName}</div>}
+                  </div>
+
+                  <div className={styles.infoField}>
+                    <label className={styles.fieldLabel}>
+                      <FiCalendar />
+                      <span>Date of Birth</span>
+                    </label>
+                    {isEditing ?
+                      <input
+                        type="date"
+                        name="dateOfBirth"
+                        value={formData.dateOfBirth}
+                        onChange={handleInputChange}
+                        className={styles.fieldInput}
+                      />
+                    : <div className={styles.fieldValue}>
+                        {new Date(user.dateOfBirth).toLocaleDateString(
+                          "en-US",
+                          {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          },
+                        )}
+                      </div>
+                    }
+                  </div>
+
+                  <div className={styles.infoField}>
+                    <label className={styles.fieldLabel}>
+                      <FiGlobe />
+                      <span>Nationality</span>
+                    </label>
+                    {isEditing ?
+                      <input
+                        type="text"
+                        name="nationality"
+                        value={formData.nationality}
+                        onChange={handleInputChange}
+                        className={styles.fieldInput}
+                        placeholder="Enter nationality"
+                      />
+                    : <div className={styles.fieldValue}>
+                        {user.nationality}
+                      </div>
+                    }
+                  </div>
+
+                  <div className={styles.infoField}>
+                    <label className={styles.fieldLabel}>
+                      <FiMapPin />
+                      <span>Address</span>
+                    </label>
+                    {isEditing ?
+                      <textarea
+                        name="address"
+                        value={formData.address}
+                        onChange={handleInputChange}
+                        className={styles.fieldTextarea}
+                        placeholder="Enter your address"
+                        rows="2"
+                      />
+                    : <div className={styles.fieldValue}>{user.address}</div>}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Tabs */}
+            <div className={styles.tabs}>
               <button
                 className={`${styles.tab} ${
                   activeTab === "overview" ? styles.active : ""
                 }`}
                 onClick={() => setActiveTab("overview")}>
-                <FiUser /> Overview
+                <FiUser /> Personal Info
               </button>
               <button
                 className={`${styles.tab} ${
@@ -461,390 +523,186 @@ function Profile() {
 
             {/* Tab Content */}
             <div className={styles.tabContent}>
-              {activeTab === "overview" && (
-                <div className={styles.overviewContent}>
-                  <div className={styles.card}>
-                    <div className={styles.cardHeader}>
-                      <h3 className={styles.cardTitle}>
-                        <FiUser /> Personal Information
-                      </h3>
-                      {isEditing && (
+              {activeTab === "security" && (
+                <div className={styles.card}>
+                  <div className={styles.cardHeader}>
+                    <h3 className={styles.cardTitle}>
+                      <FiKey /> Password Management
+                    </h3>
+                  </div>
+
+                  <div className={styles.passwordForm}>
+                    <div className={styles.formGroup}>
+                      <label className={styles.formLabel}>
+                        <FiLock /> Current Password
+                      </label>
+                      <div className={styles.inputWithIcon}>
+                        <input
+                          type={showPassword.current ? "text" : "password"}
+                          name="current"
+                          value={passwordData.current}
+                          onChange={handlePasswordChange}
+                          className={styles.formInput}
+                          placeholder="Enter current password"
+                        />
                         <button
-                          onClick={handleSave}
-                          className={styles.saveButton}>
-                          <FiSave /> Save Changes
+                          type="button"
+                          onClick={() => togglePasswordVisibility("current")}
+                          className={styles.eyeButton}>
+                          {showPassword.current ?
+                            <FiEyeOff />
+                          : <FiEye />}
                         </button>
+                      </div>
+                    </div>
+
+                    <div className={styles.formGroup}>
+                      <label className={styles.formLabel}>
+                        <MdWifiPassword /> New Password
+                      </label>
+                      <div className={styles.inputWithIcon}>
+                        <input
+                          type={showPassword.new ? "text" : "password"}
+                          name="new"
+                          value={passwordData.new}
+                          onChange={handlePasswordChange}
+                          className={styles.formInput}
+                          placeholder="Enter new password"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => togglePasswordVisibility("new")}
+                          className={styles.eyeButton}>
+                          {showPassword.new ?
+                            <FiEyeOff />
+                          : <FiEye />}
+                        </button>
+                      </div>
+
+                      {passwordData.new && (
+                        <div className={styles.passwordStrengthMeter}>
+                          <div className={styles.strengthHeader}>
+                            <span>Password Strength:</span>
+                            <span
+                              className={styles.strengthText}
+                              style={{ color: passwordStrength.color }}>
+                              {passwordStrength.message}
+                            </span>
+                          </div>
+                          <div className={styles.strengthBar}>
+                            <div
+                              className={styles.strengthFill}
+                              style={{
+                                width: passwordStrength.width,
+                                backgroundColor: passwordStrength.color,
+                              }}></div>
+                          </div>
+                        </div>
                       )}
                     </div>
 
-                    <div className={styles.infoGrid}>
-                      <div className={styles.infoField}>
-                        <label className={styles.fieldLabel}>
-                          <FiUser />
-                          <span>Full Name</span>
-                        </label>
-                        {isEditing ? (
-                          <input
-                            type="text"
-                            name="fullName"
-                            value={formData.fullName}
-                            onChange={handleInputChange}
-                            className={styles.fieldInput}
-                            placeholder="Enter your full name"
-                          />
-                        ) : (
-                          <div className={styles.fieldValue}>
-                            {user.fullName}
-                          </div>
-                        )}
-                      </div>
-
-                      <div className={styles.infoField}>
-                        <label className={styles.fieldLabel}>
-                          <FiMail />
-                          <span>Email Address</span>
-                        </label>
-                        {isEditing ? (
-                          <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleInputChange}
-                            className={styles.fieldInput}
-                            placeholder="Enter your email"
-                          />
-                        ) : (
-                          <div className={styles.fieldValue}>{user.email}</div>
-                        )}
-                      </div>
-
-                      <div className={styles.infoField}>
-                        <label className={styles.fieldLabel}>
-                          <FiPhone />
-                          <span>Phone Number</span>
-                        </label>
-                        {isEditing ? (
-                          <input
-                            type="tel"
-                            name="phone"
-                            value={formData.phone}
-                            onChange={handleInputChange}
-                            className={styles.fieldInput}
-                            placeholder="Enter phone number"
-                          />
-                        ) : (
-                          <div className={styles.fieldValue}>{user.phone}</div>
-                        )}
-                      </div>
-
-                      <div className={styles.infoField}>
-                        <label className={styles.fieldLabel}>
-                          <FiCalendar />
-                          <span>Date of Birth</span>
-                        </label>
-                        {isEditing ? (
-                          <input
-                            type="date"
-                            name="dateOfBirth"
-                            value={formData.dateOfBirth}
-                            onChange={handleInputChange}
-                            className={styles.fieldInput}
-                          />
-                        ) : (
-                          <div className={styles.fieldValue}>
-                            {new Date(user.dateOfBirth).toLocaleDateString(
-                              "en-US",
-                              {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                              }
-                            )}
-                          </div>
-                        )}
-                      </div>
-
-                      <div className={styles.infoField}>
-                        <label className={styles.fieldLabel}>
-                          <FiGlobe />
-                          <span>Nationality</span>
-                        </label>
-                        {isEditing ? (
-                          <input
-                            type="text"
-                            name="nationality"
-                            value={formData.nationality}
-                            onChange={handleInputChange}
-                            className={styles.fieldInput}
-                            placeholder="Enter nationality"
-                          />
-                        ) : (
-                          <div className={styles.fieldValue}>
-                            {user.nationality}
-                          </div>
-                        )}
-                      </div>
-
-                      <div className={styles.infoField}>
-                        <label className={styles.fieldLabel}>
-                          <FiMapPin />
-                          <span>Address</span>
-                        </label>
-                        {isEditing ? (
-                          <textarea
-                            name="address"
-                            value={formData.address}
-                            onChange={handleInputChange}
-                            className={styles.fieldTextarea}
-                            placeholder="Enter your address"
-                            rows="2"
-                          />
-                        ) : (
-                          <div className={styles.fieldValue}>
-                            {user.address}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === "security" && (
-                <div className={styles.securityContent}>
-                  <div className={styles.card}>
-                    <div className={styles.cardHeader}>
-                      <h3 className={styles.cardTitle}>
-                        <FiKey /> Password Management
-                      </h3>
-                    </div>
-
-                    <div className={styles.passwordForm}>
-                      <div className={styles.formGroup}>
-                        <label className={styles.formLabel}>
-                          <FiLock /> Current Password
-                        </label>
-                        <div className={styles.inputWithIcon}>
-                          <input
-                            type={showPassword.current ? "text" : "password"}
-                            name="current"
-                            value={passwordData.current}
-                            onChange={handlePasswordChange}
-                            className={styles.formInput}
-                            placeholder="Enter current password"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => togglePasswordVisibility("current")}
-                            className={styles.eyeButton}>
-                            {showPassword.current ? <FiEyeOff /> : <FiEye />}
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className={styles.formGroup}>
-                        <label className={styles.formLabel}>
-                          <MdWifiPassword /> New Password
-                        </label>
-                        <div className={styles.inputWithIcon}>
-                          <input
-                            type={showPassword.new ? "text" : "password"}
-                            name="new"
-                            value={passwordData.new}
-                            onChange={handlePasswordChange}
-                            className={styles.formInput}
-                            placeholder="Enter new password"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => togglePasswordVisibility("new")}
-                            className={styles.eyeButton}>
-                            {showPassword.new ? <FiEyeOff /> : <FiEye />}
-                          </button>
-                        </div>
-
-                        {passwordData.new && (
-                          <div className={styles.passwordStrengthMeter}>
-                            <div className={styles.strengthHeader}>
-                              <span>Password Strength:</span>
-                              <span
-                                className={styles.strengthText}
-                                style={{ color: passwordStrength.color }}>
-                                {passwordStrength.message}
-                              </span>
-                            </div>
-                            <div className={styles.strengthBar}>
-                              <div
-                                className={styles.strengthFill}
-                                style={{
-                                  width: passwordStrength.width,
-                                  backgroundColor: passwordStrength.color,
-                                }}></div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className={styles.formGroup}>
-                        <label className={styles.formLabel}>
-                          <FiLock /> Confirm New Password
-                        </label>
-                        <div className={styles.inputWithIcon}>
-                          <input
-                            type={showPassword.confirm ? "text" : "password"}
-                            name="confirm"
-                            value={passwordData.confirm}
-                            onChange={handlePasswordChange}
-                            className={styles.formInput}
-                            placeholder="Confirm new password"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => togglePasswordVisibility("confirm")}
-                            className={styles.eyeButton}>
-                            {showPassword.confirm ? <FiEyeOff /> : <FiEye />}
-                          </button>
-                        </div>
-
-                        {passwordData.confirm && (
-                          <div className={styles.passwordMatch}>
-                            {passwordData.new === passwordData.confirm ? (
-                              <span className={styles.matchSuccess}>
-                                <FiCheckCircle /> Passwords match
-                              </span>
-                            ) : (
-                              <span className={styles.matchError}>
-                                <FiAlertCircle /> Passwords don't match
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      </div>
-
-                      <button
-                        onClick={handlePasswordUpdate}
-                        className={styles.updateButton}
-                        disabled={
-                          !passwordData.current ||
-                          !passwordData.new ||
-                          !passwordData.confirm ||
-                          passwordData.new !== passwordData.confirm
-                        }>
-                        Update Password
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className={styles.card}>
-                    <div className={styles.cardHeader}>
-                      <h3 className={styles.cardTitle}>
-                        <MdSecurity /> Security Settings
-                      </h3>
-                    </div>
-
-                    <div className={styles.securitySettings}>
-                      <div className={styles.settingItem}>
-                        <div className={styles.settingInfo}>
-                          <div className={styles.settingTitle}>
-                            Two-Factor Authentication
-                          </div>
-                          <div className={styles.settingDescription}>
-                            Add an extra layer of security to your account
-                          </div>
-                        </div>
-                        <label className={styles.switch}>
-                          <input type="checkbox" />
-                          <span className={styles.slider}></span>
-                        </label>
-                      </div>
-
-                      <div className={styles.settingItem}>
-                        <div className={styles.settingInfo}>
-                          <div className={styles.settingTitle}>
-                            Login Notifications
-                          </div>
-                          <div className={styles.settingDescription}>
-                            Get alerts for new device logins
-                          </div>
-                        </div>
-                        <label className={styles.switch}>
-                          <input type="checkbox" defaultChecked />
-                          <span className={styles.slider}></span>
-                        </label>
-                      </div>
-
-                      <div className={styles.settingItem}>
-                        <div className={styles.settingInfo}>
-                          <div className={styles.settingTitle}>
-                            Session Management
-                          </div>
-                          <div className={styles.settingDescription}>
-                            View and manage active sessions
-                          </div>
-                        </div>
-                        <button className={styles.manageButton}>
-                          Manage Sessions
+                    <div className={styles.formGroup}>
+                      <label className={styles.formLabel}>
+                        <FiLock /> Confirm New Password
+                      </label>
+                      <div className={styles.inputWithIcon}>
+                        <input
+                          type={showPassword.confirm ? "text" : "password"}
+                          name="confirm"
+                          value={passwordData.confirm}
+                          onChange={handlePasswordChange}
+                          className={styles.formInput}
+                          placeholder="Confirm new password"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => togglePasswordVisibility("confirm")}
+                          className={styles.eyeButton}>
+                          {showPassword.confirm ?
+                            <FiEyeOff />
+                          : <FiEye />}
                         </button>
                       </div>
+
+                      {passwordData.confirm && (
+                        <div className={styles.passwordMatch}>
+                          {passwordData.new === passwordData.confirm ?
+                            <span className={styles.matchSuccess}>
+                              <FiCheckCircle /> Passwords match
+                            </span>
+                          : <span className={styles.matchError}>
+                              <FiAlertCircle /> Passwords don't match
+                            </span>
+                          }
+                        </div>
+                      )}
                     </div>
+
+                    <button
+                      onClick={handlePasswordUpdate}
+                      className={styles.updateButton}
+                      disabled={
+                        !passwordData.current ||
+                        !passwordData.new ||
+                        !passwordData.confirm ||
+                        passwordData.new !== passwordData.confirm
+                      }>
+                      Update Password
+                    </button>
                   </div>
                 </div>
               )}
 
               {activeTab === "preferences" && (
-                <div className={styles.preferencesContent}>
-                  <div className={styles.card}>
-                    <div className={styles.cardHeader}>
-                      <h3 className={styles.cardTitle}>
-                        <FiBell /> Notification Preferences
-                      </h3>
+                <div className={styles.card}>
+                  <div className={styles.cardHeader}>
+                    <h3 className={styles.cardTitle}>
+                      <FiBell /> Notification Preferences
+                    </h3>
+                  </div>
+
+                  <div className={styles.preferencesList}>
+                    <div className={styles.preferenceItem}>
+                      <div className={styles.preferenceInfo}>
+                        <div className={styles.preferenceTitle}>
+                          Email Notifications
+                        </div>
+                        <div className={styles.preferenceDescription}>
+                          Receive updates and receipts via email
+                        </div>
+                      </div>
+                      <label className={styles.switch}>
+                        <input type="checkbox" defaultChecked />
+                        <span className={styles.slider}></span>
+                      </label>
                     </div>
 
-                    <div className={styles.preferencesList}>
-                      <div className={styles.preferenceItem}>
-                        <div className={styles.preferenceInfo}>
-                          <div className={styles.preferenceTitle}>
-                            Email Notifications
-                          </div>
-                          <div className={styles.preferenceDescription}>
-                            Receive updates and receipts via email
-                          </div>
+                    <div className={styles.preferenceItem}>
+                      <div className={styles.preferenceInfo}>
+                        <div className={styles.preferenceTitle}>SMS Alerts</div>
+                        <div className={styles.preferenceDescription}>
+                          Important security alerts via SMS
                         </div>
-                        <label className={styles.switch}>
-                          <input type="checkbox" defaultChecked />
-                          <span className={styles.slider}></span>
-                        </label>
                       </div>
+                      <label className={styles.switch}>
+                        <input type="checkbox" />
+                        <span className={styles.slider}></span>
+                      </label>
+                    </div>
 
-                      <div className={styles.preferenceItem}>
-                        <div className={styles.preferenceInfo}>
-                          <div className={styles.preferenceTitle}>
-                            SMS Alerts
-                          </div>
-                          <div className={styles.preferenceDescription}>
-                            Important security alerts via SMS
-                          </div>
+                    <div className={styles.preferenceItem}>
+                      <div className={styles.preferenceInfo}>
+                        <div className={styles.preferenceTitle}>
+                          Promotional Offers
                         </div>
-                        <label className={styles.switch}>
-                          <input type="checkbox" />
-                          <span className={styles.slider}></span>
-                        </label>
-                      </div>
-
-                      <div className={styles.preferenceItem}>
-                        <div className={styles.preferenceInfo}>
-                          <div className={styles.preferenceTitle}>
-                            Promotional Offers
-                          </div>
-                          <div className={styles.preferenceDescription}>
-                            Special deals and travel offers
-                          </div>
+                        <div className={styles.preferenceDescription}>
+                          Special deals and travel offers
                         </div>
-                        <label className={styles.switch}>
-                          <input type="checkbox" defaultChecked />
-                          <span className={styles.slider}></span>
-                        </label>
                       </div>
+                      <label className={styles.switch}>
+                        <input type="checkbox" defaultChecked />
+                        <span className={styles.slider}></span>
+                      </label>
                     </div>
                   </div>
                 </div>
@@ -862,13 +720,8 @@ function Profile() {
                   <button
                     key={action.id}
                     className={styles.quickAction}
-                    onClick={() => navigate(action.path)}
-                    style={{ borderLeftColor: action.color }}>
-                    <div
-                      className={styles.quickActionIcon}
-                      style={{ color: action.color }}>
-                      {action.icon}
-                    </div>
+                    onClick={() => navigate(action.path)}>
+                    <div className={styles.quickActionIcon}>{action.icon}</div>
                     <div className={styles.quickActionContent}>
                       <div className={styles.quickActionTitle}>
                         {action.label}
@@ -890,11 +743,7 @@ function Profile() {
               <div className={styles.activityList}>
                 {recentActivities.map((activity) => (
                   <div key={activity.id} className={styles.activityItem}>
-                    <div
-                      className={styles.activityIcon}
-                      style={{ color: activity.color }}>
-                      {activity.icon}
-                    </div>
+                    <div className={styles.activityIcon}>{activity.icon}</div>
                     <div className={styles.activityContent}>
                       <div className={styles.activityText}>
                         {activity.action}
@@ -903,49 +752,6 @@ function Profile() {
                     </div>
                   </div>
                 ))}
-              </div>
-            </div>
-
-            {/* Membership Status */}
-            <div className={styles.sidebarCard}>
-              <div className={styles.membershipCard}>
-                <div className={styles.membershipHeader}>
-                  <FiAward className={styles.membershipIcon} />
-                  <div>
-                    <div className={styles.membershipTitle}>
-                      {stats.rank} Member
-                    </div>
-                    <div className={styles.membershipSubtitle}>
-                      TravelFin Elite
-                    </div>
-                  </div>
-                </div>
-                <div className={styles.progressContainer}>
-                  <div className={styles.progressInfo}>
-                    <span>{stats.loyaltyPoints} points</span>
-                    <span>1000 points</span>
-                  </div>
-                  <div className={styles.progressBar}>
-                    <div
-                      className={styles.progressFill}
-                      style={{
-                        width: `${Math.min(
-                          (stats.loyaltyPoints / 1000) * 100,
-                          100
-                        )}%`,
-                      }}></div>
-                  </div>
-                  <div className={styles.nextTier}>
-                    Next tier:{" "}
-                    <strong>
-                      {stats.rank === "Bronze"
-                        ? "Silver"
-                        : stats.rank === "Silver"
-                        ? "Gold"
-                        : "Platinum"}
-                    </strong>
-                  </div>
-                </div>
               </div>
             </div>
           </div>

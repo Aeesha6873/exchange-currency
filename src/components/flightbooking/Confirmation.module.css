@@ -12,7 +12,10 @@
 .confirmationPage {
   min-height: 100vh;
   /* background: #f8fafc; */
-  font-family: "Inter", -apple-system, sans-serif;
+  font-family:
+    "Inter",
+    -apple-system,
+    sans-serif;
   padding: 20px;
 }
 
@@ -839,68 +842,34 @@
   font-weight: 700;
 }
 
-/* Responsive */
 @media (max-width: 1024px) {
   .contentLayout {
     grid-template-columns: 1fr 280px;
   }
 }
 
+/* Mobile-specific styles (max-width: 768px) */
 @media (max-width: 768px) {
-  .contentLayout {
-    grid-template-columns: 1fr;
-    gap: 16px;
+  .confirmationPage {
+    padding: 16px;
+    background: var(--white);
   }
 
-  .rightColumn {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+  .confirmationContainer {
+    width: 100%;
+    padding: 0;
   }
 
-  .passengersSection {
-    grid-column: 1 / -1;
+  .successHeader {
+    padding: 16px;
+    border-radius: 10px;
+    margin-bottom: 16px;
   }
 
   .headerContent {
     flex-direction: column;
     text-align: center;
     gap: 16px;
-  }
-
-  .bookingInfo {
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .routeSegment {
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .flightConnector {
-    transform: rotate(90deg);
-    width: 150px;
-    margin: 8px 0;
-  }
-
-  .actionGrid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 480px) {
-  /* .confirmationPage {
-    padding: 16px;
-  } */
-
-  .rightColumn {
-    grid-template-columns: 1fr;
-  }
-
-  .successHeader {
-    padding: 16px;
   }
 
   .successCircle {
@@ -914,18 +883,551 @@
 
   .successTitle {
     font-size: 20px;
+    margin-bottom: 6px;
   }
 
-  .digitalTicket,
+  .successSubtitle {
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+
+  .bookingInfo {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .bookingIdCard {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .bookingIdValue {
+    font-size: 14px;
+  }
+
+  .copyButton {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+
+  .successStatus {
+    width: 100%;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .contentLayout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  /* Digital Ticket */
+  .digitalTicket {
+    margin-bottom: 12px;
+  }
+
+  .ticketHeader {
+    padding: 12px;
+  }
+
+  .ticketBody {
+    padding: 16px;
+  }
+
+  .routeSegment {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .departureInfo,
+  .arrivalInfo {
+    min-width: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: left;
+    padding: 8px 0;
+  }
+
+  .airportCode {
+    font-size: 20px;
+    margin-bottom: 0;
+    min-width: 50px;
+  }
+
+  .airportCity {
+    flex: 1;
+    text-align: center;
+    margin-bottom: 0;
+    font-size: 12px;
+  }
+
+  .departureTime,
+  .arrivalTime {
+    min-width: 80px;
+    align-items: flex-end;
+  }
+
+  .time {
+    font-size: 14px;
+  }
+
+  .date {
+    font-size: 12px;
+  }
+
+  .flightConnector {
+    position: relative;
+    padding: 0;
+    margin: 8px 0;
+    width: 100%;
+    flex-direction: row;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .connectorLine {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--border);
+    transform: translateY(-50%);
+  }
+
+  .flightIcon,
+  .durationBadge {
+    position: relative;
+    background: var(--white);
+    z-index: 1;
+  }
+
+  .flightIcon {
+    padding: 6px;
+    font-size: 16px;
+  }
+
+  .durationBadge {
+    padding: 3px 10px;
+    font-size: 12px;
+  }
+
+  .ticketDetails {
+    padding: 12px;
+  }
+
+  .detailGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .detailItem {
+    gap: 10px;
+  }
+
+  .detailIcon {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+
+  .detailLabel {
+    font-size: 10px;
+  }
+
+  .detailValue {
+    font-size: 13px;
+  }
+
+  .ticketFooter {
+    padding: 12px;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .scanCode {
+    width: 100%;
+  }
+
+  .validUntil {
+    align-self: flex-end;
+    font-size: 12px;
+  }
+
+  /* Next Steps */
+  .nextSteps {
+    padding: 16px;
+  }
+
+  .sectionHeader {
+    margin-bottom: 16px;
+  }
+
+  .sectionIcon {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .sectionTitle h3 {
+    font-size: 15px;
+  }
+
+  .stepItem {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .stepNumber {
+    min-width: 24px;
+    font-size: 12px;
+  }
+
+  .stepContent h4 {
+    font-size: 13px;
+  }
+
+  .stepContent p {
+    font-size: 12px;
+  }
+
+  /* Right Column */
+  .rightColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .passengersSection {
+    padding: 16px;
+  }
+
+  .passengersList {
+    gap: 10px;
+  }
+
+  .passengerCard {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .passengerIndex {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+  }
+
+  .passengerInfo h4 {
+    font-size: 13px;
+  }
+
+  .contactItem {
+    font-size: 11px;
+  }
+
+  .statusBadge {
+    font-size: 10px;
+    padding: 2px 8px;
+  }
+
+  /* Quick Actions */
+  .quickActions {
+    padding: 16px;
+  }
+
+  .actionsHeader {
+    margin-bottom: 12px;
+  }
+
+  .actionsHeader h3 {
+    font-size: 15px;
+  }
+
+  .actionGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .actionButton {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .actionIcon {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+  .actionContent span {
+    font-size: 12px;
+  }
+
+  .actionContent small {
+    font-size: 10px;
+  }
+
+  /* Support Card */
+  .supportCard {
+    padding: 16px;
+  }
+
+  .supportHeader {
+    margin-bottom: 12px;
+  }
+
+  .supportIcon {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+  .supportTitle h4 {
+    font-size: 14px;
+  }
+
+  .supportContact {
+    font-size: 12px;
+    padding: 6px;
+  }
+
+  .contactIcon {
+    font-size: 12px;
+  }
+
+  /* New Booking Button */
+  .newBookingContainer {
+    padding: 16px;
+  }
+
+  .newBookingButton {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .bookingIcon {
+    font-size: 18px;
+  }
+
+  .bookingText span {
+    font-size: 13px;
+  }
+
+  .bookingText small {
+    font-size: 11px;
+  }
+
+  .bookingArrow {
+    font-size: 16px;
+  }
+}
+
+/* Extra small mobile devices (max-width: 480px) */
+@media (max-width: 480px) {
+  .confirmationPage {
+    padding: 12px;
+  }
+
+  .successHeader {
+    padding: 14px;
+  }
+
+  .successCircle {
+    width: 50px;
+    height: 50px;
+  }
+
+  .successIcon {
+    font-size: 20px;
+  }
+
+  .successTitle {
+    font-size: 18px;
+  }
+
+  .successSubtitle {
+    font-size: 12px;
+  }
+
+  .bookingIdCard {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+
+  .copyButton {
+    align-self: stretch;
+    justify-content: center;
+  }
+
+  .routeSegment {
+    gap: 8px;
+  }
+
+  .departureInfo,
+  .arrivalInfo {
+    flex-direction: column;
+    text-align: center;
+    gap: 4px;
+    padding: 4px 0;
+  }
+
+  .airportCode {
+    min-width: auto;
+    font-size: 18px;
+  }
+
+  .airportCity {
+    font-size: 11px;
+    margin: 0;
+  }
+
+  .departureTime,
+  .arrivalTime {
+    min-width: auto;
+    align-items: center;
+  }
+
+  .time {
+    font-size: 13px;
+  }
+
+  .date {
+    font-size: 11px;
+  }
+
+  .flightConnector {
+    margin: 4px 0;
+    gap: 15px;
+  }
+
+  .actionGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .stepItem {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+
+  .stepNumber {
+    align-self: flex-start;
+  }
+
+  .stepContent {
+    text-align: left;
+  }
+
+  .stepIcon {
+    align-self: flex-end;
+    position: absolute;
+    right: 10px;
+  }
+
+  .passengerCard {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .passengerIndex {
+    align-self: flex-start;
+  }
+
+  .passengerStatus {
+    margin-left: 0;
+    margin-top: 8px;
+  }
+
+  .supportContact {
+    font-size: 11px;
+  }
+
+  .newBookingButton {
+    padding: 10px;
+  }
+
+  .bookingIcon {
+    font-size: 16px;
+  }
+
+  .bookingText span {
+    font-size: 12px;
+  }
+
+  .bookingText small {
+    font-size: 10px;
+  }
+}
+
+/* Very small mobile devices (max-width: 360px) */
+@media (max-width: 360px) {
+  .confirmationPage {
+    padding: 10px;
+  }
+
+  .successHeader {
+    padding: 12px;
+  }
+
+  .successTitle {
+    font-size: 17px;
+  }
+
+  .ticketBody {
+    padding: 12px;
+  }
+
+  .airportCode {
+    font-size: 16px;
+  }
+
+  .time {
+    font-size: 12px;
+  }
+
+  .detailItem {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .detailIcon {
+    margin: 0 auto;
+  }
+
   .nextSteps,
   .passengersSection,
   .quickActions,
   .supportCard,
   .newBookingContainer {
-    padding: 16px;
+    padding: 14px;
   }
 
-  .detailGrid {
-    grid-template-columns: 1fr;
+  .actionButton {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+
+  .actionIcon {
+    margin: 0 auto;
+  }
+
+  .actionContent {
+    text-align: center;
+  }
+
+  .newBookingButton {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+
+  .bookingArrow {
+    display: none;
   }
 }

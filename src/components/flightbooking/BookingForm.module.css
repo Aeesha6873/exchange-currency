@@ -12,7 +12,10 @@
 .bookingPage {
   min-height: 100vh;
   /* background: #f8fafc; */
-  font-family: "Inter", -apple-system, sans-serif;
+  font-family:
+    "Inter",
+    -apple-system,
+    sans-serif;
   padding: 20px;
 }
 
@@ -685,7 +688,6 @@ select.formInput {
   color: var(--dark-green);
 }
 
-/* Terms Section */
 .termsSection {
   padding: 20px;
   border-top: 1px solid var(--border);
@@ -886,7 +888,6 @@ select.formInput {
   font-weight: 500;
 }
 
-/* Responsive */
 @media (max-width: 1024px) {
   .bookingLayout {
     grid-template-columns: 280px 1fr;
@@ -900,25 +901,81 @@ select.formInput {
     height: 800px;
   }
 }
-
+/* Mobile-specific styles (max-width: 768px) */
 @media (max-width: 768px) {
+  .bookingPage {
+    padding: 16px;
+    background: var(--white);
+  }
+
+  .bookingContainer {
+    width: 100%;
+    padding: 0;
+  }
+
+  .backButton {
+    width: 100%;
+    max-width: 180px;
+    padding: 8px 12px;
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+
+  .bookingHeader {
+    padding: 16px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+  }
+
+  .headerTitle {
+    font-size: 20px;
+  }
+
+  .headerSubtitle {
+    font-size: 13px;
+  }
+
+  .flightHeaderInfo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .flightRouteMini {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .airportCodeMini {
+    font-size: 18px;
+  }
+
+  .flightDetailsMini {
+    width: 100%;
+    justify-content: center;
+    font-size: 12px;
+  }
+
   .bookingLayout {
     grid-template-columns: 1fr;
     gap: 16px;
+    margin-bottom: 20px;
   }
 
   .summarySidebar {
     position: static;
     height: auto;
     max-height: none;
+    overflow: visible;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
+    order: 2;
   }
 
-  .formContainer {
-    height: auto;
-    min-height: 600px;
+  .summaryCard {
+    margin-bottom: 0;
   }
 
   .securityBadge {
@@ -926,42 +983,15 @@ select.formInput {
     margin-top: 0;
   }
 
-  .headerMain {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+  .formContainer {
+    height: auto;
+    min-height: auto;
+    order: 1;
   }
 
-  .formGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .paymentSelector {
-    flex-direction: column;
-  }
-
-  .actionButtons {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .actionButton {
-    width: 100%;
-    justify-content: center;
-  }
-}
-
-@media (max-width: 480px) {
-  /* .bookingPage {
-    padding: 16px;
-  } */
-
-  .summarySidebar {
-    grid-template-columns: 1fr;
-  }
-
-  .bookingHeader {
-    padding: 16px;
+  .formSectionsContainer {
+    max-height: none;
+    overflow: visible;
   }
 
   .formSection {
@@ -969,8 +999,9 @@ select.formInput {
   }
 
   .sectionHeader {
-    flex-direction: column;
+    flex-direction: row;
     align-items: flex-start;
+    margin-bottom: 16px;
   }
 
   .sectionIcon {
@@ -979,18 +1010,344 @@ select.formInput {
     font-size: 16px;
   }
 
+  .sectionTitle h3 {
+    font-size: 16px;
+  }
+
+  .sectionTitle p {
+    font-size: 12px;
+  }
+
+  .passengerForms {
+    gap: 12px;
+  }
+
+  .passengerCard {
+    padding: 12px;
+  }
+
+  .passengerHeader {
+    flex-direction: row;
+    margin-bottom: 12px;
+  }
+
+  .passengerNumber {
+    width: 28px;
+    height: 28px;
+    font-size: 13px;
+  }
+
+  .passengerTitle h4 {
+    font-size: 15px;
+  }
+
+  .formGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .formInput {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .paymentSelector {
+    flex-direction: row;
+    margin-bottom: 16px;
+  }
+
+  .paymentMethod {
+    padding: 12px;
+  }
+
+  .methodLabel {
+    font-size: 12px;
+  }
+
+  .termsSection {
+    padding: 16px;
+  }
+
+  .termsCard {
+    padding: 12px;
+  }
+
+  .termsHeader h4 {
+    font-size: 15px;
+  }
+
+  .termsText {
+    font-size: 12px;
+  }
+
+  .agreeText {
+    font-size: 13px;
+  }
+
+  .formActions {
+    padding: 16px;
+  }
+
   .actionsWrapper {
     flex-direction: column;
     gap: 16px;
-    align-items: stretch;
   }
 
   .totalPreview {
+    width: 100%;
     align-items: center;
     text-align: center;
   }
 
   .previewAmount {
     font-size: 22px;
+  }
+
+  .actionButtons {
+    width: 100%;
+    /* flex-direction: column; */
+  }
+
+  .actionButton {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .buttonContent {
+    align-items: center;
+  }
+
+  .buttonSubtext {
+    font-size: 11px;
+  }
+
+  /* Flight summary specific mobile adjustments */
+  .flightVisual {
+    padding: 12px;
+  }
+
+  .flightCities {
+    flex-direction: row;
+    margin-top: 16px;
+  }
+
+  .cityInfo {
+    min-width: 70px;
+  }
+
+  .cityCode {
+    font-size: 18px;
+  }
+
+  .cityName {
+    font-size: 11px;
+  }
+
+  .cityTime {
+    font-size: 12px;
+  }
+
+  .durationText {
+    font-size: 12px;
+    padding: 3px 8px;
+  }
+
+  .flightSpecs {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .specLabel {
+    font-size: 10px;
+  }
+
+  .specValue {
+    font-size: 12px;
+  }
+}
+
+/* Extra small mobile devices (max-width: 480px) */
+@media (max-width: 480px) {
+  .bookingPage {
+    padding: 12px;
+  }
+
+  .backButton {
+    max-width: 160px;
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+
+  .bookingHeader {
+    padding: 14px;
+  }
+
+  .headerTitle {
+    font-size: 18px;
+  }
+
+  .summarySidebar {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .summaryHeader {
+    padding: 12px;
+  }
+
+  .summaryIcon {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .summaryTitle h3 {
+    font-size: 15px;
+  }
+
+  .flightCities {
+    /* flex-direction: column; */
+    gap: 12px;
+  }
+
+  .flightDuration {
+    order: 1;
+    width: 100%;
+    flex-direction: row;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .durationIcon {
+    display: none;
+  }
+
+  .distanceLabel {
+    display: none;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .paymentSelector {
+    /* flex-direction: column; */
+  }
+
+  .paymentMethod {
+    /* flex-direction: row; */
+    /* justify-content: flex-start; */
+    /* text-align: left; */
+    gap: 12px;
+  }
+
+  .sectionHeader {
+    flex-direction: column;
+  }
+
+  .formSection {
+    padding: 14px;
+  }
+
+  .passengerHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .passengerNumber {
+    width: 26px;
+    height: 26px;
+  }
+
+  .termsCheckbox {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .checkboxCustom {
+    width: 18px;
+    height: 18px;
+  }
+
+  .previewAmount {
+    font-size: 20px;
+  }
+
+  .actionButton {
+    padding: 9px 14px;
+    font-size: 12px;
+  }
+}
+
+/* Very small mobile devices (max-width: 360px) */
+@media (max-width: 360px) {
+  .bookingPage {
+    padding: 10px;
+  }
+
+  .backButton {
+    max-width: 140px;
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .bookingHeader {
+    padding: 12px;
+  }
+
+  .headerTitle {
+    font-size: 17px;
+  }
+
+  .headerSubtitle {
+    font-size: 12px;
+  }
+
+  .flightRouteMini {
+    gap: 8px;
+  }
+
+  .airportCodeMini {
+    font-size: 16px;
+  }
+
+  .flightDetailsMini {
+    font-size: 11px;
+  }
+
+  .sectionIcon {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .sectionTitle h3 {
+    font-size: 15px;
+  }
+
+  .flightVisual {
+    padding: 10px;
+  }
+
+  .cityCode {
+    font-size: 16px;
+  }
+
+  .cityTime {
+    font-size: 11px;
+  }
+
+  .formInput {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .previewAmount {
+    font-size: 18px;
   }
 }

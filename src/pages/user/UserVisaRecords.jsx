@@ -1,1451 +1,881 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import styles from "./UserVisaRecords.module.css";
 import {
-  FiUser,
-  FiMail,
-  FiPhone,
-  FiMapPin,
-  FiCalendar,
-  FiCheckCircle,
   FiClock,
+  FiCheckCircle,
+  FiXCircle,
   FiAlertCircle,
+  FiFileText,
   FiDownload,
   FiEye,
+  FiMessageSquare,
+  FiCalendar,
   FiFilter,
   FiSearch,
-  FiCreditCard,
-  FiFileText,
+  FiPlus,
+  FiUser,
+  FiMapPin,
+  FiDollarSign,
+  FiInfo,
+  FiChevronRight,
+  FiCheckSquare,
+  FiAlertTriangle,
   FiGlobe,
-  FiFlag,
-  FiEdit2,
-  FiPrinter,
-  FiShare2,
-  FiMessageSquare,
-  FiStar,
-  FiSettings,
-  FiBell,
-  FiLock,
-  FiHeart,
-  FiHelpCircle,
-  FiLogOut,
-  FiUpload,
-  FiZap,
-  FiRefreshCw,
-  FiBriefcase,
-  FiBook,
-  FiHome,
-  FiActivity,
-  FiAward,
+  FiCreditCard,
 } from "react-icons/fi";
-import {
-  MdFlight,
-  MdHotel,
-  MdDirectionsCar,
-  MdRestaurant,
-  MdLocalActivity,
-  MdOutlineVerifiedUser,
-  MdOutlineSecurity,
-  MdOutlinePayment,
-} from "react-icons/md";
-import { FaRegHospital } from "react-icons/fa";
 
 function UserVisaRecords() {
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("applications");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState("all");
-  const [selectedApplication, setSelectedApplication] = useState(null);
-  const [applications, setApplications] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [userProfile, setUserProfile] = useState(null);
+  const [filter, setFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedVisa, setSelectedVisa] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+
+  // Get visa applications from localStorage (from your VisaService)
+  const [visaApplications, setVisaApplications] = useState([]);
 
   useEffect(() => {
-    // Simulate API calls
-    setTimeout(() => {
-      // Mock user profile data
-      const mockProfile = {
-        id: 1,
-        fullName: "John Smith",
-        email: "john.smith@example.com",
-        phone: "+1 (555) 123-4567",
-        nationality: "Nigerian",
-        passportNumber: "A12345678",
-        dob: "1990-05-15",
-        address: "123 Main Street, Lagos, Nigeria",
-        profileImage: "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
-        membership: "Premium",
-        memberSince: "2023-01-15",
-        points: 2450,
-        verification: "verified",
-      };
+    // Load visa applications from localStorage
+    const loadVisaApplications = () => {
+      try {
+        const savedApplications =
+          JSON.parse(localStorage.getItem("visaApplications")) || [];
+        const sampleApplications = getSampleApplications(); // Fallback if none exist
 
-      // Mock visa applications
-      const mockApplications = [
-        {
-          id: 1,
-          type: "tourist",
-          destination: "United Kingdom",
-          destinationCode: "GB",
-          reference: "VISA-UK-789012",
-          applicationDate: "2024-11-10",
-          departureDate: "2024-12-15",
-          processingDate: "2024-11-20",
-          estimatedCompletion: "2024-11-30",
-          status: "approved",
-          visaNumber: "GBV7890123456",
-          duration: "90 days",
-          purpose: "Tourism",
-          fee: 450,
-          currency: "£",
-          processingFee: 50,
-          totalPaid: 500,
-          documents: ["passport", "photo", "financial"],
-          lastUpdated: "2024-11-25",
-          officer: "Emma Wilson",
-          priority: "standard",
-        },
-        {
-          id: 2,
-          type: "business",
-          destination: "China",
-          destinationCode: "CN",
-          reference: "VISA-CN-345678",
-          applicationDate: "2024-11-15",
-          departureDate: "2024-12-20",
-          processingDate: "2024-11-25",
-          estimatedCompletion: "2024-12-05",
-          status: "processing",
-          duration: "30 days",
-          purpose: "Business Meeting",
-          fee: 350,
-          currency: "¥",
-          processingFee: 75,
-          totalPaid: 425,
-          documents: ["passport", "invitation", "business"],
-          lastUpdated: "2024-11-28",
-          officer: "Zhang Wei",
-          priority: "express",
-        },
-        {
-          id: 3,
-          type: "student",
-          destination: "Umarah",
-          destinationCode: "SA",
-          reference: "VISA-SA-456789",
-          applicationDate: "2024-10-05",
-          departureDate: "2024-11-01",
-          processingDate: "2024-10-15",
-          estimatedCompletion: "2024-10-25",
-          status: "approved",
-          visaNumber: "SAV4567890123",
-          duration: "1 year",
-          purpose: "University Studies",
-          fee: 300,
-          currency: "SAR",
-          processingFee: 100,
-          totalPaid: 400,
-          documents: ["passport", "admission", "financial"],
-          lastUpdated: "2024-10-20",
-          officer: "Ahmed Al-Saud",
-          priority: "standard",
-        },
-        {
-          id: 4,
-          type: "tourist",
-          destination: "Dubai",
-          destinationCode: "AE",
-          reference: "VISA-AE-123456",
-          applicationDate: "2024-11-01",
-          departureDate: "2024-12-01",
-          processingDate: null,
-          estimatedCompletion: "2024-11-21",
-          status: "pending",
-          duration: "30 days",
-          purpose: "Vacation",
-          fee: 380,
-          currency: "AED",
-          processingFee: 45,
-          totalPaid: 425,
-          documents: ["passport", "photo"],
-          lastUpdated: "2024-11-01",
-          priority: "regular",
-        },
-        {
-          id: 5,
-          type: "work",
-          destination: "Qatar",
-          destinationCode: "QA",
-          reference: "VISA-QA-987654",
-          applicationDate: "2024-10-20",
-          departureDate: "2024-11-15",
-          processingDate: "2024-10-25",
-          estimatedCompletion: "2024-11-10",
-          status: "rejected",
-          duration: "2 years",
-          purpose: "Employment",
-          fee: 400,
-          currency: "QAR",
-          processingFee: 150,
-          totalPaid: 550,
-          documents: ["passport", "contract", "medical"],
-          lastUpdated: "2024-11-05",
-          officer: "Mohammed Al-Thani",
-          reason: "Incomplete documentation",
-          priority: "standard",
-        },
-        {
-          id: 6,
-          type: "medical",
-          destination: "Algeria",
-          destinationCode: "DZ",
-          reference: "VISA-DZ-654321",
-          applicationDate: "2024-09-15",
-          departureDate: "2024-10-01",
-          processingDate: "2024-09-25",
-          estimatedCompletion: "2024-10-05",
-          status: "completed",
-          visaNumber: "DZV6543210987",
-          duration: "60 days",
-          purpose: "Medical Treatment",
-          fee: 250,
-          currency: "DZD",
-          processingFee: 75,
-          totalPaid: 325,
-          documents: ["passport", "medical", "appointment"],
-          lastUpdated: "2024-10-10",
-          officer: "Fatima Zohra",
-          priority: "urgent",
-        },
-      ];
+        if (savedApplications.length > 0) {
+          setVisaApplications(savedApplications);
+        } else {
+          setVisaApplications(sampleApplications);
+          // Save sample applications for demo
+          localStorage.setItem(
+            "visaApplications",
+            JSON.stringify(sampleApplications),
+          );
+        }
+      } catch (error) {
+        console.error("Error loading visa applications:", error);
+        setVisaApplications(getSampleApplications());
+      }
+    };
 
-      setUserProfile(mockProfile);
-      setApplications(mockApplications);
-      setLoading(false);
-    }, 1500);
+    loadVisaApplications();
+
+    // Listen for new applications from VisaService
+    const handleStorageChange = () => {
+      loadVisaApplications();
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  const [stats] = useState({
-    totalApplications: 6,
-    approved: 2,
-    processing: 1,
-    pending: 1,
-    rejected: 1,
-    completed: 1,
-    totalSpent: "£2,125",
-    upcomingDepartures: 2,
-    successRate: "67%",
-  });
+  // Helper function to create sample applications matching your VisaService
+  const getSampleApplications = () => {
+    const countries = [
+      { id: "uk", name: "United Kingdom", flag: "🇬🇧", currency: "£" },
+      { id: "china", name: "China", flag: "🇨🇳", currency: "¥" },
+      { id: "umarah", name: "Umarah", flag: "🇸🇦", currency: "SAR" },
+      { id: "qatar", name: "Qatar", flag: "🇶🇦", currency: "QAR" },
+      { id: "dubai", name: "Dubai", flag: "🇦🇪", currency: "AED" },
+      { id: "algeria", name: "Algeria", flag: "🇩🇿", currency: "DZD" },
+    ];
 
-  const profileTabs = [
-    {
-      id: "applications",
-      label: "Visa Applications",
-      icon: <FiFileText />,
-      count: 6,
-      color: "#10b981",
-    },
-    {
-      id: "profile",
-      label: "Profile Info",
-      icon: <FiUser />,
-      color: "#3b82f6",
-    },
-    {
-      id: "documents",
-      label: "Documents",
-      icon: <FiFileText />,
-      color: "#8b5cf6",
-    },
-    {
-      id: "settings",
-      label: "Settings",
-      icon: <FiSettings />,
-      color: "#f59e0b",
-    },
-    {
-      id: "notifications",
-      label: "Notifications",
-      icon: <FiBell />,
-      color: "#ef4444",
-    },
-  ];
+    const processingTimes = [
+      { id: "urgent", label: "Urgent", time: "24-48 hours" },
+      { id: "express", label: "Express", time: "3-5 days" },
+      { id: "standard", label: "Standard", time: "7-10 days" },
+      { id: "regular", label: "Regular", time: "15-20 days" },
+    ];
 
-  const statusFilters = [
-    { id: "all", label: "All Status" },
-    { id: "approved", label: "Approved" },
-    { id: "processing", label: "Processing" },
-    { id: "pending", label: "Pending" },
-    { id: "rejected", label: "Rejected" },
-    { id: "completed", label: "Completed" },
-  ];
+    const durations = [
+      { id: "30", label: "Short Stay", time: "1 month" },
+      { id: "90", label: "Tourist", time: "3 months" },
+      { id: "180", label: "Business", time: "6 months" },
+      { id: "365", label: "Long Term", time: "1 year" },
+      { id: "730", label: "Residence", time: "2 years" },
+    ];
 
-  const typeFilters = [
-    { id: "all", label: "All Types", icon: "📋" },
-    { id: "tourist", label: "Tourist Visa", icon: "🏖️" },
-    { id: "business", label: "Business Visa", icon: "💼" },
-    { id: "student", label: "Student Visa", icon: "🎓" },
-    { id: "work", label: "Work Visa", icon: "👨‍💼" },
-    { id: "medical", label: "Medical Visa", icon: "🏥" },
-  ];
-
-  const quickActions = [
-    {
-      id: 1,
-      label: "New Visa Application",
-      icon: <FiGlobe />,
-      path: "/dashboard/visa",
-      description: "Apply for a new visa",
-      color: "var(--green)",
-    },
-    {
-      id: 2,
-      label: "Upload Documents",
-      icon: <FiUpload />,
-      path: "/dashboard/documents",
-      description: "Upload supporting documents",
-      color: "var(--orange)",
-    },
-    {
-      id: 3,
-      label: "Track Application",
-      icon: <FiSearch />,
-      path: "/dashboard/track",
-      description: "Check application status",
-      color: "var(--blue)",
-    },
-  ];
-
-  const securityFeatures = [
-    {
-      id: 1,
-      label: "Two-Factor Authentication",
-      icon: <MdOutlineSecurity />,
-      status: "Enabled",
-      action: "Manage",
-      color: "#10b981",
-    },
-    {
-      id: 2,
-      label: "Login Activity",
-      icon: <FiUser />,
-      status: "Active",
-      action: "View",
-      color: "#3b82f6",
-    },
-    {
-      id: 3,
-      label: "Payment Methods",
-      icon: <MdOutlinePayment />,
-      status: "2 Cards",
-      action: "Manage",
-      color: "#8b5cf6",
-    },
-  ];
-
-  const getStatusBadge = (status) => {
-    const badges = {
-      approved: (
-        <span className={styles.statusBadgeApproved}>
-          <FiCheckCircle /> Approved
-        </span>
-      ),
-      processing: (
-        <span className={styles.statusBadgeProcessing}>
-          <FiClock /> Processing
-        </span>
-      ),
-      pending: (
-        <span className={styles.statusBadgePending}>
-          <FiClock /> Pending
-        </span>
-      ),
-      rejected: (
-        <span className={styles.statusBadgeRejected}>
-          <FiAlertCircle /> Rejected
-        </span>
-      ),
-      completed: (
-        <span className={styles.statusBadgeCompleted}>
-          <FiCheckCircle /> Completed
-        </span>
-      ),
+    const statuses = ["review", "approved", "pending", "rejected"];
+    const statusTexts = {
+      review: "Under Review",
+      approved: "Approved",
+      pending: "Pending Documents",
+      rejected: "Rejected",
     };
-    return badges[status] || badges.pending;
-  };
 
-  const getTypeIcon = (type) => {
-    const icons = {
-      tourist: "🏖️",
-      business: "💼",
-      student: "🎓",
-      work: "👨‍💼",
-      medical: "🏥",
+    const getRandomElement = (arr) =>
+      arr[Math.floor(Math.random() * arr.length)];
+    const getRandomDate = (daysAgo) => {
+      const date = new Date();
+      date.setDate(date.getDate() - daysAgo);
+      return date.toISOString().split("T")[0];
     };
-    return icons[type] || "📋";
-  };
 
-  const getTypeColor = (type) => {
-    const colors = {
-      tourist: "#10b981",
-      business: "#3b82f6",
-      student: "#8b5cf6",
-      work: "#f59e0b",
-      medical: "#ef4444",
-    };
-    return colors[type] || "#64748b";
-  };
+    return Array.from({ length: 6 }, (_, i) => {
+      const country = getRandomElement(countries);
+      const processingTime = getRandomElement(processingTimes);
+      const duration = getRandomElement(durations);
+      const status = statuses[i % statuses.length];
+      const submittedDate = getRandomDate(Math.floor(Math.random() * 30) + 1);
 
-  const getCountryFlag = (code) => {
-    const flagMap = {
-      GB: "🇬🇧",
-      CN: "🇨🇳",
-      SA: "🇸🇦",
-      AE: "🇦🇪",
-      QA: "🇶🇦",
-      DZ: "🇩🇿",
-    };
-    return flagMap[code] || "🌍";
-  };
+      // Calculate progress based on status
+      let progress = 0;
+      switch (status) {
+        case "review":
+          progress = 60;
+          break;
+        case "approved":
+          progress = 100;
+          break;
+        case "pending":
+          progress = 30;
+          break;
+        case "rejected":
+          progress = 100;
+          break;
+      }
 
-  const getPriorityBadge = (priority) => {
-    const badges = {
-      urgent: <span className={styles.priorityBadgeUrgent}>Urgent</span>,
-      express: <span className={styles.priorityBadgeExpress}>Express</span>,
-      standard: <span className={styles.priorityBadgeStandard}>Standard</span>,
-      regular: <span className={styles.priorityBadgeRegular}>Regular</span>,
-    };
-    return badges[priority] || badges.standard;
-  };
+      // Color based on country ID
+      const colors = {
+        uk: "#4f46e5",
+        china: "#dc2626",
+        umarah: "#059669",
+        qatar: "#7c3aed",
+        dubai: "#ea580c",
+        algeria: "#0891b2",
+      };
 
-  const filteredApplications = applications.filter((app) => {
-    const matchesTab =
-      activeTab === "applications" ||
-      activeTab === "profile" ||
-      activeTab === "documents" ||
-      activeTab === "settings" ||
-      activeTab === "notifications";
-
-    const matchesSearch =
-      searchQuery === "" ||
-      app.destination.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.reference.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.type.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesStatus = filterStatus === "all" || app.status === filterStatus;
-
-    return matchesTab && matchesSearch && matchesStatus;
-  });
-
-  const handleViewDetails = (application) => {
-    setSelectedApplication(application);
-  };
-
-  const handleCloseDetails = () => {
-    setSelectedApplication(null);
-  };
-
-  const handleDownloadVisa = (application) => {
-    if (application.visaNumber) {
-      alert(`Downloading visa document for ${application.reference}`);
-    } else {
-      alert("Visa not yet approved for download");
-    }
-  };
-
-  const handleTrackApplication = (application) => {
-    navigate(`/dashboard/visa/track/${application.id}`);
-  };
-
-  const handleRenewApplication = (application) => {
-    alert(`Starting renewal for ${application.reference}`);
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
+      return {
+        id: `VISA-${Date.now().toString().slice(-8)}-${i}`,
+        country: country.name,
+        countryCode: country.flag,
+        countryId: country.id,
+        type:
+          duration.id <= "90" ? "Tourist Visa"
+          : duration.id <= "180" ? "Business Visa"
+          : duration.id <= "365" ? "Student Visa"
+          : "Work Visa",
+        status: status,
+        statusText: statusTexts[status],
+        submittedDate: submittedDate,
+        processingTime: processingTime.time,
+        duration: duration.time,
+        fees: `${country.currency}${Math.floor(Math.random() * 200) + 200}`,
+        ref: `VISA-${country.id.toUpperCase()}-${new Date().getFullYear()}-${String(i + 1).padStart(4, "0")}`,
+        color: colors[country.id] || "#4f46e5",
+        progress: progress,
+        applicantName: `Applicant ${i + 1}`,
+        email: `applicant${i + 1}@example.com`,
+        passportNumber: `P${String(Math.floor(Math.random() * 1000000)).padStart(6, "0")}`,
+        documents: [
+          {
+            name: "Passport Copy",
+            status: Math.random() > 0.2 ? "approved" : "pending",
+            uploaded: true,
+          },
+          {
+            name: "Photograph",
+            status: Math.random() > 0.3 ? "approved" : "pending",
+            uploaded: true,
+          },
+          {
+            name: "Supporting Documents",
+            status: status === "pending" ? "pending" : "approved",
+            uploaded: status !== "pending",
+          },
+        ],
+        timeline: generateTimeline(status, submittedDate),
+        consulate: `${country.name} Embassy`,
+        officer: ["John Davis", "Sarah Miller", "Michael Brown", "Emma Wilson"][
+          i % 4
+        ],
+        notes: getStatusNotes(status, country.name),
+        nextSteps: getNextSteps(status),
+      };
     });
   };
 
-  const formatCurrency = (amount, currency) => {
-    return `${currency}${amount.toLocaleString()}`;
-  };
+  const generateTimeline = (status, submittedDate) => {
+    const baseSteps = [
+      {
+        step: 1,
+        name: "Application Submitted",
+        date: submittedDate,
+        status: "completed",
+      },
+      {
+        step: 2,
+        name: "Document Verification",
+        date: addDays(submittedDate, 2),
+        status: "completed",
+      },
+    ];
 
-  const calculateProcessingProgress = (app) => {
-    if (app.status === "approved" || app.status === "completed") return 100;
-    if (app.status === "rejected") return 100;
-
-    if (app.applicationDate && app.estimatedCompletion) {
-      const start = new Date(app.applicationDate).getTime();
-      const end = new Date(app.estimatedCompletion).getTime();
-      const now = new Date().getTime();
-
-      if (now >= end) return 100;
-      if (now <= start) return 0;
-
-      const progress = ((now - start) / (end - start)) * 100;
-      return Math.min(100, Math.max(0, Math.round(progress)));
+    switch (status) {
+      case "approved":
+        return [
+          ...baseSteps,
+          {
+            step: 3,
+            name: "Under Review",
+            date: addDays(submittedDate, 5),
+            status: "completed",
+          },
+          {
+            step: 4,
+            name: "Approval",
+            date: addDays(submittedDate, 7),
+            status: "completed",
+          },
+          {
+            step: 5,
+            name: "Visa Issued",
+            date: addDays(submittedDate, 8),
+            status: "completed",
+          },
+        ];
+      case "review":
+        return [
+          ...baseSteps,
+          { step: 3, name: "Under Review", date: "Current", status: "current" },
+          {
+            step: 4,
+            name: "Processing",
+            date: addDays(submittedDate, 10),
+            status: "upcoming",
+          },
+          {
+            step: 5,
+            name: "Decision",
+            date: addDays(submittedDate, 14),
+            status: "upcoming",
+          },
+        ];
+      case "pending":
+        return [
+          ...baseSteps,
+          {
+            step: 3,
+            name: "Awaiting Documents",
+            date: "Current",
+            status: "current",
+          },
+          {
+            step: 4,
+            name: "Document Review",
+            date: "Pending",
+            status: "upcoming",
+          },
+          { step: 5, name: "Processing", date: "Pending", status: "upcoming" },
+        ];
+      case "rejected":
+        return [
+          ...baseSteps,
+          {
+            step: 3,
+            name: "Under Review",
+            date: addDays(submittedDate, 5),
+            status: "completed",
+          },
+          {
+            step: 4,
+            name: "Additional Review",
+            date: addDays(submittedDate, 7),
+            status: "completed",
+          },
+          {
+            step: 5,
+            name: "Application Rejected",
+            date: addDays(submittedDate, 10),
+            status: "completed",
+          },
+        ];
+      default:
+        return baseSteps;
     }
-    return 50; // Default progress
   };
 
-  if (loading) {
-    return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.loadingSpinner}></div>
-        <p>Loading your visa records...</p>
-      </div>
+  const addDays = (dateString, days) => {
+    const date = new Date(dateString);
+    date.setDate(date.getDate() + days);
+    return date.toISOString().split("T")[0];
+  };
+
+  const getStatusNotes = (status, country) => {
+    switch (status) {
+      case "approved":
+        return `Visa for ${country} has been approved. Your passport is ready for collection.`;
+      case "review":
+        return `Your application for ${country} is currently under review. We will notify you once a decision is made.`;
+      case "pending":
+        return `Additional documents required for your ${country} visa application. Please check the required documents list.`;
+      case "rejected":
+        return `Your application for ${country} was rejected due to incomplete documentation. You may reapply after addressing the issues.`;
+      default:
+        return "Application submitted successfully.";
+    }
+  };
+
+  const getNextSteps = (status) => {
+    switch (status) {
+      case "approved":
+        return ["Collect passport from visa center", "Review visa conditions"];
+      case "review":
+        return ["Monitor application status", "Prepare for possible interview"];
+      case "pending":
+        return [
+          "Upload required documents",
+          "Complete biometric appointment",
+          "Submit additional information",
+        ];
+      case "rejected":
+        return [
+          "Review rejection reasons",
+          "Gather required documents",
+          "Reapply after 30 days",
+        ];
+      default:
+        return ["Check application status", "Contact support if needed"];
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case "approved":
+        return <FiCheckCircle className={styles.statusIcon} />;
+      case "rejected":
+        return <FiXCircle className={styles.statusIcon} />;
+      case "review":
+        return <FiClock className={styles.statusIcon} />;
+      case "pending":
+        return <FiAlertCircle className={styles.statusIcon} />;
+      default:
+        return <FiClock className={styles.statusIcon} />;
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "approved":
+        return styles.statusApproved;
+      case "rejected":
+        return styles.statusRejected;
+      case "review":
+        return styles.statusReview;
+      case "pending":
+        return styles.statusPending;
+      default:
+        return styles.statusDefault;
+    }
+  };
+
+  const getDocumentStatusIcon = (status) => {
+    switch (status) {
+      case "approved":
+        return <FiCheckCircle className={styles.docApproved} />;
+      case "rejected":
+        return <FiXCircle className={styles.docRejected} />;
+      case "review":
+        return <FiClock className={styles.docReview} />;
+      case "pending":
+        return <FiAlertCircle className={styles.docPending} />;
+      default:
+        return <FiAlertCircle className={styles.docPending} />;
+    }
+  };
+
+  const handleViewDetails = (visa) => {
+    setSelectedVisa(visa);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedVisa(null);
+  };
+
+  const filteredApplications = visaApplications.filter((visa) => {
+    if (filter !== "all" && visa.status !== filter) return false;
+    if (searchTerm) {
+      return (
+        visa.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        visa.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        visa.ref.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        visa.applicantName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    return true;
+  });
+
+  const stats = {
+    total: visaApplications.length,
+    approved: visaApplications.filter((v) => v.status === "approved").length,
+    review: visaApplications.filter((v) => v.status === "review").length,
+    pending: visaApplications.filter((v) => v.status === "pending").length,
+  };
+
+  const addNewApplication = () => {
+    // This would be called when a new application is submitted via VisaService
+    const newApp = {
+      id: `VISA-${Date.now().toString().slice(-8)}-${visaApplications.length}`,
+      country: "New Country",
+      countryCode: "🇺🇸",
+      type: "Tourist Visa",
+      status: "review",
+      statusText: "Under Review",
+      submittedDate: new Date().toISOString().split("T")[0],
+      processingTime: "7-10 days",
+      duration: "3 months",
+      fees: "$250",
+      ref: `VISA-NEW-${new Date().getFullYear()}-${String(visaApplications.length + 1).padStart(4, "0")}`,
+      color: "#4f46e5",
+      progress: 10,
+      applicantName: "New Applicant",
+      email: "new@example.com",
+      passportNumber: "P123456",
+    };
+
+    const updatedApplications = [newApp, ...visaApplications];
+    setVisaApplications(updatedApplications);
+    localStorage.setItem(
+      "visaApplications",
+      JSON.stringify(updatedApplications),
     );
-  }
+  };
 
   return (
-    <div className={styles.visaRecordsContainer}>
-      {/* Hero Section */}
-      <div className={styles.heroSection}>
-        <div className={styles.heroContent}>
-          <div className={styles.heroHeader}>
-            <div className={styles.heroText}>
-              <h1 className={styles.heroTitle}>Visa Records & Profile</h1>
-              <p className={styles.heroSubtitle}>
-                Manage your visa applications, profile, and security settings
-              </p>
-            </div>
-            <div className={styles.userQuickActions}>
-              <button
-                className={styles.newVisaButton}
-                onClick={() => navigate("/dashboard/visa")}>
-                <FiGlobe /> New Visa Application
-              </button>
-              <button
-                className={styles.profileButton}
-                onClick={() => setActiveTab("profile")}>
-                <FiUser /> Edit Profile
-              </button>
-            </div>
-          </div>
-
-          {/* User Profile Summary */}
-          <div className={styles.profileSummaryCard}>
-            <div className={styles.profileHeader}>
-              <div className={styles.profileImage}>
-                <img
-                  src={userProfile.profileImage}
-                  alt={userProfile.fullName}
-                />
-                {userProfile.verification === "verified" && (
-                  <span className={styles.verifiedBadge}>
-                    <MdOutlineVerifiedUser />
-                  </span>
-                )}
-              </div>
-              <div className={styles.profileInfo}>
-                <h2 className={styles.userName}>{userProfile.fullName}</h2>
-                <div className={styles.userDetails}>
-                  <span className={styles.userDetail}>
-                    <FiMail /> {userProfile.email}
-                  </span>
-                  <span className={styles.userDetail}>
-                    <FiPhone /> {userProfile.phone}
-                  </span>
-                  <span className={styles.userDetail}>
-                    <FiFlag /> {userProfile.nationality}
-                  </span>
-                </div>
-                <div className={styles.userStats}>
-                  <span className={styles.userStat}>
-                    <span className={styles.statValue}>
-                      {stats.totalApplications}
-                    </span>
-                    <span className={styles.statLabel}>Total Applications</span>
-                  </span>
-                  <span className={styles.userStat}>
-                    <span className={styles.statValue}>
-                      {stats.successRate}
-                    </span>
-                    <span className={styles.statLabel}>Success Rate</span>
-                  </span>
-                  <span className={styles.userStat}>
-                    <span className={styles.statValue}>
-                      {userProfile.points}
-                    </span>
-                    <span className={styles.statLabel}>Reward Points</span>
-                  </span>
-                </div>
-              </div>
-              <div className={styles.membershipBadge}>
-                <FiStar /> {userProfile.membership} Member
-              </div>
-            </div>
-          </div>
-
-          {/* Stats Cards */}
-          <div className={styles.statsCards}>
-            <div className={styles.statCard}>
-              <div className={styles.statIcon} style={{ color: "#10b981" }}>
-                <FiFileText />
-              </div>
-              <div className={styles.statContent}>
-                <div className={styles.statNumber}>
-                  {stats.totalApplications}
-                </div>
-                <div className={styles.statLabel}>Total Applications</div>
-              </div>
-            </div>
-
-            <div className={styles.statCard}>
-              <div className={styles.statIcon} style={{ color: "#3b82f6" }}>
-                <FiCheckCircle />
-              </div>
-              <div className={styles.statContent}>
-                <div className={styles.statNumber}>{stats.approved}</div>
-                <div className={styles.statLabel}>Approved</div>
-              </div>
-            </div>
-
-            <div className={styles.statCard}>
-              <div className={styles.statIcon} style={{ color: "#f59e0b" }}>
-                <FiClock />
-              </div>
-              <div className={styles.statContent}>
-                <div className={styles.statNumber}>{stats.processing}</div>
-                <div className={styles.statLabel}>Processing</div>
-              </div>
-            </div>
-
-            <div className={styles.statCard}>
-              <div className={styles.statIcon} style={{ color: "#ef4444" }}>
-                <FiCreditCard />
-              </div>
-              <div className={styles.statContent}>
-                <div className={styles.statNumber}>{stats.totalSpent}</div>
-                <div className={styles.statLabel}>Total Spent</div>
-              </div>
-            </div>
-          </div>
+    <div className={styles.visaProcessContainer}>
+      {/* Header */}
+      <div className={styles.header}>
+        <div className={styles.headerContent}>
+          <h1 className={styles.title}>Visa Process</h1>
+          <p className={styles.subtitle}>
+            Track your visa applications from {visaApplications.length}{" "}
+            submitted applications
+          </p>
+        </div>
+        <div className={styles.headerActions}>
+          <Link to="/dashboard/my-visa" className={styles.newVisaBtn}>
+            <FiPlus />
+            New Application
+          </Link>
+          <button
+            onClick={addNewApplication}
+            className={styles.refreshBtn}
+            title="Add Test Application"></button>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className={styles.mainContent}>
-        <div className={styles.contentWrapper}>
-          {/* Left Column */}
-          <div className={styles.leftColumn}>
-            {/* Profile Tabs */}
-            <div className={styles.profileTabs}>
-              {profileTabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  className={`${styles.tabButton} ${
-                    activeTab === tab.id ? styles.active : ""
-                  }`}
-                  onClick={() => setActiveTab(tab.id)}
-                  style={{
-                    borderBottomColor: activeTab === tab.id ? tab.color : "",
-                  }}>
-                  <div className={styles.tabContent}>
-                    <div className={styles.tabIcon}>{tab.icon}</div>
-                    <div className={styles.tabLabel}>{tab.label}</div>
-                    {tab.count && (
-                      <div
-                        className={styles.tabBadge}
-                        style={{ backgroundColor: tab.color }}>
-                        {tab.count}
-                      </div>
-                    )}
-                  </div>
-                </button>
-              ))}
+      {/* Stats */}
+      <div className={styles.stats}>
+        <div className={styles.statItem}>
+          <span className={styles.statNumber}>{stats.total}</span>
+          <span className={styles.statLabel}>Total Applications</span>
+        </div>
+        <div className={`${styles.statItem} ${styles.statApproved}`}>
+          <span className={styles.statNumber}>{stats.approved}</span>
+          <span className={styles.statLabel}>Approved</span>
+        </div>
+        <div className={`${styles.statItem} ${styles.statReview}`}>
+          <span className={styles.statNumber}>{stats.review}</span>
+          <span className={styles.statLabel}>In Review</span>
+        </div>
+        <div className={`${styles.statItem} ${styles.statPending}`}>
+          <span className={styles.statNumber}>{stats.pending}</span>
+          <span className={styles.statLabel}>Pending</span>
+        </div>
+      </div>
+
+      {/* Controls */}
+      <div className={styles.controls}>
+        <div className={styles.searchContainer}>
+          <FiSearch className={styles.searchIcon} />
+          <input
+            type="text"
+            placeholder="Search by country, visa type, reference, or applicant..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className={styles.searchInput}
+          />
+        </div>
+
+        <div className={styles.filters}>
+          <button
+            className={`${styles.filterBtn} ${filter === "all" ? styles.active : ""}`}
+            onClick={() => setFilter("all")}>
+            All Applications
+          </button>
+          <button
+            className={`${styles.filterBtn} ${filter === "review" ? styles.active : ""}`}
+            onClick={() => setFilter("review")}>
+            In Review
+          </button>
+          <button
+            className={`${styles.filterBtn} ${filter === "pending" ? styles.active : ""}`}
+            onClick={() => setFilter("pending")}>
+            Pending
+          </button>
+          <button
+            className={`${styles.filterBtn} ${filter === "approved" ? styles.active : ""}`}
+            onClick={() => setFilter("approved")}>
+            Approved
+          </button>
+        </div>
+      </div>
+
+      {/* Applications Grid */}
+      <div className={styles.applicationsGrid}>
+        {filteredApplications.map((visa) => (
+          <div key={visa.id} className={styles.applicationCard}>
+            <div className={styles.cardHeader}>
+              <div
+                className={styles.countryBadge}
+                style={{ backgroundColor: visa.color }}>
+                {visa.countryCode}
+              </div>
+              <div className={styles.applicationInfo}>
+                <h3 className={styles.countryName}>{visa.country}</h3>
+                <div className={styles.applicationMeta}>
+                  <span className={styles.visaType}>{visa.type}</span>
+                  <span className={styles.refNumber}>#{visa.ref}</span>
+                </div>
+              </div>
+              <div
+                className={`${styles.status} ${getStatusColor(visa.status)}`}>
+                {getStatusIcon(visa.status)}
+                <span>{visa.statusText}</span>
+              </div>
             </div>
 
-            {/* Content based on active tab */}
-            {activeTab === "applications" && (
-              <>
-                {/* Search and Filters */}
-                <div className={styles.searchFiltersCard}>
-                  <div className={styles.searchContainer}>
-                    <div className={styles.searchBox}>
-                      <FiSearch className={styles.searchIcon} />
-                      <input
-                        type="text"
-                        placeholder="Search applications by destination, reference, or type..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className={styles.searchInput}
-                      />
-                    </div>
-                    <button className={styles.filterButton}>
-                      <FiFilter /> Filters
-                    </button>
+            <div className={styles.cardContent}>
+              <div className={styles.applicantInfo}>
+                <FiUser className={styles.applicantIcon} />
+                <div className={styles.applicantDetails}>
+                  <div className={styles.applicantName}>
+                    {visa.applicantName}
                   </div>
+                  <div className={styles.applicantEmail}>{visa.email}</div>
+                </div>
+              </div>
 
-                  <div className={styles.filterChips}>
-                    {statusFilters.map((filter) => (
-                      <button
-                        key={filter.id}
-                        className={`${styles.filterChip} ${
-                          filterStatus === filter.id ? styles.active : ""
-                        }`}
-                        onClick={() => setFilterStatus(filter.id)}>
-                        {filter.label}
-                      </button>
-                    ))}
+              <div className={styles.detailsGrid}>
+                <div className={styles.detailItem}>
+                  <FiCalendar className={styles.detailIcon} />
+                  <div>
+                    <div className={styles.detailLabel}>Submitted</div>
+                    <div className={styles.detailValue}>
+                      {visa.submittedDate}
+                    </div>
                   </div>
                 </div>
+                <div className={styles.detailItem}>
+                  <FiClock className={styles.detailIcon} />
+                  <div>
+                    <div className={styles.detailLabel}>Processing</div>
+                    <div className={styles.detailValue}>
+                      {visa.processingTime}
+                    </div>
+                  </div>
+                </div>
+                <div className={styles.detailItem}>
+                  <FiDollarSign className={styles.detailIcon} />
+                  <div>
+                    <div className={styles.detailLabel}>Fees</div>
+                    <div className={styles.detailValue}>{visa.fees}</div>
+                  </div>
+                </div>
+                <div className={styles.detailItem}>
+                  <FiGlobe className={styles.detailIcon} />
+                  <div>
+                    <div className={styles.detailLabel}>Duration</div>
+                    <div className={styles.detailValue}>{visa.duration}</div>
+                  </div>
+                </div>
+              </div>
 
-                {/* Applications List */}
-                <div className={styles.applicationsList}>
-                  {filteredApplications.length > 0 ? (
-                    filteredApplications.map((app) => (
-                      <div key={app.id} className={styles.applicationCard}>
-                        <div className={styles.applicationHeader}>
-                          <div className={styles.applicationType}>
-                            <div
-                              className={styles.typeIcon}
-                              style={{
-                                backgroundColor: getTypeColor(app.type),
-                              }}>
-                              {getTypeIcon(app.type)}
-                            </div>
-                            <div className={styles.typeInfo}>
-                              <div className={styles.typeLabel}>
-                                {app.type.charAt(0).toUpperCase() +
-                                  app.type.slice(1)}{" "}
-                                Visa
-                              </div>
-                              <div className={styles.applicationReference}>
-                                {app.reference}
-                              </div>
-                            </div>
-                          </div>
-                          <div className={styles.applicationPriority}>
-                            {getPriorityBadge(app.priority)}
-                            <div className={styles.applicationDate}>
-                              Applied: {formatDate(app.applicationDate)}
-                            </div>
-                          </div>
-                        </div>
+              <div className={styles.progressContainer}>
+                <div className={styles.progressLabel}>
+                  <span>Progress</span>
+                  <span>{visa.progress}%</span>
+                </div>
+                <div className={styles.progressBar}>
+                  <div
+                    className={styles.progressFill}
+                    style={{
+                      width: `${visa.progress}%`,
+                      backgroundColor: visa.color,
+                    }}
+                  />
+                </div>
+              </div>
 
-                        <div className={styles.applicationContent}>
-                          <div className={styles.applicationInfo}>
-                            <div className={styles.destinationRow}>
-                              <div className={styles.destinationFlag}>
-                                {getCountryFlag(app.destinationCode)}
-                              </div>
-                              <h3 className={styles.destination}>
-                                {app.destination}
-                              </h3>
-                            </div>
-
-                            <div className={styles.processingProgress}>
-                              <div className={styles.progressBar}>
-                                <div
-                                  className={styles.progressFill}
-                                  style={{
-                                    width: `${calculateProcessingProgress(
-                                      app
-                                    )}%`,
-                                  }}
-                                />
-                              </div>
-                              <div className={styles.progressInfo}>
-                                <span className={styles.progressText}>
-                                  {calculateProcessingProgress(app)}% Complete
-                                </span>
-                                <span className={styles.estimatedDate}>
-                                  Est. Completion:{" "}
-                                  {formatDate(app.estimatedCompletion)}
-                                </span>
-                              </div>
-                            </div>
-
-                            <div className={styles.detailsGrid}>
-                              <div className={styles.detailItem}>
-                                <span className={styles.detailLabel}>
-                                  Duration:
-                                </span>
-                                <span className={styles.detailValue}>
-                                  {app.duration}
-                                </span>
-                              </div>
-                              <div className={styles.detailItem}>
-                                <span className={styles.detailLabel}>
-                                  Purpose:
-                                </span>
-                                <span className={styles.detailValue}>
-                                  {app.purpose}
-                                </span>
-                              </div>
-                              <div className={styles.detailItem}>
-                                <span className={styles.detailLabel}>
-                                  Departure:
-                                </span>
-                                <span className={styles.detailValue}>
-                                  {formatDate(app.departureDate)}
-                                </span>
-                              </div>
-                              <div className={styles.detailItem}>
-                                <span className={styles.detailLabel}>
-                                  Processing Fee:
-                                </span>
-                                <span className={styles.detailValue}>
-                                  {formatCurrency(
-                                    app.processingFee,
-                                    app.currency
-                                  )}
-                                </span>
-                              </div>
-                            </div>
-
-                            {app.documents && app.documents.length > 0 && (
-                              <div className={styles.documents}>
-                                {app.documents.map((doc, index) => (
-                                  <span key={index} className={styles.document}>
-                                    <FiFileText /> {doc}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-
-                          <div className={styles.applicationActions}>
-                            <div className={styles.actionStatus}>
-                              {getStatusBadge(app.status)}
-                              <div className={styles.applicationPrice}>
-                                {formatCurrency(app.totalPaid, app.currency)}
-                              </div>
-                            </div>
-
-                            <div className={styles.actionButtons}>
-                              <button
-                                className={styles.viewButton}
-                                onClick={() => handleViewDetails(app)}>
-                                <FiEye /> Details
-                              </button>
-                              <button
-                                className={styles.trackButton}
-                                onClick={() => handleTrackApplication(app)}>
-                                <FiSearch /> Track
-                              </button>
-                              {app.status === "approved" && (
-                                <button
-                                  className={styles.downloadButton}
-                                  onClick={() => handleDownloadVisa(app)}>
-                                  <FiDownload /> Visa
-                                </button>
-                              )}
-                              {app.status === "completed" && (
-                                <button
-                                  className={styles.renewButton}
-                                  onClick={() => handleRenewApplication(app)}>
-                                  <FiRefreshCw /> Renew
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        </div>
+              <div className={styles.documentsPreview}>
+                <div className={styles.documentsLabel}>Documents:</div>
+                <div className={styles.documentsStatus}>
+                  {visa.documents ?
+                    visa.documents.map((doc, index) => (
+                      <div
+                        key={index}
+                        className={styles.docBadge}
+                        title={`${doc.name}: ${doc.status}`}>
+                        {getDocumentStatusIcon(doc.status)}
                       </div>
                     ))
-                  ) : (
-                    <div className={styles.emptyState}>
-                      <FiGlobe className={styles.emptyIcon} />
-                      <h3>No visa applications found</h3>
-                      <p>
-                        {searchQuery
-                          ? "No applications match your search criteria"
-                          : "You haven't applied for any visas yet."}
-                      </p>
-                      <button
-                        className={styles.newVisaAction}
-                        onClick={() => navigate("/dashboard/visa")}>
-                        <FiGlobe /> Apply for a Visa
-                      </button>
+                  : <div className={styles.docBadge}>
+                      <FiFileText />
                     </div>
-                  )}
-                </div>
-              </>
-            )}
-
-            {activeTab === "profile" && userProfile && (
-              <div className={styles.profileDetailsCard}>
-                <h3 className={styles.profileSectionTitle}>
-                  Personal Information
-                </h3>
-
-                <div className={styles.profileForm}>
-                  <div className={styles.formGrid}>
-                    <div className={styles.formField}>
-                      <label>
-                        <FiUser /> Full Name
-                      </label>
-                      <div className={styles.readOnlyField}>
-                        {userProfile.fullName}
-                      </div>
-                    </div>
-                    <div className={styles.formField}>
-                      <label>
-                        <FiMail /> Email Address
-                      </label>
-                      <div className={styles.readOnlyField}>
-                        {userProfile.email}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className={styles.formGrid}>
-                    <div className={styles.formField}>
-                      <label>
-                        <FiPhone /> Phone Number
-                      </label>
-                      <div className={styles.readOnlyField}>
-                        {userProfile.phone}
-                      </div>
-                    </div>
-                    <div className={styles.formField}>
-                      <label>
-                        <FiCalendar /> Date of Birth
-                      </label>
-                      <div className={styles.readOnlyField}>
-                        {formatDate(userProfile.dob)}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className={styles.formField}>
-                    <label>
-                      <FiFlag /> Nationality
-                    </label>
-                    <div className={styles.readOnlyField}>
-                      {userProfile.nationality}
-                    </div>
-                  </div>
-
-                  <div className={styles.formField}>
-                    <label>
-                      <FiFileText /> Passport Number
-                    </label>
-                    <div className={styles.readOnlyField}>
-                      {userProfile.passportNumber}
-                    </div>
-                  </div>
-
-                  <div className={styles.formField}>
-                    <label>
-                      <FiMapPin /> Address
-                    </label>
-                    <div className={styles.readOnlyField}>
-                      {userProfile.address}
-                    </div>
-                  </div>
-
-                  <div className={styles.profileActions}>
-                    <button className={styles.editProfileButton}>
-                      <FiEdit2 /> Edit Profile Information
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "documents" && (
-              <div className={styles.documentsCard}>
-                <h3 className={styles.profileSectionTitle}>Document Library</h3>
-                <p className={styles.sectionSubtitle}>
-                  Your uploaded documents for visa applications
-                </p>
-
-                <div className={styles.documentCategories}>
-                  <div className={styles.documentCategory}>
-                    <h4>Passport & Identification</h4>
-                    <div className={styles.documentList}>
-                      <div className={styles.documentItem}>
-                        <FiFileText className={styles.documentIcon} />
-                        <div className={styles.documentInfo}>
-                          <div className={styles.documentName}>
-                            Passport Data Page
-                          </div>
-                          <div className={styles.documentMeta}>
-                            Uploaded: Nov 10, 2024 • Verified ✓
-                          </div>
-                        </div>
-                        <div className={styles.documentActions}>
-                          <button className={styles.documentAction}>
-                            <FiDownload />
-                          </button>
-                          <button className={styles.documentAction}>
-                            <FiEye />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className={styles.documentCategory}>
-                    <h4>Financial Documents</h4>
-                    <div className={styles.documentList}>
-                      <div className={styles.documentItem}>
-                        <FiFileText className={styles.documentIcon} />
-                        <div className={styles.documentInfo}>
-                          <div className={styles.documentName}>
-                            Bank Statement
-                          </div>
-                          <div className={styles.documentMeta}>
-                            Uploaded: Nov 15, 2024 • Expires: May 15, 2025
-                          </div>
-                        </div>
-                        <div className={styles.documentActions}>
-                          <button className={styles.documentAction}>
-                            <FiDownload />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className={styles.uploadSection}>
-                  <div className={styles.uploadZone}>
-                    <FiUpload className={styles.uploadIcon} />
-                    <div className={styles.uploadText}>
-                      <h4>Upload New Document</h4>
-                      <p>
-                        Drag & drop or click to browse files (PDF, JPG, PNG)
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "settings" && (
-              <div className={styles.settingsCard}>
-                <h3 className={styles.profileSectionTitle}>Account Settings</h3>
-
-                <div className={styles.settingsSections}>
-                  <div className={styles.settingsSection}>
-                    <h4>
-                      <FiLock /> Security
-                    </h4>
-                    <div className={styles.securityFeatures}>
-                      {securityFeatures.map((feature) => (
-                        <div
-                          key={feature.id}
-                          className={styles.securityFeature}>
-                          <div className={styles.featureInfo}>
-                            <div
-                              className={styles.featureIcon}
-                              style={{ color: feature.color }}>
-                              {feature.icon}
-                            </div>
-                            <div>
-                              <div className={styles.featureLabel}>
-                                {feature.label}
-                              </div>
-                              <div className={styles.featureStatus}>
-                                {feature.status}
-                              </div>
-                            </div>
-                          </div>
-                          <button className={styles.featureAction}>
-                            {feature.action}
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className={styles.settingsSection}>
-                    <h4>
-                      <FiBell /> Notifications
-                    </h4>
-                    <div className={styles.notificationSettings}>
-                      <div className={styles.notificationItem}>
-                        <div className={styles.notificationInfo}>
-                          <div className={styles.notificationLabel}>
-                            Application Status Updates
-                          </div>
-                          <div className={styles.notificationDescription}>
-                            Get notified when your visa application status
-                            changes
-                          </div>
-                        </div>
-                        <div className={styles.toggleSwitch}>
-                          <input
-                            type="checkbox"
-                            id="status-updates"
-                            defaultChecked
-                          />
-                          <label htmlFor="status-updates"></label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "notifications" && (
-              <div className={styles.notificationsCard}>
-                <h3 className={styles.profileSectionTitle}>Notifications</h3>
-
-                <div className={styles.notificationsList}>
-                  <div className={styles.notificationItem}>
-                    <div
-                      className={styles.notificationIcon}
-                      style={{ color: "#10b981" }}>
-                      <FiCheckCircle />
-                    </div>
-                    <div className={styles.notificationContent}>
-                      <div className={styles.notificationTitle}>
-                        Visa Approved!
-                      </div>
-                      <div className={styles.notificationMessage}>
-                        Your UK Tourist Visa (VISA-UK-789012) has been approved.
-                      </div>
-                      <div className={styles.notificationTime}>2 hours ago</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Right Column */}
-          <div className={styles.rightColumn}>
-            {/* Quick Actions */}
-            <div className={styles.sidebarCard}>
-              <h3 className={styles.sidebarTitle}>
-                <FiZap /> Quick Actions
-              </h3>
-              <div className={styles.quickActions}>
-                {quickActions.map((action) => (
-                  <button
-                    key={action.id}
-                    className={styles.quickAction}
-                    onClick={() => navigate(action.path)}
-                    style={{ borderLeftColor: action.color }}>
-                    <div
-                      className={styles.quickActionIcon}
-                      style={{ color: action.color }}>
-                      {action.icon}
-                    </div>
-                    <div className={styles.quickActionContent}>
-                      <div className={styles.quickActionTitle}>
-                        {action.label}
-                      </div>
-                      <div className={styles.quickActionDescription}>
-                        {action.description}
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Processing Applications */}
-            <div className={styles.sidebarCard}>
-              <h3 className={styles.sidebarTitle}>
-                <FiClock /> Processing Applications
-              </h3>
-              <div className={styles.processingList}>
-                {applications
-                  .filter(
-                    (app) =>
-                      app.status === "processing" || app.status === "pending"
-                  )
-                  .map((app) => (
-                    <div key={app.id} className={styles.processingItem}>
-                      <div className={styles.processingFlag}>
-                        {getCountryFlag(app.destinationCode)}
-                      </div>
-                      <div className={styles.processingInfo}>
-                        <div className={styles.processingDestination}>
-                          {app.destination}
-                        </div>
-                        <div className={styles.processingType}>
-                          {app.type} Visa
-                        </div>
-                        <div className={styles.processingReference}>
-                          {app.reference}
-                        </div>
-                      </div>
-                      <div className={styles.processingStatus}>
-                        {app.status === "processing" ? "In Review" : "Pending"}
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
-
-            {/* Visa Tips */}
-            <div className={styles.sidebarCard}>
-              <h3 className={styles.sidebarTitle}>
-                <FiHelpCircle /> Visa Tips
-              </h3>
-              <div className={styles.tipsList}>
-                <div className={styles.tipItem}>
-                  <FiCheckCircle className={styles.tipIcon} />
-                  <div className={styles.tipContent}>
-                    Apply at least 4-6 weeks before travel
-                  </div>
-                </div>
-                <div className={styles.tipItem}>
-                  <FiCheckCircle className={styles.tipIcon} />
-                  <div className={styles.tipContent}>
-                    Keep passport valid for 6+ months
-                  </div>
-                </div>
-                <div className={styles.tipItem}>
-                  <FiCheckCircle className={styles.tipIcon} />
-                  <div className={styles.tipContent}>
-                    Upload clear document scans
-                  </div>
-                </div>
-                <div className={styles.tipItem}>
-                  <FiCheckCircle className={styles.tipIcon} />
-                  <div className={styles.tipContent}>
-                    Check visa requirements per country
-                  </div>
+                  }
                 </div>
               </div>
             </div>
 
-            {/* Upcoming Travel */}
-            <div className={styles.sidebarCard}>
-              <h3 className={styles.sidebarTitle}>
-                <FiCalendar /> Upcoming Travel
-              </h3>
-              <div className={styles.upcomingList}>
-                {applications
-                  .filter(
-                    (app) =>
-                      app.status === "approved" || app.status === "completed"
-                  )
-                  .sort(
-                    (a, b) =>
-                      new Date(a.departureDate) - new Date(b.departureDate)
-                  )
-                  .slice(0, 3)
-                  .map((app) => (
-                    <div key={app.id} className={styles.upcomingItem}>
-                      <div className={styles.upcomingDate}>
-                        {new Date(app.departureDate).toLocaleDateString(
-                          "en-US",
-                          { month: "short", day: "numeric" }
-                        )}
-                      </div>
-                      <div className={styles.upcomingInfo}>
-                        <div className={styles.upcomingDestination}>
-                          {app.destination}
-                        </div>
-                        <div className={styles.upcomingType}>
-                          {app.type} Visa
-                        </div>
-                      </div>
-                      <div className={styles.upcomingAction}>
-                        <button className={styles.viewButtonSmall}>
-                          <FiEye />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-              </div>
+            <div className={styles.cardActions}>
+              <button
+                className={styles.actionBtn}
+                onClick={() => handleViewDetails(visa)}>
+                <FiEye />
+                View Details
+              </button>
+              <button className={styles.actionBtn}>
+                <FiMessageSquare />
+                Support
+              </button>
+              {visa.status === "approved" && (
+                <button className={styles.actionBtn}>
+                  <FiDownload />
+                  Download Visa
+                </button>
+              )}
             </div>
           </div>
-        </div>
+        ))}
       </div>
 
-      {/* Application Details Modal */}
-      {selectedApplication && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modalContent}>
+      {/* Empty State */}
+      {filteredApplications.length === 0 && (
+        <div className={styles.emptyState}>
+          <FiFileText className={styles.emptyIcon} />
+          <h3>No visa applications found</h3>
+          <p>Try adjusting your search or start a new application</p>
+          <Link to="/dashboard/visa" className={styles.emptyBtn}>
+            Apply for Visa
+          </Link>
+        </div>
+      )}
+
+      {/* Details Modal */}
+      {showModal && selectedVisa && (
+        <div className={styles.modalOverlay} onClick={closeModal}>
+          <div
+            className={styles.modalContent}
+            onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h2 className={styles.modalTitle}>Visa Application Details</h2>
-              <button
-                className={styles.closeButton}
-                onClick={handleCloseDetails}>
-                <FiX />
+              <div className={styles.modalTitle}>
+                <div
+                  className={styles.modalCountryBadge}
+                  style={{ backgroundColor: selectedVisa.color }}>
+                  {selectedVisa.countryCode}
+                </div>
+                <div>
+                  <h2>
+                    {selectedVisa.country} - {selectedVisa.type}
+                  </h2>
+                  <p className={styles.modalRef}>#{selectedVisa.ref}</p>
+                </div>
+              </div>
+              <button className={styles.modalClose} onClick={closeModal}>
+                ×
               </button>
             </div>
 
             <div className={styles.modalBody}>
-              <div className={styles.applicationSummary}>
-                <div className={styles.summaryHeader}>
-                  <div className={styles.summaryFlag}>
-                    {getCountryFlag(selectedApplication.destinationCode)}
+              {/* Status Overview */}
+              <div className={styles.modalSection}>
+                <div className={styles.statusOverview}>
+                  <div
+                    className={`${styles.modalStatus} ${getStatusColor(selectedVisa.status)}`}>
+                    {getStatusIcon(selectedVisa.status)}
+                    <span>{selectedVisa.statusText}</span>
                   </div>
-                  <div className={styles.summaryInfo}>
-                    <h3 className={styles.summaryTitle}>
-                      {selectedApplication.destination} -{" "}
-                      {selectedApplication.type} Visa
-                    </h3>
-                    <div className={styles.summaryReference}>
-                      Reference: {selectedApplication.reference}
+                  <div className={styles.modalDates}>
+                    <div className={styles.dateInfo}>
+                      <FiCalendar />
+                      <span>
+                        <strong>Submitted:</strong> {selectedVisa.submittedDate}
+                      </span>
+                    </div>
+                    {selectedVisa.approvedDate && (
+                      <div className={styles.dateInfo}>
+                        <FiCheckCircle />
+                        <span>
+                          <strong>Approved:</strong> {selectedVisa.approvedDate}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Applicant Info */}
+              <div className={styles.modalSection}>
+                <h3>
+                  <FiUser />
+                  Applicant Information
+                </h3>
+                <div className={styles.applicantGrid}>
+                  <div className={styles.applicantField}>
+                    <label>Name:</label>
+                    <span>{selectedVisa.applicantName}</span>
+                  </div>
+                  <div className={styles.applicantField}>
+                    <label>Email:</label>
+                    <span>{selectedVisa.email}</span>
+                  </div>
+                  <div className={styles.applicantField}>
+                    <label>Passport:</label>
+                    <span>{selectedVisa.passportNumber}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Application Details */}
+              <div className={styles.modalGrid}>
+                <div className={styles.detailCard}>
+                  <h3>
+                    <FiInfo />
+                    Application Details
+                  </h3>
+                  <div className={styles.detailList}>
+                    <div className={styles.detailRow}>
+                      <span>Processing Time:</span>
+                      <span>{selectedVisa.processingTime}</span>
+                    </div>
+                    <div className={styles.detailRow}>
+                      <span>Duration:</span>
+                      <span>{selectedVisa.duration}</span>
+                    </div>
+                    <div className={styles.detailRow}>
+                      <span>Fees Paid:</span>
+                      <span>{selectedVisa.fees}</span>
                     </div>
                   </div>
-                  {getStatusBadge(selectedApplication.status)}
                 </div>
 
-                <div className={styles.summaryDetails}>
-                  <div className={styles.detailSection}>
-                    <h4 className={styles.detailTitle}>
-                      Application Information
-                    </h4>
-                    <div className={styles.detailGrid}>
-                      <div className={styles.detailItem}>
-                        <span className={styles.detailLabel}>
-                          Application Date:
-                        </span>
-                        <span className={styles.detailValue}>
-                          {formatDate(selectedApplication.applicationDate)}
-                        </span>
-                      </div>
-                      <div className={styles.detailItem}>
-                        <span className={styles.detailLabel}>
-                          Processing Start:
-                        </span>
-                        <span className={styles.detailValue}>
-                          {formatDate(selectedApplication.processingDate) ||
-                            "Pending"}
-                        </span>
-                      </div>
-                      <div className={styles.detailItem}>
-                        <span className={styles.detailLabel}>
-                          Estimated Completion:
-                        </span>
-                        <span className={styles.detailValue}>
-                          {formatDate(selectedApplication.estimatedCompletion)}
-                        </span>
-                      </div>
-                      <div className={styles.detailItem}>
-                        <span className={styles.detailLabel}>
-                          Departure Date:
-                        </span>
-                        <span className={styles.detailValue}>
-                          {formatDate(selectedApplication.departureDate)}
-                        </span>
-                      </div>
-                      <div className={styles.detailItem}>
-                        <span className={styles.detailLabel}>
-                          Visa Duration:
-                        </span>
-                        <span className={styles.detailValue}>
-                          {selectedApplication.duration}
-                        </span>
-                      </div>
-                      <div className={styles.detailItem}>
-                        <span className={styles.detailLabel}>Purpose:</span>
-                        <span className={styles.detailValue}>
-                          {selectedApplication.purpose}
-                        </span>
-                      </div>
-                      <div className={styles.detailItem}>
-                        <span className={styles.detailLabel}>Priority:</span>
-                        <span className={styles.detailValue}>
-                          {selectedApplication.priority
-                            .charAt(0)
-                            .toUpperCase() +
-                            selectedApplication.priority.slice(1)}
-                        </span>
-                      </div>
-                      {selectedApplication.officer && (
-                        <div className={styles.detailItem}>
-                          <span className={styles.detailLabel}>
-                            Processing Officer:
-                          </span>
-                          <span className={styles.detailValue}>
-                            {selectedApplication.officer}
-                          </span>
-                        </div>
-                      )}
-                      {selectedApplication.visaNumber && (
-                        <div className={styles.detailItem}>
-                          <span className={styles.detailLabel}>
-                            Visa Number:
-                          </span>
-                          <span className={styles.detailValue}>
-                            {selectedApplication.visaNumber}
-                          </span>
-                        </div>
-                      )}
+                <div className={styles.detailCard}>
+                  <h3>
+                    <FiMapPin />
+                    Consulate Info
+                  </h3>
+                  <div className={styles.detailList}>
+                    <div className={styles.detailRow}>
+                      <span>Consulate:</span>
+                      <span>{selectedVisa.consulate}</span>
+                    </div>
+                    <div className={styles.detailRow}>
+                      <span>Visa Officer:</span>
+                      <span>{selectedVisa.officer}</span>
                     </div>
                   </div>
+                </div>
+              </div>
 
-                  <div className={styles.detailSection}>
-                    <h4 className={styles.detailTitle}>Payment Details</h4>
-                    <div className={styles.paymentSummary}>
-                      <div className={styles.paymentRow}>
-                        <span>Visa Fee:</span>
-                        <span>
-                          {formatCurrency(
-                            selectedApplication.fee,
-                            selectedApplication.currency
-                          )}
-                        </span>
+              {/* Documents */}
+              {selectedVisa.documents && (
+                <div className={styles.modalSection}>
+                  <h3>
+                    <FiFileText />
+                    Required Documents
+                  </h3>
+                  <div className={styles.documentsList}>
+                    {selectedVisa.documents.map((doc, index) => (
+                      <div key={index} className={styles.documentItem}>
+                        <div className={styles.documentInfo}>
+                          {getDocumentStatusIcon(doc.status)}
+                          <span className={styles.documentName}>
+                            {doc.name}
+                          </span>
+                        </div>
+                        <div
+                          className={`${styles.documentStatus} ${styles[`doc${doc.status}`]}`}>
+                          {doc.status.charAt(0).toUpperCase() +
+                            doc.status.slice(1)}
+                          {doc.uploaded ? " ✓" : " ✗"}
+                        </div>
                       </div>
-                      <div className={styles.paymentRow}>
-                        <span>Processing Fee:</span>
-                        <span>
-                          {formatCurrency(
-                            selectedApplication.processingFee,
-                            selectedApplication.currency
-                          )}
-                        </span>
-                      </div>
-                      <div className={styles.paymentRow}>
-                        <span>Total Paid:</span>
-                        <span className={styles.paymentAmount}>
-                          {formatCurrency(
-                            selectedApplication.totalPaid,
-                            selectedApplication.currency
-                          )}
-                        </span>
-                      </div>
-                      <div className={styles.paymentRow}>
-                        <span>Payment Status:</span>
-                        <span className={styles.paymentStatusPaid}>Paid</span>
-                      </div>
-                    </div>
+                    ))}
                   </div>
+                </div>
+              )}
 
-                  {selectedApplication.reason && (
-                    <div className={styles.detailSection}>
-                      <h4 className={styles.detailTitle}>
-                        <FiAlertCircle /> Rejection Reason
-                      </h4>
-                      <div className={styles.rejectionReason}>
-                        {selectedApplication.reason}
+              {/* Timeline */}
+              {selectedVisa.timeline && (
+                <div className={styles.modalSection}>
+                  <h3>
+                    <FiClock />
+                    Application Timeline
+                  </h3>
+                  <div className={styles.timeline}>
+                    {selectedVisa.timeline.map((step) => (
+                      <div
+                        key={step.step}
+                        className={`${styles.timelineStep} ${styles[step.status]}`}>
+                        <div className={styles.timelineDot}></div>
+                        <div className={styles.timelineContent}>
+                          <div className={styles.timelineTitle}>
+                            {step.name}
+                          </div>
+                          <div className={styles.timelineDate}>{step.date}</div>
+                        </div>
+                        <FiChevronRight className={styles.timelineArrow} />
                       </div>
-                    </div>
-                  )}
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Notes & Next Steps */}
+              <div className={styles.modalGrid}>
+                <div className={styles.detailCard}>
+                  <h3>
+                    <FiAlertTriangle />
+                    Notes
+                  </h3>
+                  <p className={styles.notesText}>{selectedVisa.notes}</p>
+                </div>
+
+                <div className={styles.detailCard}>
+                  <h3>
+                    <FiCheckSquare />
+                    Next Steps
+                  </h3>
+                  <ul className={styles.nextStepsList}>
+                    {selectedVisa.nextSteps &&
+                      selectedVisa.nextSteps.map((step, index) => (
+                        <li key={index}>
+                          <FiChevronRight />
+                          {step}
+                        </li>
+                      ))}
+                  </ul>
                 </div>
               </div>
             </div>
 
             <div className={styles.modalFooter}>
-              <div className={styles.modalActions}>
-                {selectedApplication.visaNumber && (
-                  <button
-                    className={styles.modalButton}
-                    onClick={() => handleDownloadVisa(selectedApplication)}>
-                    <FiDownload /> Download Visa
-                  </button>
-                )}
-                <button className={styles.modalButtonSecondary}>
-                  <FiPrinter /> Print Summary
+              <button className={styles.modalBtn}>
+                <FiMessageSquare />
+                Contact Support
+              </button>
+              <button className={styles.modalBtn}>
+                <FiDownload />
+                Download Documents
+              </button>
+              {selectedVisa.status === "pending" && (
+                <button className={`${styles.modalBtn} ${styles.primaryBtn}`}>
+                  <FiPlus />
+                  Upload Documents
                 </button>
-                <button className={styles.modalButtonSecondary}>
-                  <FiShare2 /> Share Details
-                </button>
-                <button
-                  className={styles.modalButton}
-                  onClick={() => handleTrackApplication(selectedApplication)}>
-                  <FiSearch /> Track Application
-                </button>
-              </div>
+              )}
             </div>
           </div>
         </div>

@@ -1,4 +1,3 @@
-// components/admin/AdminNavbar.jsx - FIXED & COOL DESIGN
 import React, { useState, useEffect, useRef } from "react";
 import {
   FiSearch,
@@ -8,17 +7,34 @@ import {
   FiDollarSign,
   FiAirplay,
   FiPackage,
+  FiMenu,
+  FiChevronRight,
+  FiGlobe,
+  FiHome,
+  FiSettings,
+  FiMessageSquare,
 } from "react-icons/fi";
 import styles from "./AdminNavbar.module.css";
 
-function AdminNavbar({ user }) {
+function AdminNavbar({ user, isSidebarCollapsed, onToggleSidebar }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showQuickMenu, setShowQuickMenu] = useState(false);
   const [unreadCount, setUnreadCount] = useState(3);
+  const [isMobile, setIsMobile] = useState(false);
 
   const notificationRef = useRef(null);
   const userMenuRef = useRef(null);
+  const quickMenuRef = useRef(null);
+
+  // Check if mobile
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1025);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const notifications = [
     {
@@ -28,6 +44,7 @@ function AdminNavbar({ user }) {
       unread: true,
       type: "user",
       icon: <FiUser />,
+      color: "#10b981",
     },
     {
       id: 2,
@@ -36,6 +53,7 @@ function AdminNavbar({ user }) {
       unread: true,
       type: "exchange",
       icon: <FiDollarSign />,
+      color: "#3b82f6",
     },
     {
       id: 3,
@@ -44,6 +62,7 @@ function AdminNavbar({ user }) {
       unread: false,
       type: "flight",
       icon: <FiAirplay />,
+      color: "#f97316",
     },
     {
       id: 4,
@@ -52,18 +71,46 @@ function AdminNavbar({ user }) {
       unread: true,
       type: "travel",
       icon: <FiPackage />,
+      color: "#8b5cf6",
+    },
+    {
+      id: 5,
+      title: "Visa application approved",
+      time: "5 hours ago",
+      unread: false,
+      type: "visa",
+      icon: <FiGlobe />,
+      color: "#ec4899",
     },
   ];
 
   const userMenuItems = [
     { label: "My Profile", icon: <FiUser />, path: "/admin/profile" },
-    { label: "Account Settings", icon: <FiUser />, path: "/admin/account" },
+    {
+      label: "Account Settings",
+      icon: <FiSettings />,
+      path: "/admin/settings",
+    },
+    {
+      label: "Help & Support",
+      icon: <FiMessageSquare />,
+      path: "/admin/support",
+    },
     {
       label: "Logout",
       icon: <FiUser />,
       path: "/logout",
-      color: "var(--orange)",
+      color: "#ef4444",
     },
+  ];
+
+  const quickActions = [
+    { label: "New Exchange", icon: <FiDollarSign />, color: "#10b981" },
+    { label: "Book Flight", icon: <FiAirplay />, color: "#3b82f6" },
+    { label: "Create Package", icon: <FiPackage />, color: "#f59e0b" },
+    { label: "Add User", icon: <FiUser />, color: "#8b5cf6" },
+    { label: "View Reports", icon: <FiHome />, color: "#ec4899" },
+    { label: "System Settings", icon: <FiSettings />, color: "#6b7280" },
   ];
 
   // Close dropdowns when clicking outside
@@ -78,6 +125,12 @@ function AdminNavbar({ user }) {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
         setShowUserMenu(false);
       }
+      if (
+        quickMenuRef.current &&
+        !quickMenuRef.current.contains(event.target)
+      ) {
+        setShowQuickMenu(false);
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -88,32 +141,26 @@ function AdminNavbar({ user }) {
     setUnreadCount(0);
   };
 
-  const getNotificationColor = (type) => {
-    switch (type) {
-      case "exchange":
-        return "#10b981";
-      case "flight":
-        return "#3b82f6";
-      case "travel":
-        return "#f97316";
-      default:
-        return "#8b5cf6";
-    }
+  const handleQuickAction = (action) => {
+    console.log("Quick action:", action);
+    setShowQuickMenu(false);
   };
 
   return (
     <header className={styles.adminNavbar}>
-      {/* Logo/Brand Section */}
-      <div className={styles.brandSection}>
-        <div className={styles.brandLogo}>
-          <span className={styles.logoIcon}>💱✈️</span>
-          <h1 className={styles.brandName}>TravelFin</h1>
+      {/* Left Section - Toggle & Brand */}
+      <div className={styles.leftSection}>
+        <div className={styles.brandSection}>
+          <div className={styles.brandLogo}>
+            <span className={styles.logoIcon}>💱✈️</span>
+            <h1 className={styles.brandName}>TravelFin</h1>
+          </div>
+          <div className={styles.brandTagline}>Admin Dashboard</div>
         </div>
-        <div className={styles.brandTagline}>Currency • Flights • Travel</div>
       </div>
 
-      {/* Center Search Section */}
-      <div className={styles.searchSection}>
+      {/* Center Section - Search */}
+      <div className={styles.centerSection}>
         <div className={styles.searchWrapper}>
           <FiSearch className={styles.searchIcon} />
           <input
@@ -134,8 +181,47 @@ function AdminNavbar({ user }) {
         </div>
       </div>
 
-      {/* Right Actions Section */}
-      <div className={styles.actionsSection}>
+      {/* Right Section - Actions */}
+      <div className={styles.rightSection}>
+        {/* Quick Actions */}
+        <div className={styles.quickActionsContainer} ref={quickMenuRef}>
+          <button
+            className={`${styles.actionBtn} ${styles.quickActionsBtn} ${
+              showQuickMenu ? styles.active : ""
+            }`}
+            onClick={() => {
+              setShowQuickMenu(!showQuickMenu);
+              setShowNotifications(false);
+              setShowUserMenu(false);
+            }}
+            aria-label="Quick actions">
+            <span className={styles.quickActionsIcon}>⚡</span>
+            <span className={styles.quickActionsText}>Quick Actions</span>
+          </button>
+
+          {showQuickMenu && (
+            <div className={styles.quickActionsDropdown}>
+              <div className={styles.dropdownHeader}>
+                <h3>Quick Actions</h3>
+              </div>
+              <div className={styles.quickActionsGrid}>
+                {quickActions.map((action, index) => (
+                  <button
+                    key={index}
+                    className={styles.quickActionItem}
+                    onClick={() => handleQuickAction(action.label)}
+                    style={{ "--action-color": action.color }}>
+                    <div className={styles.quickActionIcon}>{action.icon}</div>
+                    <span className={styles.quickActionLabel}>
+                      {action.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Notifications */}
         <div className={styles.notificationContainer} ref={notificationRef}>
           <button
@@ -145,6 +231,7 @@ function AdminNavbar({ user }) {
             onClick={() => {
               setShowNotifications(!showNotifications);
               setShowUserMenu(false);
+              setShowQuickMenu(false);
             }}
             aria-label="Notifications">
             <FiBell className={styles.notificationIcon} />
@@ -173,17 +260,10 @@ function AdminNavbar({ user }) {
                     className={`${styles.notificationItem} ${
                       notification.unread ? styles.unread : ""
                     }`}
-                    onClick={() => {
-                      // Handle notification click
-                      setShowNotifications(false);
-                    }}>
+                    onClick={() => setShowNotifications(false)}>
                     <div
                       className={styles.notificationTypeIcon}
-                      style={{
-                        background: `${getNotificationColor(
-                          notification.type
-                        )}20`,
-                      }}>
+                      style={{ background: `${notification.color}20` }}>
                       {notification.icon}
                     </div>
                     <div className={styles.notificationContent}>
@@ -193,11 +273,8 @@ function AdminNavbar({ user }) {
                       <div className={styles.notificationMeta}>
                         <span
                           className={styles.notificationType}
-                          style={{
-                            color: getNotificationColor(notification.type),
-                          }}>
-                          {notification.type.charAt(0).toUpperCase() +
-                            notification.type.slice(1)}
+                          style={{ color: notification.color }}>
+                          {notification.type}
                         </span>
                         <span className={styles.notificationTime}>
                           {notification.time}
@@ -207,9 +284,7 @@ function AdminNavbar({ user }) {
                     {notification.unread && (
                       <div
                         className={styles.unreadDot}
-                        style={{
-                          background: getNotificationColor(notification.type),
-                        }}></div>
+                        style={{ background: notification.color }}></div>
                     )}
                   </div>
                 ))}
@@ -233,6 +308,7 @@ function AdminNavbar({ user }) {
             onClick={() => {
               setShowUserMenu(!showUserMenu);
               setShowNotifications(false);
+              setShowQuickMenu(false);
             }}
             aria-label="User menu">
             <div className={styles.avatar}>
@@ -279,7 +355,6 @@ function AdminNavbar({ user }) {
                     onClick={(e) => {
                       if (item.label === "Logout") {
                         e.preventDefault();
-                        // Handle logout
                         console.log("Logout clicked");
                       }
                       setShowUserMenu(false);

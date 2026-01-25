@@ -12,14 +12,18 @@
 .flightSearch {
   min-height: 100vh;
   /* background: linear-gradient(135deg, var(--off-white) 0%, #f0f7f4 100%); */
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   color: var(--gray);
   position: relative;
   overflow-x: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  /* padding: 20px; */
 }
 
 /* Background Elements */
@@ -200,8 +204,7 @@
   background: rgba(255, 255, 255, 0.95);
   border-radius: 24px;
   padding: 40px;
-  /* box-shadow: 0 20px 60px rgba(6, 78, 59, 0.1),
-    0 8px 32px rgba(16, 185, 129, 0.08); */
+
   border: 1px solid rgba(16, 185, 129, 0.15);
   backdrop-filter: blur(20px);
 }
@@ -240,7 +243,7 @@
 .routeSection {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
-  gap: 16px;
+  gap: 12px;
   margin-bottom: 24px;
   align-items: end;
 }
@@ -413,13 +416,12 @@
   transform: rotate(180deg);
 }
 
-/* Travelers Dropdown - ULTRA COMPACT - NO OVERFLOW */
 .travelersDropdown {
   position: absolute;
   top: calc(10% + 6px);
   right: 0;
-  width: 500px; /* Even smaller width */
-  max-height: 380px; /* Reduced height */
+  width: 500px;
+  max-height: 380px;
   background: var(--white);
   border: 1px solid var(--gray-light);
   border-radius: 14px;
@@ -479,11 +481,10 @@
   font-size: 12px;
 }
 
-/* Dropdown Content - HORIZONTAL LAYOUT */
 .dropdownContent {
   padding: 16px;
   display: flex;
-  /* flex-direction: column; */
+
   gap: 24px;
   overflow: visible;
   flex: 1;
@@ -731,8 +732,6 @@
   background: var(--green);
 }
 
-/* ========= RESPONSIVE FIXES ========= */
-
 @media (max-width: 768px) {
   .travelersDropdown {
     position: fixed;
@@ -886,7 +885,6 @@
   }
 
   .welcomeSection {
-    padding-right: 0;
     text-align: center;
   }
 
@@ -905,12 +903,12 @@
   }
 
   .routeSection {
-    grid-template-columns: 1fr;
+    /* grid-template-columns: 1fr; */
   }
 
   .swapButton {
-    justify-self: center;
-    margin: 8px 0;
+    /* justify-self: center;
+    margin: 8px 0; */
   }
 
   .datesSection {
@@ -930,6 +928,7 @@
 
   .dropdownContent {
     grid-template-columns: 1fr;
+    flex-direction: column;
     gap: 24px;
   }
 
@@ -951,7 +950,8 @@
   }
 
   .formCard {
-    padding: 24px 20px;
+    /* padding: 24px 20px; */
+    border: 0;
   }
 
   .tripButton {
@@ -961,8 +961,8 @@
 
   .input,
   .dateInput {
-    padding: 12px 14px;
-    font-size: 14px;
+    padding: 10px 6px;
+    font-size: 12px;
   }
 
   .featureItem {

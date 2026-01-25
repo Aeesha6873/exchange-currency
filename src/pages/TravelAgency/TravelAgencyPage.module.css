@@ -1,14 +1,16 @@
-/* TravelAgencyPage.module.css */
-
 .travelAgencyPage {
   min-height: 100vh;
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   color: var(--gray);
   position: relative;
   overflow-x: hidden;
+  width: 100%;
 }
 
-/* Background Elements */
 .backgroundElements {
   position: fixed;
   inset: 0;
@@ -19,10 +21,8 @@
 .gridLines {
   position: absolute;
   inset: 0;
-  background-image: linear-gradient(
-      rgba(16, 185, 129, 0.05) 1px,
-      transparent 1px
-    ),
+  background-image:
+    linear-gradient(rgba(16, 185, 129, 0.05) 1px, transparent 1px),
     linear-gradient(90deg, rgba(16, 185, 129, 0.05) 1px, transparent 1px);
   background-size: 50px 50px;
   mask-image: radial-gradient(circle at center, black 20%, transparent 70%);
@@ -87,7 +87,7 @@
 .container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 32px;
+  /* padding: 0 32px; */
   position: relative;
   z-index: 1;
 }
@@ -629,7 +629,7 @@
 
 @media (max-width: 768px) {
   .container {
-    padding: 0 20px;
+    /* padding: 0 20px; */
   }
 
   .main {
@@ -658,7 +658,7 @@
   }
 
   .cardContent {
-    padding: 25px;
+    /* padding: 25px; */
     min-height: 300px;
   }
 

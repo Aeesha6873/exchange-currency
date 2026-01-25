@@ -12,20 +12,39 @@ import {
   FiChevronRight,
   FiChevronLeft,
   FiGlobe,
-  FiCreditCard,
   FiPackage,
   FiBriefcase,
+  FiChevronDown,
+  FiChevronUp,
 } from "react-icons/fi";
 import styles from "./AdminSidebar.module.css";
 
-function AdminSidebar({ onLogout }) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+function AdminSidebar({ onLogout, isCollapsed, onToggle }) {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [activeSection, setActiveSection] = useState(null);
+  const [expandedSections, setExpandedSections] = useState({});
 
   const location = useLocation();
   const sidebarRef = useRef(null);
+  const navRef = useRef(null);
 
-  // Simplified menu items focusing on core functionality
+  // Detect mobile
+  useEffect(() => {
+    const checkIfMobile = () => {
+      const mobile = window.innerWidth < 1025;
+      setIsMobile(mobile);
+      if (mobile) {
+        onToggle(false);
+      }
+    };
+
+    checkIfMobile();
+    window.addEventListener("resize", checkIfMobile);
+
+    return () => window.removeEventListener("resize", checkIfMobile);
+  }, [onToggle]);
+
   const menuItems = [
     {
       section: "Dashboard",
@@ -74,13 +93,19 @@ function AdminSidebar({ onLogout }) {
       ],
     },
     {
-      section: "visa",
+      section: "Visa",
       items: [
         {
           id: "visa",
           path: "/admin/visa",
-          label: "Visa",
-          icon: <FiDollarSign />,
+          label: "Visa Applications",
+          icon: <FiGlobe />,
+        },
+        {
+          id: "visa-processing",
+          path: "/admin/visa-processing",
+          label: "Visa Processing",
+          icon: <FiBriefcase />,
         },
       ],
     },
@@ -99,6 +124,12 @@ function AdminSidebar({ onLogout }) {
           label: "Manage Flights",
           icon: <FiBriefcase />,
         },
+        {
+          id: "airline-partners",
+          path: "/admin/airlines",
+          label: "Airline Partners",
+          icon: <FiGlobe />,
+        },
       ],
     },
     {
@@ -116,8 +147,15 @@ function AdminSidebar({ onLogout }) {
           label: "Travel Bookings",
           icon: <FiGlobe />,
         },
+        {
+          id: "destinations",
+          path: "/admin/destinations",
+          label: "Destinations",
+          icon: <FiGlobe />,
+        },
       ],
     },
+
     {
       section: "Management",
       items: [
@@ -127,67 +165,73 @@ function AdminSidebar({ onLogout }) {
           label: "Settings",
           icon: <FiSettings />,
         },
+        {
+          id: "staff-management",
+          path: "/admin/staff",
+          label: "Staff Management",
+          icon: <FiUsers />,
+        },
       ],
     },
   ];
 
   const handleToggle = () => {
-    if (window.innerWidth < 1024) {
-      const newState = !isMobileOpen;
-      setIsMobileOpen(newState);
-      document.body.style.overflow = newState ? "hidden" : "";
+    if (isMobile) {
+      setIsMobileOpen(!isMobileOpen);
+      document.body.style.overflow = !isMobileOpen ? "hidden" : "";
     } else {
-      setIsCollapsed((prev) => !prev);
+      onToggle(!isCollapsed);
     }
   };
 
   const handleCloseMobile = () => {
-    if (window.innerWidth < 1024) {
-      setIsMobileOpen(false);
-      document.body.style.overflow = "";
+    setIsMobileOpen(false);
+    document.body.style.overflow = "";
+  };
+
+  const toggleSection = (sectionName) => {
+    if (!isCollapsed && !isMobile) {
+      setExpandedSections((prev) => ({
+        ...prev,
+        [sectionName]: !prev[sectionName],
+      }));
     }
   };
 
-  // Close mobile menu on route change
+  // Set active section based on current route
   useEffect(() => {
-    if (window.innerWidth < 1024) {
-      setIsMobileOpen(false);
-      document.body.style.overflow = "";
+    const currentSection = menuItems.find((section) =>
+      section.items.some((item) => location.pathname.startsWith(item.path)),
+    );
+    if (currentSection) {
+      setActiveSection(currentSection.section);
+      if (!expandedSections[currentSection.section]) {
+        setExpandedSections((prev) => ({
+          ...prev,
+          [currentSection.section]: true,
+        }));
+      }
     }
   }, [location.pathname]);
 
-  // Handle window resize
+  // Close mobile menu on route change
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 1024) {
-        setIsMobileOpen(false);
-        document.body.style.overflow = "";
-      } else {
-        setIsCollapsed(false);
-      }
-    };
-
-    window.addEventListener("resize", handleResize);
-    handleResize();
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      document.body.style.overflow = "";
-    };
-  }, []);
+    if (isMobile) {
+      handleCloseMobile();
+    }
+  }, [location.pathname, isMobile]);
 
   // Close mobile menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
-        window.innerWidth < 1024 &&
+        isMobile &&
+        isMobileOpen &&
         sidebarRef.current &&
         !sidebarRef.current.contains(event.target) &&
-        !event.target.closest(`.${styles.mobileMenuToggle}`) &&
-        isMobileOpen
+        !event.target.closest(`.${styles.mobileMenuToggle}`)
       ) {
-        setIsMobileOpen(false);
-        document.body.style.overflow = "";
+        handleCloseMobile();
       }
     };
 
@@ -198,42 +242,44 @@ function AdminSidebar({ onLogout }) {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("touchstart", handleClickOutside);
     };
-  }, [isMobileOpen]);
+  }, [isMobile, isMobileOpen]);
 
-  // Handle escape key to close mobile menu
+  // Handle escape key
   useEffect(() => {
     const handleEscapeKey = (event) => {
       if (event.key === "Escape" && isMobileOpen) {
-        setIsMobileOpen(false);
-        document.body.style.overflow = "";
+        handleCloseMobile();
       }
     };
 
     document.addEventListener("keydown", handleEscapeKey);
-    return () => {
-      document.removeEventListener("keydown", handleEscapeKey);
-    };
+    return () => document.removeEventListener("keydown", handleEscapeKey);
   }, [isMobileOpen]);
 
-  const isMobile = window.innerWidth < 1024;
+  // Prevent body scroll when sidebar is open on mobile
+  useEffect(() => {
+    if (isMobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+  }, [isMobileOpen]);
 
   return (
     <>
-      {/* Mobile Menu Toggle */}
       {isMobile && (
         <button
-          className={`${styles.mobileMenuToggle} ${
-            isMobileOpen ? styles.active : ""
-          }`}
+          className={`${styles.mobileMenuToggle}`}
           onClick={handleToggle}
           aria-label={isMobileOpen ? "Close menu" : "Open menu"}
-          aria-expanded={isMobileOpen}
-          aria-controls="admin-sidebar">
-          {isMobileOpen ? <FiX /> : <FiMenu />}
+          aria-expanded={isMobileOpen}>
+          {isMobileOpen ?
+            <FiX />
+          : <FiMenu />}
         </button>
       )}
 
-      {/* Overlay for mobile */}
+      {/* Mobile overlay */}
       {isMobile && isMobileOpen && (
         <div
           className={styles.mobileOverlay}
@@ -242,85 +288,116 @@ function AdminSidebar({ onLogout }) {
         />
       )}
 
+      {/* Sidebar */}
       <aside
         ref={sidebarRef}
         id="admin-sidebar"
         className={`${styles.adminSidebar} ${
-          isCollapsed ? styles.collapsed : ""
+          !isMobile && isCollapsed ? styles.collapsed : ""
         } ${isMobileOpen ? styles.mobileOpen : ""}`}
         aria-label="Admin Navigation">
-        {/* Header */}
         <div className={styles.sidebarHeader}>
           <div className={styles.logoContainer}>
             <div className={styles.logoIcon}>
               <FiGlobe />
             </div>
-            {(!isCollapsed || isMobileOpen) && (
+            {(!isCollapsed || isMobile) && (
               <div className={styles.logoText}>
-                <span className={styles.logoMain}>Admin</span>
-                <span className={styles.logoSub}>Dashboard</span>
+                <span className={styles.logoMain}>TravelFin</span>
+                <span className={styles.logoSub}>Admin Panel</span>
               </div>
             )}
           </div>
 
-          {/* Desktop Toggle */}
+          {/* Desktop toggle - only on desktop */}
           {!isMobile && (
             <button
               className={styles.desktopToggleBtn}
               onClick={handleToggle}
-              aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-              title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}>
-              {isCollapsed ? <FiChevronRight /> : <FiChevronLeft />}
-            </button>
-          )}
-
-          {/* Mobile Close Button */}
-          {isMobile && isMobileOpen && (
-            <button
-              className={styles.mobileCloseBtn}
-              onClick={handleCloseMobile}
-              aria-label="Close menu">
-              <FiX />
+              aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}>
+              {isCollapsed ?
+                <FiChevronRight />
+              : <FiChevronLeft />}
             </button>
           )}
         </div>
 
-        {/* Navigation */}
-        <nav className={styles.sidebarNav}>
-          {menuItems.map((section, sectionIndex) => (
-            <div key={sectionIndex} className={styles.navSection}>
-              {(!isCollapsed || isMobileOpen) && (
-                <span className={styles.sectionLabel}>{section.section}</span>
-              )}
-              <div className={styles.navItems}>
-                {section.items.map((item) => (
-                  <div key={item.id} className={styles.navItemWrapper}>
-                    <NavLink
-                      to={item.path}
-                      className={({ isActive }) =>
-                        `${styles.navLink} ${isActive ? styles.active : ""} ${
-                          isCollapsed && !isMobileOpen ? styles.collapsed : ""
-                        }`
-                      }
-                      onClick={handleCloseMobile}
-                      end={item.exact}
-                      data-tooltip={item.label}>
-                      <span className={styles.navIcon}>{item.icon}</span>
-                      {!isCollapsed || isMobileOpen ? (
-                        <>
-                          <span className={styles.navLabel}>{item.label}</span>
-                        </>
-                      ) : null}
-                    </NavLink>
+        <nav
+          ref={navRef}
+          className={styles.sidebarNav}
+          onWheel={(e) => {
+            e.currentTarget.scrollLeft += e.deltaY;
+          }}>
+          <div className={styles.navContent}>
+            {menuItems.map((section, sectionIndex) => (
+              <div
+                key={sectionIndex}
+                className={`${styles.navSection} ${
+                  activeSection === section.section ? styles.activeSection : ""
+                }`}>
+                {(!isCollapsed || isMobile) && (
+                  <div
+                    className={styles.sectionHeader}
+                    onClick={() => toggleSection(section.section)}>
+                    <span className={styles.sectionLabel}>
+                      {section.section}
+                    </span>
+                    {section.items.length > 1 && !isMobile && !isCollapsed && (
+                      <span className={styles.sectionToggle}>
+                        {expandedSections[section.section] ?
+                          <FiChevronUp />
+                        : <FiChevronDown />}
+                      </span>
+                    )}
                   </div>
-                ))}
+                )}
+                <div
+                  className={`${styles.navItems} ${
+                    (
+                      !isCollapsed &&
+                      !isMobile &&
+                      !expandedSections[section.section] &&
+                      section.items.length > 1
+                    ) ?
+                      styles.collapsedItems
+                    : ""
+                  }`}>
+                  {section.items.map((item) => (
+                    <div key={item.id} className={styles.navItemWrapper}>
+                      <NavLink
+                        to={item.path}
+                        className={({ isActive }) =>
+                          `${styles.navLink} ${isActive ? styles.active : ""} ${
+                            !isMobile && isCollapsed ? styles.collapsed : ""
+                          }`
+                        }
+                        onClick={isMobile ? handleCloseMobile : undefined}
+                        end={item.exact}>
+                        <span className={styles.navIcon}>{item.icon}</span>
+                        {(!isCollapsed || isMobile) && (
+                          <span className={styles.navLabel}>{item.label}</span>
+                        )}
+                      </NavLink>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </nav>
 
-        {/* Footer */}
         <div className={styles.sidebarFooter}>
+          <div className={styles.userInfo}>
+            <div className={styles.userAvatar}>
+              <span>A</span>
+            </div>
+            {(!isCollapsed || isMobile) && (
+              <div className={styles.userDetails}>
+                <span className={styles.userName}>Admin User</span>
+                <span className={styles.userRole}>Super Admin</span>
+              </div>
+            )}
+          </div>
           <button
             onClick={() => {
               onLogout();
@@ -329,7 +406,7 @@ function AdminSidebar({ onLogout }) {
             className={styles.logoutBtn}
             aria-label="Logout">
             <FiLogOut />
-            {(!isCollapsed || isMobileOpen) && <span>Logout</span>}
+            {(!isCollapsed || isMobile) && <span>Logout</span>}
           </button>
         </div>
       </aside>

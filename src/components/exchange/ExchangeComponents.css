@@ -96,12 +96,15 @@
   padding: 20px 20px 20px 60px;
   font-size: 32px;
   font-weight: 700;
-  border: 2px solid transparent;
+
   background: rgba(16, 185, 129, 0.02);
   border-radius: 16px;
   color: var(--dark-green);
   transition: var(--transition);
-  font-family: "Inter", -apple-system, sans-serif;
+  font-family:
+    "Inter",
+    -apple-system,
+    sans-serif;
 }
 
 .currency-input input:focus {
@@ -609,7 +612,7 @@
 /* Responsive */
 @media (max-width: 768px) {
   .exchange-component {
-    padding: 20px;
+    /* padding: 20px; */
   }
 
   .currency-cards {
@@ -640,7 +643,7 @@
   }
 
   .button-group {
-    flex-direction: column;
+    /* flex-direction: column; */
   }
 
   .status-details {

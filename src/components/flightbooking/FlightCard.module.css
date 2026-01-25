@@ -1,4 +1,3 @@
-/* FlightCard.module.css - Clean & Balanced */
 .flightCard {
   --dark-green: #064e3b;
   --green: #10b981;
@@ -10,7 +9,6 @@
 }
 
 .flightCard {
-  /* background: var(--white); */
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 16px;
@@ -22,7 +20,6 @@
   border-color: var(--green);
 }
 
-/* Header - Reduced spacing */
 .cardHeader {
   display: flex;
   justify-content: space-between;
@@ -278,59 +275,352 @@
   background: var(--green);
 }
 
-/* Responsive */
+/* Mobile-specific styles (max-width: 768px) */
 @media (max-width: 768px) {
+  .flightCard {
+    padding: 14px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+  }
+
+  .cardHeader {
+    flex-direction: row;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+
+  .airlineLogo {
+    width: 32px;
+    height: 32px;
+    font-size: 11px;
+  }
+
+  .airlineDetails h3 {
+    font-size: 13px;
+  }
+
+  .flightMeta {
+    font-size: 10px;
+  }
+
+  .quickInfo {
+    align-items: flex-end;
+    gap: 3px;
+  }
+
+  .duration {
+    font-size: 12px;
+  }
+
+  .stops {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  /* FIXED: Better routeInfo for mobile */
+  .routeInfo {
+    padding: 10px;
+    margin-bottom: 10px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+  }
+
+  .departure,
+  .arrival {
+    flex: 0 0 auto;
+    width: 40%;
+    min-width: 0;
+  }
+
+  .time {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  .airportCode {
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 1px;
+  }
+
+  .city {
+    font-size: 10px;
+    color: var(--gray);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .routeCenter {
+    padding: 0 10px;
+    font-size: 12px;
+    color: var(--green);
+    font-weight: bold;
+    position: relative;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .routeCenter::before {
+    content: "↓";
+    font-size: 10px;
+    color: var(--gray);
+  }
+
   .features {
     grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .featureItem {
+    padding: 6px;
+    gap: 6px;
+  }
+
+  .featureIcon {
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+  }
+
+  .featureLabel {
+    font-size: 9px;
+  }
+
+  .featureValue {
+    font-size: 11px;
+  }
+
+  .cardFooter {
+    padding-top: 10px;
+    flex-direction: row;
+    align-items: center;
+    gap: 0;
+  }
+
+  .seatIndicator {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+
+  .seatDot {
+    width: 4px;
+    height: 4px;
   }
 
   .priceAction {
-    gap: 12px;
+    gap: 10px;
+  }
+
+  .priceLabel {
+    font-size: 10px;
   }
 
   .priceValue {
     font-size: 14px;
   }
 
+  .priceNote {
+    font-size: 9px;
+  }
+
   .selectButton {
+    padding: 6px 12px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+}
+
+/* Extra small mobile devices (max-width: 480px) */
+@media (max-width: 480px) {
+  .flightCard {
+    padding: 12px;
+    margin-bottom: 8px;
+  }
+
+  .cardHeader {
+    flex-direction: row;
+    gap: 0;
+    margin-bottom: 8px;
+  }
+
+  .quickInfo {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
+
+  /* FIXED: Much better routeInfo for small mobile */
+  .routeInfo {
+    flex-direction: row;
+    padding: 8px;
+    margin-bottom: 8px;
+    background: rgba(16, 185, 129, 0.03);
+    border-radius: 6px;
+    position: relative;
+  }
+
+  .departure {
+    text-align: left;
+    width: 45%;
+  }
+
+  .arrival {
+    text-align: right;
+    width: 45%;
+  }
+
+  .time {
+    font-size: 13px;
+    display: block;
+  }
+
+  .airportCode {
+    font-size: 11px;
+    display: block;
+  }
+
+  .city {
+    font-size: 10px;
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .routeCenter {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    padding: 0;
+    font-size: 14px;
+    color: var(--green);
+    font-weight: bold;
+  }
+
+  .routeCenter::before {
+    content: "";
+  }
+
+  /* Alternative option: Arrow with duration */
+  /* .routeCenter::after {
+    content: attr(data-duration);
+    font-size: 9px;
+    color: var(--gray);
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    margin-top: 2px;
+  } */
+
+  .features {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+  }
+
+  .cardFooter {
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  .seatStatus {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .priceAction {
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .priceSection {
+    text-align: left;
+  }
+
+  .selectButton {
+    min-width: 120px;
     padding: 6px 12px;
     font-size: 12px;
   }
 }
 
-@media (max-width: 480px) {
-  .cardHeader {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .quickInfo {
-    flex-direction: row;
-    align-self: flex-start;
+/* Very small mobile devices (max-width: 360px) */
+@media (max-width: 360px) {
+  .flightCard {
+    padding: 10px;
   }
 
   .routeInfo {
     flex-direction: column;
-    gap: 12px;
+    text-align: center;
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .departure,
+  .arrival {
+    width: 100%;
+    text-align: center;
   }
 
   .routeCenter {
-    padding: 0;
-    transform: rotate(90deg);
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    order: 1;
+    margin: 0;
+    padding: 4px 0;
+    font-size: 12px;
+  }
+
+  .routeCenter::before {
+    content: "↓";
+    display: block;
+    font-size: 10px;
+    margin-bottom: 2px;
   }
 
   .features {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  .cardFooter {
-    flex-direction: column;
-    gap: 12px;
-    align-items: stretch;
+  .time {
+    font-size: 12px;
+  }
+
+  .airportCode {
+    font-size: 10px;
+  }
+
+  .city {
+    font-size: 9px;
   }
 
   .priceAction {
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .priceSection {
+    text-align: center;
+  }
+
+  .selectButton {
+    width: 100%;
+    padding: 7px;
+    font-size: 12px;
   }
 }

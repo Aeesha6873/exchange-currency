@@ -1,26 +1,95 @@
-/* components/admin/AdminNavbar.module.css */
+:root {
+  --navbar-bg: #ffffff;
+  --navbar-border: rgba(167, 243, 208, 0.3);
+  --navbar-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --navbar-height: 80px;
+  --navbar-height-mobile: 70px;
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.4s ease;
+}
 
 .adminNavbar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 0 2rem;
-  height: 80px;
-  background: var(--white);
-  border-bottom: 1px solid var(--border-color);
-  box-shadow: var(--shadow-sm);
+  justify-content: space-between;
+  padding: 0 24px;
+  height: var(--navbar-height);
+  background: var(--navbar-bg);
+  border-bottom: 1px solid var(--navbar-border);
+  box-shadow: var(--navbar-shadow);
   position: sticky;
   top: 0;
-  z-index: 50;
-  gap: 2rem;
+  z-index: 1000;
+  gap: 20px;
+  transition: var(--transition-normal);
+  width: 100%;
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95);
 }
 
-/* Brand Section */
+/* Left Section */
+.leftSection {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+  min-width: 200px;
+}
+
+.sidebarToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.1),
+    rgba(16, 185, 129, 0.05)
+  );
+  border: 2px solid rgba(16, 185, 129, 0.2);
+  border-radius: 12px;
+  color: var(--dark-green);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-normal);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.sidebarToggle:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.2),
+    rgba(16, 185, 129, 0.1)
+  );
+  border-color: var(--green);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.15);
+}
+
+.toggleIcon {
+  font-size: 20px;
+  transition: var(--transition-normal);
+}
+
+.toggleText {
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.sidebarToggle:hover .toggleIcon {
+  transform: scale(1.1);
+}
+
 .brandSection {
   display: flex;
   flex-direction: column;
-  min-width: 200px;
-  padding: 0 1rem;
+  justify-content: center;
+  margin-left: 8px;
 }
 
 .brandLogo {
@@ -32,35 +101,41 @@
 
 .logoIcon {
   font-size: 24px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 .brandName {
   margin: 0;
   font-size: 22px;
-  font-weight: 700;
+  font-weight: 800;
   background: linear-gradient(135deg, var(--dark-green), var(--green));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  letter-spacing: -0.5px;
 }
 
 .brandTagline {
   font-size: 11px;
   color: var(--gray);
-  font-weight: 500;
-  letter-spacing: 0.5px;
+  font-weight: 600;
+  letter-spacing: 1px;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
-/* Search Section */
-.searchSection {
+/* Center Section */
+.centerSection {
   flex: 1;
   max-width: 600px;
+  min-width: 200px;
 }
 
 .searchWrapper {
   position: relative;
   width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
 }
 
 .searchIcon {
@@ -70,29 +145,33 @@
   transform: translateY(-50%);
   color: var(--gray);
   font-size: 20px;
+  z-index: 2;
 }
 
 .searchInput {
-  width: 80%;
-  padding: 14px 20px 14px 50px;
-  border: 2px solid var(--border-color);
-  border-radius: 12px;
+  width: 100%;
+  padding: 14px 20px 14px 52px;
+  border: 2px solid rgba(167, 243, 208, 0.5);
+  border-radius: 14px;
   font-size: 15px;
-  background: var(--light-gray);
+  background: rgba(241, 245, 249, 0.8);
   color: var(--dark-green);
   font-weight: 500;
-  transition: var(--transition);
+  transition: var(--transition-normal);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .searchInput:focus {
   outline: none;
   border-color: var(--green);
-  background: var(--white);
-  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+  background: white;
+  box-shadow:
+    0 0 0 4px rgba(16, 185, 129, 0.15),
+    0 4px 12px rgba(16, 185, 129, 0.1);
 }
 
 .searchInput::placeholder {
-  color: var(--gray);
+  color: #94a3b8;
   font-weight: 400;
 }
 
@@ -106,107 +185,88 @@
   font-size: 20px;
   color: var(--gray);
   cursor: pointer;
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  transition: var(--transition);
+  transition: var(--transition-fast);
+  z-index: 2;
 }
 
 .clearSearch:hover {
   background: var(--gray);
-  color: var(--white);
+  color: white;
+  transform: translateY(-50%) scale(1.1);
 }
 
-/* Actions Section */
-.actionsSection {
+/* Right Section */
+.rightSection {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  min-width: 200px;
+  gap: 12px;
+  min-width: 180px;
   justify-content: flex-end;
+  flex-shrink: 0;
 }
 
-/* Notifications */
-.notificationContainer {
+/* Quick Actions */
+.quickActionsContainer {
   position: relative;
 }
 
-.actionBtn {
-  background: transparent;
-  border: none;
+.quickActionsBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.1),
+    rgba(139, 92, 246, 0.05)
+  );
+  border: 2px solid rgba(139, 92, 246, 0.2);
+  border-radius: 12px;
+  color: #7c3aed;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  position: relative;
-  padding: 8px;
-  border-radius: 10px;
-  transition: var(--transition);
+  transition: var(--transition-normal);
+  white-space: nowrap;
 }
 
-.notificationBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.quickActionsBtn:hover,
+.quickActionsBtn.active {
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.2),
+    rgba(139, 92, 246, 0.1)
+  );
+  border-color: #8b5cf6;
+  transform: translateY(-2px);
 }
 
-.notificationBtn:hover,
-.notificationBtn.active {
-  background: rgba(16, 185, 129, 0.1);
+.quickActionsIcon {
+  font-size: 18px;
 }
 
-.notificationIcon {
-  font-size: 24px;
-  color: var(--dark-green);
-  transition: var(--transition);
+.quickActionsText {
+  font-weight: 600;
 }
 
-.notificationBtn:hover .notificationIcon {
-  color: var(--green);
-  transform: scale(1.1);
-}
-
-.notificationBadge {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  background: var(--orange);
-  color: var(--white);
-  font-size: 11px;
-  font-weight: 700;
-  min-width: 20px;
-  height: 20px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid var(--white);
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.notificationDropdown {
+.quickActionsDropdown {
   position: absolute;
   top: calc(100% + 10px);
   right: 0;
-  width: 380px;
-  background: var(--white);
+  width: 320px;
+  background: white;
   border-radius: 16px;
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--border-color);
-  z-index: 1000;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(167, 243, 208, 0.3);
+  z-index: 1001;
   animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
 }
 
 @keyframes slideDown {
@@ -220,19 +280,167 @@
   }
 }
 
+.quickActionsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 16px;
+}
+
+.quickActionItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  background: rgba(241, 245, 249, 0.5);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: var(--transition-normal);
+  text-align: center;
+}
+
+.quickActionItem:hover {
+  background: white;
+  border-color: var(--action-color);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.quickActionIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--action-color);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  transition: var(--transition-normal);
+}
+
+.quickActionItem:hover .quickActionIcon {
+  transform: scale(1.1);
+  box-shadow: 0 6px 15px var(--action-color);
+}
+
+.quickActionLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dark-green);
+  transition: var(--transition-normal);
+}
+
+.quickActionItem:hover .quickActionLabel {
+  color: var(--action-color);
+}
+
+/* Notifications */
+.notificationContainer {
+  position: relative;
+}
+
+.actionBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  padding: 10px;
+  border-radius: 12px;
+  transition: var(--transition-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  min-height: 48px;
+}
+
+.notificationBtn:hover,
+.notificationBtn.active {
+  background: rgba(16, 185, 129, 0.1);
+  transform: translateY(-2px);
+}
+
+.notificationIcon {
+  font-size: 22px;
+  color: var(--dark-green);
+  transition: var(--transition-normal);
+}
+
+.notificationBtn:hover .notificationIcon {
+  color: var(--green);
+  transform: scale(1.1);
+}
+
+.notificationBadge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  animation: pulse 2s infinite;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+.notificationDropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 380px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(167, 243, 208, 0.3);
+  z-index: 1001;
+  animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
 .dropdownHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.25rem;
-  border-bottom: 1px solid var(--border-color);
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(167, 243, 208, 0.3);
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.05),
+    rgba(16, 185, 129, 0.02)
+  );
 }
 
 .dropdownHeader h3 {
   margin: 0;
-  font-size: 17px;
+  font-size: 18px;
   color: var(--dark-green);
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: -0.3px;
 }
 
 .markAllRead {
@@ -242,29 +450,30 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  padding: 6px 12px;
-  border-radius: 8px;
-  transition: var(--transition);
+  padding: 8px 16px;
+  border-radius: 10px;
+  transition: var(--transition-fast);
 }
 
 .markAllRead:hover {
   background: rgba(16, 185, 129, 0.1);
+  transform: translateY(-1px);
 }
 
 .notificationList {
   max-height: 400px;
   overflow-y: auto;
-  padding: 0.5rem;
+  padding: 8px;
 }
 
 .notificationItem {
   display: flex;
   align-items: flex-start;
-  padding: 1rem;
-  border-radius: 12px;
+  padding: 16px;
+  border-radius: 14px;
   cursor: pointer;
-  transition: var(--transition);
-  gap: 14px;
+  transition: var(--transition-normal);
+  gap: 16px;
   margin-bottom: 4px;
 }
 
@@ -278,14 +487,14 @@
 }
 
 .notificationTypeIcon {
-  min-width: 44px;
-  height: 44px;
+  min-width: 48px;
+  height: 48px;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--dark-green);
-  font-size: 20px;
+  color: white;
+  font-size: 22px;
   flex-shrink: 0;
 }
 
@@ -295,34 +504,41 @@
 }
 
 .notificationTitle {
-  margin: 0 0 6px 0;
+  margin: 0 0 8px 0;
   font-size: 15px;
   color: var(--dark-green);
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.4;
+  word-wrap: break-word;
 }
 
 .notificationMeta {
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 12px;
+  font-size: 13px;
+  flex-wrap: wrap;
 }
 
 .notificationType {
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 4px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
   background: rgba(16, 185, 129, 0.1);
+  color: var(--green);
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
 }
 
 .notificationTime {
   color: var(--gray);
+  font-weight: 500;
 }
 
 .unreadDot {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   flex-shrink: 0;
   margin-top: 6px;
@@ -330,30 +546,31 @@
 }
 
 .dropdownFooter {
-  padding: 1rem;
-  border-top: 1px solid var(--border-color);
+  padding: 20px;
+  border-top: 1px solid rgba(167, 243, 208, 0.3);
 }
 
 .viewAllBtn {
   width: 100%;
-  padding: 12px;
+  padding: 14px;
   background: linear-gradient(135deg, var(--green), var(--dark-green));
   border: none;
-  border-radius: 10px;
-  color: var(--white);
-  font-weight: 600;
-  font-size: 14px;
+  border-radius: 12px;
+  color: white;
+  font-weight: 700;
+  font-size: 15px;
   cursor: pointer;
-  transition: var(--transition);
+  transition: var(--transition-normal);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
+  letter-spacing: 0.3px;
 }
 
 .viewAllBtn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
 }
 
 /* User Profile */
@@ -365,64 +582,92 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: rgba(16, 185, 129, 0.08);
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.1),
+    rgba(16, 185, 129, 0.05)
+  );
   border: 2px solid transparent;
-  border-radius: 14px;
-  padding: 8px 16px 8px 12px;
+  border-radius: 16px;
+  padding: 10px 18px 10px 14px;
   cursor: pointer;
-  transition: var(--transition);
+  transition: var(--transition-normal);
   min-width: 180px;
+  max-width: 220px;
 }
 
 .userProfileBtn:hover,
 .userProfileBtn.active {
-  background: rgba(16, 185, 129, 0.15);
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.2),
+    rgba(16, 185, 129, 0.1)
+  );
   border-color: var(--green);
   transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.15);
 }
 
 .avatar {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   background: linear-gradient(135deg, var(--green), var(--dark-green));
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--white);
-  font-weight: 700;
-  font-size: 18px;
-  box-shadow: 0 4px 12px rgba(6, 78, 59, 0.2);
+  color: white;
+  font-weight: 800;
+  font-size: 20px;
+  box-shadow: 0 6px 20px rgba(6, 78, 59, 0.25);
+  flex-shrink: 0;
+  transition: var(--transition-normal);
+}
+
+.userProfileBtn:hover .avatar {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(6, 78, 59, 0.35);
 }
 
 .userInfo {
   text-align: left;
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .userName {
   display: block;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--dark-green);
-  margin-bottom: 2px;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.2px;
 }
 
 .userRole {
   display: block;
   font-size: 12px;
   color: var(--gray);
-  font-weight: 500;
+  font-weight: 600;
   background: rgba(100, 116, 139, 0.1);
-  padding: 2px 8px;
-  border-radius: 4px;
+  padding: 3px 10px;
+  border-radius: 6px;
   display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .chevron {
   color: var(--gray);
-  font-size: 18px;
-  transition: var(--transition);
+  font-size: 20px;
+  transition: var(--transition-normal);
+  flex-shrink: 0;
 }
 
 .chevron.rotated {
@@ -432,95 +677,126 @@
 
 .userDropdown {
   position: absolute;
-  top: calc(100% + 10px);
+  top: calc(100% + 12px);
   right: 0;
-  width: 280px;
-  background: var(--white);
-  border-radius: 16px;
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--border-color);
-  /* z-index: 1000; */
+  width: 300px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(167, 243, 208, 0.3);
+  z-index: 1001;
   animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
 }
 
 .userDropdownHeader {
-  padding: 1.5rem;
+  padding: 24px;
   display: flex;
   align-items: center;
-  gap: 14px;
-  border-bottom: 1px solid var(--border-color);
+  gap: 16px;
+  border-bottom: 1px solid rgba(167, 243, 208, 0.3);
   background: linear-gradient(
     135deg,
     rgba(16, 185, 129, 0.1),
     rgba(6, 78, 59, 0.05)
   );
-  border-radius: 16px 16px 0 0;
 }
 
 .dropdownAvatar {
-  width: 50px;
-  height: 50px;
+  width: 56px;
+  height: 56px;
   background: linear-gradient(135deg, var(--green), var(--dark-green));
-  border-radius: 12px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--white);
-  font-weight: 700;
-  font-size: 22px;
-  box-shadow: 0 6px 16px rgba(6, 78, 59, 0.2);
+  color: white;
+  font-weight: 800;
+  font-size: 24px;
+  box-shadow: 0 8px 25px rgba(6, 78, 59, 0.3);
+  flex-shrink: 0;
+}
+
+.dropdownUserInfo {
+  flex: 1;
+  min-width: 0;
 }
 
 .dropdownUserInfo h4 {
   margin: 0 0 6px 0;
-  font-size: 16px;
+  font-size: 18px;
   color: var(--dark-green);
-  font-weight: 700;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.3px;
 }
 
 .dropdownUserInfo p {
   margin: 0;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--gray);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .userDropdownMenu {
-  padding: 0.75rem;
+  padding: 16px 8px;
 }
 
 .dropdownItem {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 0.875rem 1rem;
+  gap: 14px;
+  padding: 14px 20px;
   text-decoration: none;
   color: var(--dark-green);
   font-size: 15px;
-  font-weight: 500;
-  border-radius: 10px;
-  transition: var(--transition);
+  font-weight: 600;
+  border-radius: 12px;
+  transition: var(--transition-normal);
+  margin: 0 8px;
 }
 
 .dropdownItem:hover {
   background: rgba(16, 185, 129, 0.1);
   color: var(--green);
-  transform: translateX(4px);
+  transform: translateX(6px);
 }
 
 .dropdownIcon {
-  font-size: 18px;
-  opacity: 0.7;
+  font-size: 20px;
+  opacity: 0.8;
+  flex-shrink: 0;
+  transition: var(--transition-normal);
 }
 
-/* Responsive */
+.dropdownItem:hover .dropdownIcon {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+
+/* Large Tablets (1024px and below) */
 @media (max-width: 1024px) {
   .adminNavbar {
-    padding: 0 1rem;
-    gap: 1rem;
+    padding: 0 20px;
+    gap: 16px;
   }
 
-  .brandSection {
-    min-width: 160px;
+  .leftSection {
+    min-width: auto;
+  }
+
+  .sidebarToggle .toggleText {
+    display: none;
+  }
+
+  .sidebarToggle {
+    padding: 10px;
   }
 
   .brandName {
@@ -530,48 +806,311 @@
   .brandTagline {
     font-size: 10px;
   }
-}
 
-@media (max-width: 768px) {
-  .adminNavbar {
-    height: 70px;
-    padding: 0 1rem;
-  }
-
-  .brandSection {
-    min-width: auto;
-  }
-
-  .brandTagline {
+  .quickActionsBtn .quickActionsText {
     display: none;
   }
 
-  .searchSection {
+  .quickActionsBtn {
+    padding: 10px;
+  }
+
+  .userProfileBtn {
+    min-width: auto;
+    padding: 10px 14px 10px 10px;
+  }
+
+  .userName {
+    font-size: 14px;
+  }
+
+  .userRole {
+    font-size: 11px;
+  }
+
+  .notificationDropdown,
+  .quickActionsDropdown,
+  .userDropdown {
+    width: 320px;
+  }
+}
+
+/* Tablets (768px and below) */
+@media (max-width: 768px) {
+  .adminNavbar {
+    height: var(--navbar-height-mobile);
+    padding: 0 16px;
+    gap: 12px;
+  }
+
+  .brandSection {
+    display: none;
+  }
+
+  .centerSection {
     flex: 1;
     min-width: 0;
   }
 
   .searchInput {
-    padding: 12px 16px 12px 42px;
+    padding: 12px 16px 12px 48px;
     font-size: 14px;
+    border-radius: 12px;
+  }
+
+  .searchIcon {
+    left: 16px;
+    font-size: 18px;
+  }
+
+  .clearSearch {
+    right: 14px;
+    width: 24px;
+    height: 24px;
+  }
+
+  .rightSection {
+    gap: 8px;
+  }
+
+  .actionBtn {
+    padding: 8px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .notificationIcon {
+    font-size: 20px;
+  }
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  .notificationDropdown,
+  .quickActionsDropdown,
+  .userDropdown {
+    width: 280px;
+    right: -60px;
+  }
+
+  .quickActionsGrid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+/* Small Mobile (640px and below) */
+@media (max-width: 640px) {
+  .adminNavbar {
+    padding: 0 12px;
+  }
+
+  .sidebarToggle {
+    padding: 8px;
+    min-width: 40px;
+  }
+
+  .toggleIcon {
+    font-size: 18px;
+  }
+
+  .searchSection {
+    margin-left: 0;
+  }
+
+  .searchInput {
+    padding: 10px 14px 10px 44px;
+    font-size: 13px;
+  }
+
+  .searchIcon {
+    left: 14px;
+    font-size: 16px;
+  }
+
+  .clearSearch {
+    right: 12px;
+    width: 22px;
+    height: 22px;
+    font-size: 18px;
   }
 
   .userProfileBtn {
     min-width: auto;
-    padding: 6px 10px 6px 6px;
+    padding: 8px 12px 8px 8px;
+    gap: 8px;
   }
 
-  .userName,
-  .userRole {
+  .userInfo {
     display: none;
-  }
-
-  .notificationDropdown {
-    width: 320px;
-    right: -50px;
   }
 
   .chevron {
     display: none;
+  }
+
+  .notificationBadge {
+    top: 4px;
+    right: 4px;
+    min-width: 18px;
+    height: 18px;
+    font-size: 10px;
+  }
+
+  .notificationDropdown,
+  .quickActionsDropdown,
+  .userDropdown {
+    width: 260px;
+    right: -80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .adminNavbar {
+    height: 60px;
+    padding: 0 10px;
+    gap: 8px;
+  }
+
+  .sidebarToggle {
+    min-width: 36px;
+    min-height: 36px;
+    padding: 6px;
+  }
+
+  .searchInput {
+    padding: 9px 12px 9px 40px;
+    font-size: 12px;
+    border-radius: 10px;
+    margin-left: 50px;
+    width: 80%;
+  }
+
+  .searchIcon {
+    left: 12px;
+    font-size: 15px;
+  }
+
+  .actionBtn {
+    padding: 6px;
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .notificationIcon {
+    font-size: 18px;
+  }
+
+  .quickActionsBtn {
+    padding: 6px;
+  }
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  .notificationDropdown,
+  .quickActionsDropdown,
+  .userDropdown {
+    width: 240px;
+    right: -100px;
+  }
+
+  .dropdownHeader,
+  .userDropdownHeader {
+    padding: 16px;
+  }
+
+  .dropdownHeader h3 {
+    font-size: 16px;
+  }
+}
+
+/* Landscape Mode for Mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+  .adminNavbar {
+    height: 60px;
+  }
+
+  .notificationDropdown,
+  .quickActionsDropdown,
+  .userDropdown {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .actionBtn,
+  .userProfileBtn,
+  .dropdownItem,
+  .markAllRead,
+  .viewAllBtn,
+  .sidebarToggle,
+  .quickActionsBtn {
+    min-height: 44px;
+  }
+
+  .notificationItem:hover,
+  .dropdownItem:hover,
+  .quickActionItem:hover {
+    transform: none;
+  }
+
+  .searchInput:focus {
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+  }
+
+  /* Larger touch targets */
+  .clearSearch {
+    width: 28px;
+    height: 28px;
+  }
+
+  .notificationBadge {
+    min-width: 22px;
+    height: 22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .adminNavbar,
+  .actionBtn,
+  .userProfileBtn,
+  .dropdownItem,
+  .notificationItem,
+  .searchInput,
+  .markAllRead,
+  .viewAllBtn,
+  .sidebarToggle,
+  .quickActionsBtn {
+    transition: none;
+  }
+
+  .notificationDropdown,
+  .userDropdown,
+  .quickActionsDropdown {
+    animation: none;
+  }
+
+  .notificationBadge,
+  .unreadDot {
+    animation: none;
+  }
+
+  .notificationItem:hover,
+  .dropdownItem:hover,
+  .quickActionItem:hover {
+    transform: none;
+  }
+
+  .viewAllBtn:hover {
+    transform: none;
   }
 }

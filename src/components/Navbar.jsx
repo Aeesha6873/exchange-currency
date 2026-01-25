@@ -230,6 +230,12 @@ function Navbar() {
                 Currency Exchange
               </Link>
               <Link
+                to="/visa"
+                className={styles.dropdownItem}
+                onClick={handleServiceClick}>
+                <FiDollarSign className={styles.dropdownItemIcon} /> Visa
+              </Link>
+              <Link
                 to="/travel-agency"
                 className={styles.mobileServiceItem}
                 onClick={handleServiceClick}>

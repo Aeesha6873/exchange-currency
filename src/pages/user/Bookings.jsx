@@ -11,25 +11,20 @@ import {
   FiEye,
   FiFilter,
   FiSearch,
-  FiChevronRight,
   FiUser,
   FiUsers,
-  FiTag,
-  FiNavigation,
   FiCheckCircle,
   FiAlertCircle,
   FiCreditCard,
-  FiStar,
-  FiShare2,
-  FiMessageSquare,
+  FiEdit2,
   FiPrinter,
   FiMail,
+  FiChevronRight,
 } from "react-icons/fi";
 import {
   MdFlight,
   MdHotel,
   MdDirectionsCar,
-  MdRestaurant,
   MdLocalActivity,
 } from "react-icons/md";
 
@@ -144,7 +139,7 @@ function Bookings() {
     }, 1000);
   }, []);
 
-  const [stats] = useState({
+  const stats = {
     totalBookings: 5,
     flights: 2,
     hotels: 1,
@@ -153,29 +148,21 @@ function Bookings() {
     totalSpent: "$3,600",
     upcomingTrips: 2,
     savings: "$150",
-  });
+  };
 
   const bookingTabs = [
-    { id: "upcoming", label: "Upcoming", count: 2, color: "#10b981" },
-    { id: "completed", label: "Completed", count: 1, color: "#3b82f6" },
-    { id: "cancelled", label: "Cancelled", count: 1, color: "#ef4444" },
-    { id: "pending", label: "Pending", count: 1, color: "#f59e0b" },
+    { id: "upcoming", label: "Upcoming", count: 2 },
+    { id: "completed", label: "Completed", count: 1 },
+    { id: "cancelled", label: "Cancelled", count: 1 },
+    { id: "pending", label: "Pending", count: 1 },
   ];
 
   const statusFilters = [
-    { id: "all", label: "All Status" },
+    { id: "all", label: "All" },
     { id: "confirmed", label: "Confirmed" },
     { id: "pending", label: "Pending" },
     { id: "completed", label: "Completed" },
     { id: "cancelled", label: "Cancelled" },
-  ];
-
-  const typeFilters = [
-    { id: "all", label: "All Types", icon: "📅" },
-    { id: "flight", label: "Flights", icon: "✈️" },
-    { id: "hotel", label: "Hotels", icon: "🏨" },
-    { id: "tour", label: "Tours", icon: "🗺️" },
-    { id: "car", label: "Cars", icon: "🚗" },
   ];
 
   const quickActions = [
@@ -185,7 +172,6 @@ function Bookings() {
       icon: <MdFlight />,
       path: "/dashboard/flight",
       description: "Find best flight deals",
-      color: "var(--green)",
     },
     {
       id: 2,
@@ -193,7 +179,6 @@ function Bookings() {
       icon: <MdHotel />,
       path: "/dashboard/hotel",
       description: "Best hotels worldwide",
-      color: "var(--orange)",
     },
     {
       id: 3,
@@ -201,7 +186,6 @@ function Bookings() {
       icon: <MdLocalActivity />,
       path: "/dashboard/tours",
       description: "Curated experiences",
-      color: "var(--dark-green)",
     },
   ];
 
@@ -214,12 +198,12 @@ function Bookings() {
       ),
       pending: (
         <span className={styles.statusBadgePending}>
-          <FiClock /> Pending
+          <FiAlertCircle /> Pending
         </span>
       ),
       completed: (
         <span className={styles.statusBadgeCompleted}>
-          <FiCheck /> Completed
+          <FiCheckCircle /> Completed
         </span>
       ),
       cancelled: (
@@ -237,7 +221,6 @@ function Bookings() {
       hotel: <MdHotel />,
       tour: <MdLocalActivity />,
       car: <MdDirectionsCar />,
-      restaurant: <MdRestaurant />,
     };
     return icons[type] || <FiCalendar />;
   };
@@ -248,22 +231,18 @@ function Bookings() {
       hotel: "#10b981",
       tour: "#8b5cf6",
       car: "#f59e0b",
-      restaurant: "#ef4444",
     };
     return colors[type] || "#64748b";
   };
 
   const filteredBookings = bookings.filter((booking) => {
     const matchesTab =
-      activeTab === "upcoming"
-        ? booking.status === "confirmed" && new Date(booking.date) > new Date()
-        : activeTab === "completed"
-        ? booking.status === "completed"
-        : activeTab === "cancelled"
-        ? booking.status === "cancelled"
-        : activeTab === "pending"
-        ? booking.status === "pending"
-        : true;
+      activeTab === "upcoming" ?
+        booking.status === "confirmed" && new Date(booking.date) > new Date()
+      : activeTab === "completed" ? booking.status === "completed"
+      : activeTab === "cancelled" ? booking.status === "cancelled"
+      : activeTab === "pending" ? booking.status === "pending"
+      : true;
 
     const matchesSearch =
       searchQuery === "" ||
@@ -295,7 +274,7 @@ function Bookings() {
   const handleCancelBooking = (booking) => {
     if (
       window.confirm(
-        `Are you sure you want to cancel booking ${booking.reference}?`
+        `Are you sure you want to cancel booking ${booking.reference}?`,
       )
     ) {
       alert(`Booking ${booking.reference} cancelled successfully.`);
@@ -308,11 +287,14 @@ function Bookings() {
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
+      month: "short",
       day: "numeric",
+      year: "numeric",
     });
+  };
+
+  const formatTime = (timeString) => {
+    return timeString;
   };
 
   if (loading) {
@@ -326,292 +308,243 @@ function Bookings() {
 
   return (
     <div className={styles.bookingsContainer}>
-      {/* Hero Section */}
-      <div className={styles.heroSection}>
-        <div className={styles.heroContent}>
-          <div className={styles.heroHeader}>
-            <div className={styles.heroText}>
-              <h1 className={styles.heroTitle}>My Bookings</h1>
-              <p className={styles.heroSubtitle}>
-                Manage your travel bookings, reservations, and itineraries
-              </p>
-            </div>
+      {/* Header */}
+      <div className={styles.header}>
+        <div className={styles.headerContent}>
+          <h1 className={styles.title}>My Bookings</h1>
+          <p className={styles.subtitle}>
+            Track your travel bookings and reservations
+          </p>
+        </div>
+        <div className={styles.headerActions}>
+          <button
+            className={styles.newBookingButton}
+            onClick={() => navigate("/dashboard/flight")}>
+            <MdFlight />
+            New Booking
+          </button>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className={styles.stats}>
+        <div className={styles.statItem}>
+          <span className={styles.statNumber}>{stats.totalBookings}</span>
+          <span className={styles.statLabel}>Total Bookings</span>
+        </div>
+        <div className={`${styles.statItem} ${styles.statFlight}`}>
+          <span className={styles.statNumber}>{stats.flights}</span>
+          <span className={styles.statLabel}>Flights</span>
+        </div>
+        <div className={`${styles.statItem} ${styles.statHotel}`}>
+          <span className={styles.statNumber}>{stats.hotels}</span>
+          <span className={styles.statLabel}>Hotels</span>
+        </div>
+        <div className={`${styles.statItem} ${styles.statMoney}`}>
+          <span className={styles.statNumber}>{stats.totalSpent}</span>
+          <span className={styles.statLabel}>Total Spent</span>
+        </div>
+      </div>
+
+      {/* Controls */}
+      <div className={styles.controls}>
+        <div className={styles.searchContainer}>
+          <FiSearch className={styles.searchIcon} />
+          <input
+            type="text"
+            placeholder="Search bookings by destination, reference, or airline..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className={styles.searchInput}
+          />
+        </div>
+
+        <div className={styles.filters}>
+          {statusFilters.map((filter) => (
             <button
-              className={styles.newBookingButton}
-              onClick={() => navigate("/dashboard/flight")}>
-              <MdFlight /> New Booking
+              key={filter.id}
+              className={`${styles.filterBtn} ${filterStatus === filter.id ? styles.active : ""}`}
+              onClick={() => setFilterStatus(filter.id)}>
+              {filter.label}
             </button>
-          </div>
-
-          {/* Stats Cards */}
-          <div className={styles.statsCards}>
-            <div className={styles.statCard}>
-              <div className={styles.statIcon} style={{ color: "#10b981" }}>
-                <FiCalendar />
-              </div>
-              <div className={styles.statContent}>
-                <div className={styles.statNumber}>{stats.totalBookings}</div>
-                <div className={styles.statLabel}>Total Bookings</div>
-              </div>
-            </div>
-
-            <div className={styles.statCard}>
-              <div className={styles.statIcon} style={{ color: "#3b82f6" }}>
-                <MdFlight />
-              </div>
-              <div className={styles.statContent}>
-                <div className={styles.statNumber}>{stats.flights}</div>
-                <div className={styles.statLabel}>Flights</div>
-              </div>
-            </div>
-
-            <div className={styles.statCard}>
-              <div className={styles.statIcon} style={{ color: "#10b981" }}>
-                <MdHotel />
-              </div>
-              <div className={styles.statContent}>
-                <div className={styles.statNumber}>{stats.hotels}</div>
-                <div className={styles.statLabel}>Hotels</div>
-              </div>
-            </div>
-
-            <div className={styles.statCard}>
-              <div className={styles.statIcon} style={{ color: "#f59e0b" }}>
-                <FiCreditCard />
-              </div>
-              <div className={styles.statContent}>
-                <div className={styles.statNumber}>{stats.totalSpent}</div>
-                <div className={styles.statLabel}>Total Spent</div>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
 
       {/* Main Content */}
       <div className={styles.mainContent}>
+        {/* Booking Tabs */}
+        <div className={styles.bookingTabs}>
+          {bookingTabs.map((tab) => (
+            <button
+              key={tab.id}
+              className={`${styles.tabButton} ${activeTab === tab.id ? styles.active : ""}`}
+              onClick={() => setActiveTab(tab.id)}>
+              <div className={styles.tabContent}>
+                <div className={styles.tabLabel}>{tab.label}</div>
+                <div className={styles.tabBadge}>{tab.count}</div>
+              </div>
+            </button>
+          ))}
+        </div>
+
         <div className={styles.contentWrapper}>
-          {/* Left Column */}
+          {/* Left Column - Bookings List */}
           <div className={styles.leftColumn}>
-            {/* Search and Filters */}
-            <div className={styles.searchFiltersCard}>
-              <div className={styles.searchContainer}>
-                <div className={styles.searchBox}>
-                  <FiSearch className={styles.searchIcon} />
-                  <input
-                    type="text"
-                    placeholder="Search bookings by destination, reference, or airline..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className={styles.searchInput}
-                  />
-                </div>
-                <button className={styles.filterButton}>
-                  <FiFilter /> Filters
-                </button>
-              </div>
-
-              <div className={styles.filterChips}>
-                {statusFilters.map((filter) => (
-                  <button
-                    key={filter.id}
-                    className={`${styles.filterChip} ${
-                      filterStatus === filter.id ? styles.active : ""
-                    }`}
-                    onClick={() => setFilterStatus(filter.id)}>
-                    {filter.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Booking Tabs */}
-            <div className={styles.bookingTabs}>
-              {bookingTabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  className={`${styles.tabButton} ${
-                    activeTab === tab.id ? styles.active : ""
-                  }`}
-                  onClick={() => setActiveTab(tab.id)}
-                  style={{
-                    borderBottomColor: activeTab === tab.id ? tab.color : "",
-                  }}>
-                  <div className={styles.tabContent}>
-                    <div className={styles.tabLabel}>{tab.label}</div>
-                    <div
-                      className={styles.tabBadge}
-                      style={{ backgroundColor: tab.color }}>
-                      {tab.count}
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-
             {/* Bookings List */}
             <div className={styles.bookingsList}>
-              {filteredBookings.length > 0 ? (
+              {filteredBookings.length > 0 ?
                 filteredBookings.map((booking) => (
                   <div key={booking.id} className={styles.bookingCard}>
-                    <div className={styles.bookingHeader}>
+                    {/* Card Header */}
+                    <div className={styles.cardHeader}>
                       <div className={styles.bookingType}>
                         <div
                           className={styles.typeIcon}
                           style={{ color: getTypeColor(booking.type) }}>
                           {getTypeIcon(booking.type)}
                         </div>
-                        <div className={styles.typeInfo}>
+                        <div className={styles.bookingInfo}>
                           <div className={styles.typeLabel}>
                             {booking.type.charAt(0).toUpperCase() +
                               booking.type.slice(1)}
                           </div>
                           <div className={styles.bookingReference}>
-                            {booking.reference}
+                            #{booking.reference}
                           </div>
                         </div>
                       </div>
-                      <div className={styles.bookingDate}>
-                        {formatDate(booking.date)}
+                      <div
+                        className={`${styles.status} ${styles[`status${booking.status}`]}`}>
+                        {getStatusBadge(booking.status)}
                       </div>
                     </div>
 
-                    <div className={styles.bookingContent}>
-                      <div className={styles.bookingInfo}>
-                        <div className={styles.destinationRow}>
-                          <FiMapPin className={styles.infoIcon} />
-                          <h3 className={styles.destination}>
-                            {booking.destination}
-                          </h3>
+                    {/* Card Content */}
+                    <div className={styles.cardContent}>
+                      <div className={styles.destinationRow}>
+                        <FiMapPin className={styles.destinationIcon} />
+                        <h3 className={styles.destination}>
+                          {booking.destination}
+                        </h3>
+                      </div>
+
+                      <div className={styles.bookingDetails}>
+                        <div className={styles.detailItem}>
+                          <FiCalendar className={styles.detailIcon} />
+                          <div>
+                            <div className={styles.detailLabel}>Date</div>
+                            <div className={styles.detailValue}>
+                              {formatDate(booking.date)}
+                            </div>
+                          </div>
                         </div>
-
-                        <div className={styles.detailsGrid}>
-                          {booking.airline && (
-                            <div className={styles.detailItem}>
-                              <span className={styles.detailLabel}>
-                                Airline:
-                              </span>
-                              <span className={styles.detailValue}>
-                                {booking.airline} ({booking.flight})
-                              </span>
+                        {booking.time && (
+                          <div className={styles.detailItem}>
+                            <FiClock className={styles.detailIcon} />
+                            <div>
+                              <div className={styles.detailLabel}>Time</div>
+                              <div className={styles.detailValue}>
+                                {formatTime(booking.time)}
+                              </div>
                             </div>
-                          )}
-
-                          {booking.hotel && (
-                            <div className={styles.detailItem}>
-                              <span className={styles.detailLabel}>Hotel:</span>
-                              <span className={styles.detailValue}>
-                                {booking.hotel}
-                              </span>
-                            </div>
-                          )}
-
-                          {booking.tourName && (
-                            <div className={styles.detailItem}>
-                              <span className={styles.detailLabel}>Tour:</span>
-                              <span className={styles.detailValue}>
-                                {booking.tourName}
-                              </span>
-                            </div>
-                          )}
-
-                          {booking.carModel && (
-                            <div className={styles.detailItem}>
-                              <span className={styles.detailLabel}>Car:</span>
-                              <span className={styles.detailValue}>
-                                {booking.carModel}
-                              </span>
-                            </div>
-                          )}
-
-                          {booking.time && (
-                            <div className={styles.detailItem}>
-                              <FiClock className={styles.infoIcon} />
-                              <span className={styles.detailValue}>
-                                {booking.time}
-                              </span>
-                            </div>
-                          )}
-
-                          {booking.duration && (
-                            <div className={styles.detailItem}>
-                              <span className={styles.detailLabel}>
-                                Duration:
-                              </span>
-                              <span className={styles.detailValue}>
+                          </div>
+                        )}
+                        {booking.duration && (
+                          <div className={styles.detailItem}>
+                            <FiClock className={styles.detailIcon} />
+                            <div>
+                              <div className={styles.detailLabel}>Duration</div>
+                              <div className={styles.detailValue}>
                                 {booking.duration}
-                              </span>
+                              </div>
                             </div>
-                          )}
-
-                          {booking.passengers && (
-                            <div className={styles.detailItem}>
-                              <FiUsers className={styles.infoIcon} />
-                              <span className={styles.detailValue}>
-                                {booking.passengers} passenger
-                                {booking.passengers > 1 ? "s" : ""}
-                              </span>
+                          </div>
+                        )}
+                        {booking.passengers && (
+                          <div className={styles.detailItem}>
+                            <FiUsers className={styles.detailIcon} />
+                            <div>
+                              <div className={styles.detailLabel}>
+                                Passengers
+                              </div>
+                              <div className={styles.detailValue}>
+                                {booking.passengers}
+                              </div>
                             </div>
-                          )}
-                        </div>
-
-                        {booking.amenities && booking.amenities.length > 0 && (
-                          <div className={styles.amenities}>
-                            {booking.amenities.map((amenity, index) => (
-                              <span key={index} className={styles.amenity}>
-                                <FiCheck /> {amenity}
-                              </span>
-                            ))}
                           </div>
                         )}
                       </div>
 
-                      <div className={styles.bookingActions}>
-                        <div className={styles.actionStatus}>
-                          {getStatusBadge(booking.status)}
-                          <div className={styles.bookingPrice}>
-                            {booking.currency} {booking.price}
-                          </div>
-                        </div>
-
-                        <div className={styles.actionButtons}>
-                          <button
-                            className={styles.viewButton}
-                            onClick={() => handleViewDetails(booking)}>
-                            <FiEye /> Details
-                          </button>
-                          <button
-                            className={styles.downloadButton}
-                            onClick={() => handleDownloadInvoice(booking)}>
-                            <FiDownload /> Invoice
-                          </button>
-                          {booking.status === "confirmed" && (
-                            <>
-                              <button
-                                className={styles.modifyButton}
-                                onClick={() => handleModifyBooking(booking)}>
-                                <FiEdit2 /> Modify
-                              </button>
-                              <button
-                                className={styles.cancelButton}
-                                onClick={() => handleCancelBooking(booking)}>
-                                <FiX /> Cancel
-                              </button>
-                            </>
+                      {booking.amenities && booking.amenities.length > 0 && (
+                        <div className={styles.amenities}>
+                          {booking.amenities
+                            .slice(0, 3)
+                            .map((amenity, index) => (
+                              <span key={index} className={styles.amenity}>
+                                <FiCheck /> {amenity}
+                              </span>
+                            ))}
+                          {booking.amenities.length > 3 && (
+                            <span className={styles.amenityMore}>
+                              +{booking.amenities.length - 3} more
+                            </span>
                           )}
                         </div>
+                      )}
+                    </div>
+
+                    {/* Card Footer */}
+                    <div className={styles.cardFooter}>
+                      <div className={styles.priceSection}>
+                        <div className={styles.bookingPrice}>
+                          {booking.currency} {booking.price}
+                        </div>
+                        <div className={styles.bookingDate}>
+                          Booked: {formatDate(booking.bookingDate)}
+                        </div>
+                      </div>
+
+                      <div className={styles.actionButtons}>
+                        <button
+                          className={styles.viewButton}
+                          onClick={() => handleViewDetails(booking)}>
+                          <FiEye />
+                          Details
+                        </button>
+                        <button
+                          className={styles.downloadButton}
+                          onClick={() => handleDownloadInvoice(booking)}>
+                          <FiDownload />
+                          Invoice
+                        </button>
+                        {booking.status === "confirmed" && (
+                          <>
+                            <button
+                              className={styles.modifyButton}
+                              onClick={() => handleModifyBooking(booking)}>
+                              <FiEdit2 />
+                              Modify
+                            </button>
+                            <button
+                              className={styles.cancelButton}
+                              onClick={() => handleCancelBooking(booking)}>
+                              <FiX />
+                              Cancel
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
                 ))
-              ) : (
-                <div className={styles.emptyState}>
+              : <div className={styles.emptyState}>
                   <FiCalendar className={styles.emptyIcon} />
                   <h3>No bookings found</h3>
                   <p>
-                    {searchQuery
-                      ? "No bookings match your search criteria"
-                      : `You don't have any ${activeTab} bookings at the moment.`}
+                    {searchQuery ?
+                      "No bookings match your search criteria"
+                    : `You don't have any ${activeTab} bookings at the moment.`}
                   </p>
                   {activeTab === "upcoming" && (
                     <button
@@ -621,11 +554,11 @@ function Bookings() {
                     </button>
                   )}
                 </div>
-              )}
+              }
             </div>
           </div>
 
-          {/* Right Column */}
+          {/* Right Column - Sidebar */}
           <div className={styles.rightColumn}>
             {/* Quick Actions */}
             <div className={styles.sidebarCard}>
@@ -635,13 +568,8 @@ function Bookings() {
                   <button
                     key={action.id}
                     className={styles.quickAction}
-                    onClick={() => navigate(action.path)}
-                    style={{ borderLeftColor: action.color }}>
-                    <div
-                      className={styles.quickActionIcon}
-                      style={{ color: action.color }}>
-                      {action.icon}
-                    </div>
+                    onClick={() => navigate(action.path)}>
+                    <div className={styles.quickActionIcon}>{action.icon}</div>
                     <div className={styles.quickActionContent}>
                       <div className={styles.quickActionTitle}>
                         {action.label}
@@ -650,6 +578,7 @@ function Bookings() {
                         {action.description}
                       </div>
                     </div>
+                    <FiChevronRight className={styles.quickActionArrow} />
                   </button>
                 ))}
               </div>
@@ -685,154 +614,153 @@ function Bookings() {
                 </div>
               </div>
             </div>
-
-            {/* Recent Activity */}
-            <div className={styles.sidebarCard}>
-              <h3 className={styles.sidebarTitle}>
-                <FiCalendar /> Recent Activity
-              </h3>
-              <div className={styles.activityList}>
-                <div className={styles.activityItem}>
-                  <div
-                    className={styles.activityIcon}
-                    style={{ color: "#10b981" }}>
-                    <FiCheck />
-                  </div>
-                  <div className={styles.activityContent}>
-                    <div className={styles.activityText}>
-                      Flight to Paris confirmed
-                    </div>
-                    <div className={styles.activityTime}>Today, 10:30 AM</div>
-                  </div>
-                </div>
-                <div className={styles.activityItem}>
-                  <div
-                    className={styles.activityIcon}
-                    style={{ color: "#3b82f6" }}>
-                    <FiDownload />
-                  </div>
-                  <div className={styles.activityContent}>
-                    <div className={styles.activityText}>
-                      Downloaded Tokyo tour invoice
-                    </div>
-                    <div className={styles.activityTime}>Yesterday</div>
-                  </div>
-                </div>
-                <div className={styles.activityItem}>
-                  <div
-                    className={styles.activityIcon}
-                    style={{ color: "#f59e0b" }}>
-                    <FiClock />
-                  </div>
-                  <div className={styles.activityContent}>
-                    <div className={styles.activityText}>
-                      Hotel booking pending payment
-                    </div>
-                    <div className={styles.activityTime}>2 days ago</div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
 
       {/* Booking Details Modal */}
       {selectedBooking && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modalContent}>
+        <div className={styles.modalOverlay} onClick={handleCloseDetails}>
+          <div
+            className={styles.modalContent}
+            onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h2 className={styles.modalTitle}>Booking Details</h2>
+              <div className={styles.modalTitle}>
+                <div
+                  className={styles.modalTypeIcon}
+                  style={{ color: getTypeColor(selectedBooking.type) }}>
+                  {getTypeIcon(selectedBooking.type)}
+                </div>
+                <div>
+                  <h2>{selectedBooking.destination}</h2>
+                  <p className={styles.modalReference}>
+                    #{selectedBooking.reference}
+                  </p>
+                </div>
+              </div>
               <button
-                className={styles.closeButton}
+                className={styles.modalClose}
                 onClick={handleCloseDetails}>
                 <FiX />
               </button>
             </div>
 
             <div className={styles.modalBody}>
-              <div className={styles.bookingSummary}>
-                <div className={styles.summaryHeader}>
-                  <div
-                    className={styles.summaryTypeIcon}
-                    style={{ color: getTypeColor(selectedBooking.type) }}>
-                    {getTypeIcon(selectedBooking.type)}
-                  </div>
-                  <div className={styles.summaryInfo}>
-                    <h3 className={styles.summaryTitle}>
-                      {selectedBooking.destination}
-                    </h3>
-                    <div className={styles.summaryReference}>
-                      Reference: {selectedBooking.reference}
-                    </div>
-                  </div>
+              <div className={styles.modalSection}>
+                <div className={styles.modalStatus}>
                   {getStatusBadge(selectedBooking.status)}
                 </div>
-
-                <div className={styles.summaryDetails}>
-                  <div className={styles.detailSection}>
-                    <h4 className={styles.detailTitle}>Booking Information</h4>
-                    <div className={styles.detailGrid}>
-                      <div className={styles.detailItem}>
-                        <span className={styles.detailLabel}>Date:</span>
-                        <span className={styles.detailValue}>
-                          {formatDate(selectedBooking.date)}
-                        </span>
-                      </div>
-                      {selectedBooking.time && (
-                        <div className={styles.detailItem}>
-                          <span className={styles.detailLabel}>Time:</span>
-                          <span className={styles.detailValue}>
-                            {selectedBooking.time}
-                          </span>
-                        </div>
-                      )}
-                      <div className={styles.detailItem}>
-                        <span className={styles.detailLabel}>Booked On:</span>
-                        <span className={styles.detailValue}>
-                          {formatDate(selectedBooking.bookingDate)}
-                        </span>
-                      </div>
-                      <div className={styles.detailItem}>
-                        <span className={styles.detailLabel}>Status:</span>
-                        <span className={styles.detailValue}>
-                          {selectedBooking.status.charAt(0).toUpperCase() +
-                            selectedBooking.status.slice(1)}
-                        </span>
-                      </div>
-                    </div>
+                <div className={styles.modalDates}>
+                  <div className={styles.dateInfo}>
+                    <FiCalendar />
+                    <span>
+                      <strong>Travel Date:</strong>{" "}
+                      {formatDate(selectedBooking.date)}
+                    </span>
                   </div>
-
-                  <div className={styles.detailSection}>
-                    <h4 className={styles.detailTitle}>Payment Details</h4>
-                    <div className={styles.paymentSummary}>
-                      <div className={styles.paymentRow}>
-                        <span>Amount:</span>
-                        <span className={styles.paymentAmount}>
-                          {selectedBooking.currency} {selectedBooking.price}
-                        </span>
-                      </div>
-                      {selectedBooking.cancellationDate && (
-                        <div className={styles.paymentRow}>
-                          <span>Cancelled On:</span>
-                          <span>
-                            {formatDate(selectedBooking.cancellationDate)}
-                          </span>
-                        </div>
-                      )}
-                      {selectedBooking.refundAmount && (
-                        <div className={styles.paymentRow}>
-                          <span>Refund Amount:</span>
-                          <span className={styles.refundAmount}>
-                            {selectedBooking.currency}{" "}
-                            {selectedBooking.refundAmount}
-                          </span>
-                        </div>
-                      )}
+                  {selectedBooking.time && (
+                    <div className={styles.dateInfo}>
+                      <FiClock />
+                      <span>
+                        <strong>Time:</strong> {selectedBooking.time}
+                      </span>
                     </div>
+                  )}
+                  <div className={styles.dateInfo}>
+                    <FiCalendar />
+                    <span>
+                      <strong>Booked On:</strong>{" "}
+                      {formatDate(selectedBooking.bookingDate)}
+                    </span>
                   </div>
                 </div>
               </div>
+
+              <div className={styles.modalGrid}>
+                <div className={styles.detailCard}>
+                  <h3>Booking Details</h3>
+                  <div className={styles.detailList}>
+                    {selectedBooking.airline && (
+                      <div className={styles.detailRow}>
+                        <span>Airline:</span>
+                        <span>
+                          {selectedBooking.airline} ({selectedBooking.flight})
+                        </span>
+                      </div>
+                    )}
+                    {selectedBooking.hotel && (
+                      <div className={styles.detailRow}>
+                        <span>Hotel:</span>
+                        <span>{selectedBooking.hotel}</span>
+                      </div>
+                    )}
+                    {selectedBooking.tourName && (
+                      <div className={styles.detailRow}>
+                        <span>Tour:</span>
+                        <span>{selectedBooking.tourName}</span>
+                      </div>
+                    )}
+                    {selectedBooking.carModel && (
+                      <div className={styles.detailRow}>
+                        <span>Car:</span>
+                        <span>{selectedBooking.carModel}</span>
+                      </div>
+                    )}
+                    <div className={styles.detailRow}>
+                      <span>Class/Type:</span>
+                      <span>
+                        {selectedBooking.class ||
+                          selectedBooking.roomType ||
+                          "Standard"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.detailCard}>
+                  <h3>Payment Details</h3>
+                  <div className={styles.paymentSummary}>
+                    <div className={styles.paymentRow}>
+                      <span>Amount:</span>
+                      <span className={styles.paymentAmount}>
+                        {selectedBooking.currency} {selectedBooking.price}
+                      </span>
+                    </div>
+                    {selectedBooking.cancellationDate && (
+                      <div className={styles.paymentRow}>
+                        <span>Cancelled:</span>
+                        <span>
+                          {formatDate(selectedBooking.cancellationDate)}
+                        </span>
+                      </div>
+                    )}
+                    {selectedBooking.refundAmount && (
+                      <div className={styles.paymentRow}>
+                        <span>Refund:</span>
+                        <span className={styles.refundAmount}>
+                          {selectedBooking.currency}{" "}
+                          {selectedBooking.refundAmount}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {selectedBooking.amenities &&
+                selectedBooking.amenities.length > 0 && (
+                  <div className={styles.modalSection}>
+                    <h3>Amenities & Services</h3>
+                    <div className={styles.modalAmenities}>
+                      {selectedBooking.amenities.map((amenity, index) => (
+                        <div key={index} className={styles.modalAmenity}>
+                          <FiCheck />
+                          {amenity}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
             </div>
 
             <div className={styles.modalFooter}>
@@ -840,13 +768,16 @@ function Bookings() {
                 <button
                   className={styles.modalButton}
                   onClick={() => handleDownloadInvoice(selectedBooking)}>
-                  <FiDownload /> Download Invoice
+                  <FiDownload />
+                  Download Invoice
                 </button>
                 <button className={styles.modalButtonSecondary}>
-                  <FiPrinter /> Print
+                  <FiPrinter />
+                  Print
                 </button>
                 <button className={styles.modalButtonSecondary}>
-                  <FiMail /> Email
+                  <FiMail />
+                  Email
                 </button>
                 {selectedBooking.status === "confirmed" && (
                   <button
@@ -855,7 +786,8 @@ function Bookings() {
                       handleCancelBooking(selectedBooking);
                       handleCloseDetails();
                     }}>
-                    <FiX /> Cancel Booking
+                    <FiX />
+                    Cancel Booking
                   </button>
                 )}
               </div>

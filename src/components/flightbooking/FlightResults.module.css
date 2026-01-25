@@ -11,7 +11,10 @@
 .flightResults {
   min-height: 100vh;
 
-  font-family: "Inter", -apple-system, sans-serif;
+  font-family:
+    "Inter",
+    -apple-system,
+    sans-serif;
   padding: 20px;
 }
 
@@ -519,14 +522,56 @@
   border-color: var(--green);
 }
 
-/* Responsive */
-@media (max-width: 1024px) {
-  .mainContent {
-    grid-template-columns: 240px 1fr;
-  }
-}
-
+/* Mobile-specific styles (max-width: 768px) */
 @media (max-width: 768px) {
+  .flightResults {
+    padding: 12px;
+  }
+
+  .container {
+    padding: 0;
+  }
+
+  .backButton {
+    margin-bottom: 16px;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .resultsHeader {
+    padding: 16px;
+    margin-bottom: 16px;
+    border-radius: 10px;
+  }
+
+  .routeDisplay {
+    font-size: 16px;
+    gap: 6px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .routeDisplay::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tripDetails {
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .tripDetails::-webkit-scrollbar {
+    display: none;
+  }
+
+  .detailItem {
+    flex-shrink: 0;
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+
   .mainContent {
     grid-template-columns: 1fr;
     gap: 16px;
@@ -535,13 +580,16 @@
   .filtersSidebar {
     position: static;
     max-height: none;
+    overflow: visible;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
+    margin-bottom: 0;
   }
 
   .filterCard {
     margin-bottom: 0;
+    padding: 12px;
   }
 
   .statsCard {
@@ -550,61 +598,190 @@
 
   .statsGrid {
     grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .statItem {
+    padding: 8px;
+  }
+
+  .statValue {
+    font-size: 14px;
+  }
+
+  .statLabel {
+    font-size: 10px;
+  }
+
+  .resultsArea {
+    min-height: auto;
   }
 
   .resultsToolbar {
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
+    align-items: stretch;
+    padding: 12px;
+  }
+
+  .resultsCount {
+    text-align: center;
+    font-size: 13px;
   }
 
   .sortContainer {
     width: 100%;
+    justify-content: space-between;
+  }
+
+  .sortLabel {
+    flex-shrink: 0;
   }
 
   .sortSelect {
     flex: 1;
+    min-width: 0;
+    max-width: 180px;
+  }
+
+  .flightsList {
+    min-height: 300px;
   }
 
   .pagination {
-    /* flex-direction: column;
-    gap: 12px; */
+    /* flex-direction: column; */
+    gap: 12px;
+    padding: 12px;
+    margin-top: 12px;
   }
 
   .paginationLeft,
   .paginationRight,
   .paginationCenter {
     width: 100%;
+    display: flex;
     justify-content: center;
   }
-}
 
-@media (max-width: 480px) {
-  /* .flightResults {
-    padding: 16px;
-  } */
+  .paginationLeft {
+    order: 1;
+  }
 
-  .filtersSidebar {
-    grid-template-columns: 1fr;
+  .paginationCenter {
+    order: 2;
+  }
+
+  .paginationRight {
+    order: 3;
+  }
+
+  .pageButton {
+    width: 100%;
+    justify-content: center;
+    padding: 8px;
+  }
+
+  .pageNumber {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+
+  .loadingState,
+  .noResults {
+    padding: 30px 16px;
+    min-height: 300px;
+  }
+
+  .noResultsTitle {
+    font-size: 15px;
+  }
+
+  .noResultsText {
+    font-size: 12px;
+    max-width: 100%;
+    padding: 0 10px;
   }
 
   .actionButtons {
     flex-direction: column;
     width: 100%;
+    max-width: 250px;
   }
 
   .primaryButton,
   .secondaryButton {
     width: 100%;
+    padding: 10px;
+  }
+}
+
+/* Extra small mobile devices (max-width: 480px) */
+@media (max-width: 480px) {
+  .flightResults {
+    padding: 10px;
+  }
+
+  .filtersSidebar {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .filterHeader {
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+  }
+
+  .priceSlider {
+    width: 100%;
+  }
+
+  .filterOptions {
+    gap: 4px;
+  }
+
+  .filterOption {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+
+  .clearFiltersBtn {
+    margin-top: 10px;
+    padding: 8px;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .routeDisplay {
+    font-size: 15px;
+  }
+
+  .detailItem {
+    font-size: 11px;
+  }
+
+  .resultsCount {
+    font-size: 12px;
+  }
+
+  .sortLabel {
+    font-size: 12px;
+  }
+
+  .sortSelect {
+    font-size: 12px;
   }
 
   .pageButton {
-    padding: 6px 10px;
     font-size: 12px;
+    padding: 6px 8px;
   }
 
   .pageNumber {
     width: 28px;
     height: 28px;
-    font-size: 12px;
   }
 }

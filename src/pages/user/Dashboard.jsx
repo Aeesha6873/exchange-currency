@@ -6,15 +6,18 @@ import {
   FiDollarSign,
   FiMap,
   FiSend,
-  FiCreditCard,
+  FiGlobe,
   FiChevronRight,
   FiCheckCircle,
   FiClock,
   FiArrowUpRight,
-  FiUsers,
   FiPackage,
-  FiPercent,
+  FiUsers,
   FiSmile,
+  FiCreditCard,
+  FiList,
+  FiNavigation,
+  FiActivity,
 } from "react-icons/fi";
 
 import styles from "./Dashboard.module.css";
@@ -40,10 +43,11 @@ function Dashboard() {
     exchangeCount: 12,
     flightBookings: 5,
     travelBookings: 3,
-    savedAmount: 125.5,
-    walletBalance: 2450.8,
-    exchangeSavings: 45.2,
+    visaApplications: 2,
     totalTransactions: 20,
+    completedTransactions: 18,
+    inProgress: 2,
+    successRate: "94%",
   });
 
   const formatTime = (date) => {
@@ -67,67 +71,140 @@ function Dashboard() {
     {
       id: 1,
       type: "exchange",
-      description: "USD to EUR exchange",
+      description: "USD to EUR Exchange",
       amount: "$500 → €460",
-      date: "2 hours ago",
+      date: "Today, 10:30 AM",
       status: "completed",
       icon: <FiDollarSign />,
       color: "#10b981",
-      savings: "$12.50",
+      processStep: "Completed",
+      category: "currency",
     },
     {
       id: 2,
       type: "flight",
-      description: "Flight to Paris booked",
+      description: "Paris Flight Booking",
       amount: "$850",
-      date: "Yesterday",
+      date: "Yesterday, 2:45 PM",
       status: "confirmed",
       icon: <FiSend />,
       color: "#f97316",
-      savings: "$25.00",
+      processStep: "Ticket Issued",
+      category: "travel",
     },
     {
       id: 3,
-      type: "travel",
-      description: "Hotel reservation in Bali",
-      amount: "$320/night",
-      date: "3 days ago",
-      status: "confirmed",
-      icon: <FiMap />,
-      color: "#064e3b",
-      savings: "$18.40",
+      type: "visa",
+      description: "UK Tourist Visa",
+      amount: "£450",
+      date: "2 days ago, 9:15 AM",
+      status: "processing",
+      icon: <FiGlobe />,
+      color: "#3b82f6",
+      processStep: "Document Review",
+      category: "visa",
     },
     {
       id: 4,
+      type: "travel",
+      description: "Bali Resort Package",
+      amount: "$1,200",
+      date: "3 days ago, 4:30 PM",
+      status: "confirmed",
+      icon: <FiMap />,
+      color: "#8b5cf6",
+      processStep: "Confirmed",
+      category: "travel",
+    },
+    {
+      id: 5,
       type: "exchange",
-      description: "GBP to JPY exchange",
+      description: "GBP to JPY Exchange",
       amount: "£800 → ¥148,000",
-      date: "1 week ago",
+      date: "1 week ago, 11:20 AM",
       status: "completed",
       icon: <FiDollarSign />,
       color: "#10b981",
-      savings: "$19.80",
+      processStep: "Completed",
+      category: "currency",
     },
   ];
 
-  const upcomingTrips = [
+  const processStatus = [
     {
       id: 1,
-      destination: "Paris, France",
-      date: "Dec 15-22, 2023",
-      type: "Flight & Hotel",
-      price: "$1,250",
-      status: "confirmed",
-      icon: <FiSend />,
+      type: "exchange",
+      title: "Currency Exchange",
+      status: "active",
+      icon: <FiDollarSign />,
+      color: "#10b981",
+      count: 2,
+      statusText: "2 Active",
     },
     {
       id: 2,
-      destination: "Bali, Indonesia",
-      date: "Jan 10-20, 2024",
-      type: "All-inclusive",
-      price: "$1,800",
+      type: "flight",
+      title: "Flight Bookings",
       status: "upcoming",
+      icon: <FiSend />,
+      color: "#f97316",
+      count: 1,
+      statusText: "1 Upcoming",
+    },
+    {
+      id: 3,
+      type: "visa",
+      title: "Visa Applications",
+      status: "processing",
+      icon: <FiGlobe />,
+      color: "#3b82f6",
+      count: 1,
+      statusText: "In Review",
+    },
+    {
+      id: 4,
+      type: "travel",
+      title: "Travel Packages",
+      status: "completed",
       icon: <FiMap />,
+      color: "#8b5cf6",
+      count: 0,
+      statusText: "All Complete",
+    },
+  ];
+
+  const quickLinks = [
+    {
+      id: 1,
+      title: "Transaction History",
+      description: "View all transactions",
+      icon: <FiActivity />,
+      color: "#10b981",
+      path: "/dashboard/transactions",
+    },
+    {
+      id: 2,
+      title: "Manage Bookings",
+      description: "Check reservations",
+      icon: <FiCalendar />,
+      color: "#3b82f6",
+      path: "/dashboard/bookings",
+    },
+    {
+      id: 3,
+      title: "Visa Applications",
+      description: "Track visa status",
+      icon: <FiGlobe />,
+      color: "#f97316",
+      path: "/dashboard/visa",
+    },
+    {
+      id: 4,
+      title: "Support Center",
+      description: "Get help & support",
+      icon: <FiUsers />,
+      color: "#8b5cf6",
+      path: "/dashboard/support",
     },
   ];
 
@@ -138,284 +215,205 @@ function Dashboard() {
     return "Good evening";
   };
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "completed":
+        return "#10b981";
+      case "confirmed":
+        return "#f97316";
+      case "processing":
+        return "#3b82f6";
+      case "upcoming":
+        return "#8b5cf6";
+      default:
+        return "#64748b";
+    }
+  };
+
   if (!user) {
-    return <div className={styles.loading}>Loading...</div>;
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingSpinner}></div>
+        <p>Loading your dashboard...</p>
+      </div>
+    );
   }
 
   return (
     <div className={styles.dashboardContainer}>
-      <main className={styles.mainContent}>
-        <div className={styles.contentWrapper}>
-          {/* Header Section - IMPROVED */}
-          <div className={styles.headerSection}>
-            <div className={styles.headerInfo}>
-              <h1 className={styles.greeting}>
-                {getGreeting()}, {user.fullName?.split(" ")[0]}
-              </h1>
-              <p className={styles.dateTime}>
-                {formatDate(currentTime)} • {formatTime(currentTime)}
-              </p>
-              <div className={styles.welcomeMessage}>
-                <FiSmile className={styles.welcomeIcon} />
-                Welcome back to your dashboard
+      <div className={styles.dashboardWrapper}>
+        {/* Header Section */}
+        <div className={styles.dashboardHeader}>
+          <div className={styles.headerContent}>
+            <div className={styles.userGreeting}>
+              <div className={styles.greetingContent}>
+                <h1>
+                  {getGreeting()}, {user.fullName?.split(" ")[0]}!
+                </h1>
+                <p className={styles.welcomeText}>
+                  <FiSmile /> Welcome to your travel & finance dashboard
+                </p>
+              </div>
+              <div className={styles.timeDisplay}>
+                <span className={styles.date}>{formatDate(currentTime)}</span>
+                <span className={styles.time}>{formatTime(currentTime)}</span>
               </div>
             </div>
 
-            <div className={styles.walletCard}>
-              <div className={styles.walletHeader}>
-                <FiCreditCard className={styles.walletIcon} />
-                <span>Wallet Balance</span>
+            <div className={styles.performanceStats}>
+              <div className={styles.performanceStat}>
+                <span className={styles.statNumber}>{stats.successRate}</span>
+                <span className={styles.statLabel}>Success Rate</span>
               </div>
-              <h2 className={styles.walletAmount}>
-                ${stats.walletBalance.toLocaleString()}
-              </h2>
-              <button
-                className={styles.walletAction}
-                onClick={() => navigate("/dashboard/wallet")}>
-                <FiChevronRight />
-                Manage Wallet
-              </button>
+              <div className={styles.performanceStat}>
+                <span className={styles.statNumber}>
+                  {stats.totalTransactions}
+                </span>
+                <span className={styles.statLabel}>Total Activities</span>
+              </div>
+              <div className={styles.performanceStat}>
+                <span className={styles.statNumber}>{stats.inProgress}</span>
+                <span className={styles.statLabel}>In Progress</span>
+              </div>
             </div>
           </div>
+        </div>
 
-          {/* Stats Grid */}
-          <div className={styles.statsGrid}>
-            <div className={styles.statCard}>
-              <div
+        {/* Stats Cards Grid */}
+        <div className={styles.statsGrid}>
+          <div
+            className={styles.statCard}
+            style={{ borderLeftColor: "#10b981" }}>
+            <div className={styles.statIconWrapper}>
+              <FiDollarSign
                 className={styles.statIcon}
-                style={{ background: "#10b981" }}>
-                <FiDollarSign />
-              </div>
-              <div className={styles.statContent}>
-                <h3>{stats.exchangeCount}</h3>
-                <p>Currency Exchanges</p>
-                <div className={styles.statSub}>
-                  <FiTrendingUp />
-                  <span>+12% this month</span>
-                </div>
-              </div>
+                style={{ color: "#10b981" }}
+              />
             </div>
-
-            <div className={styles.statCard}>
-              <div
-                className={styles.statIcon}
-                style={{ background: "#f97316" }}>
-                <FiSend />
-              </div>
-              <div className={styles.statContent}>
-                <h3>{stats.flightBookings}</h3>
-                <p>Flight Bookings</p>
-                <div className={styles.statSub}>
-                  <FiCalendar />
-                  <span>2 upcoming trips</span>
-                </div>
-              </div>
-            </div>
-
-            <div className={styles.statCard}>
-              <div
-                className={styles.statIcon}
-                style={{ background: "#064e3b" }}>
-                <FiMap />
-              </div>
-              <div className={styles.statContent}>
-                <h3>{stats.travelBookings}</h3>
-                <p>Travel Packages</p>
-                <div className={styles.statSub}>
-                  <FiPercent />
-                  <span>Saved ${stats.savedAmount}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className={styles.statCard}>
-              <div
-                className={styles.statIcon}
-                style={{ background: "#8b5cf6" }}>
-                <FiPackage />
-              </div>
-              <div className={styles.statContent}>
-                <h3>{stats.totalTransactions}</h3>
-                <p>Total Transactions</p>
-                <div className={styles.statSub}>
-                  <FiCalendar />
-                  <span>Last 30 days</span>
-                </div>
+            <div className={styles.statContent}>
+              <h3>{stats.exchangeCount}</h3>
+              <p>Currency Exchanges</p>
+              <div className={styles.statTrend}>
+                <FiTrendingUp /> <span>+12% this month</span>
               </div>
             </div>
           </div>
 
-          {/* Main Content Grid */}
-          <div className={styles.mainGrid}>
-            {/* Left Column */}
-            <div className={styles.leftColumn}>
-              {/* Quick Actions */}
-              <div className={styles.card}>
-                <div className={styles.cardHeader}>
-                  <div>
-                    <h3>Quick Actions</h3>
-                    <p>Start a new transaction</p>
-                  </div>
-                </div>
-                <div className={styles.actionsGrid}>
-                  <button
-                    className={styles.actionButton}
-                    onClick={() => navigate("/dashboard/exchange")}>
-                    <div className={styles.actionIcon}>
-                      <FiDollarSign />
-                    </div>
-                    <div className={styles.actionContent}>
-                      <span className={styles.actionTitle}>
-                        Exchange Currency
-                      </span>
-                      <span className={styles.actionDesc}>
-                        Get best rates instantly
-                      </span>
-                    </div>
-                    <FiArrowUpRight className={styles.actionArrow} />
-                  </button>
-
-                  <button
-                    className={styles.actionButton}
-                    onClick={() => navigate("/dashboard/flight")}>
-                    <div className={styles.actionIcon}>
-                      <FiSend />
-                    </div>
-                    <div className={styles.actionContent}>
-                      <span className={styles.actionTitle}>Book Flight</span>
-                      <span className={styles.actionDesc}>
-                        Find cheap flights
-                      </span>
-                    </div>
-                    <FiArrowUpRight className={styles.actionArrow} />
-                  </button>
-
-                  <button
-                    className={styles.actionButton}
-                    onClick={() => navigate("/dashboard/travel-agency")}>
-                    <div className={styles.actionIcon}>
-                      <FiMap />
-                    </div>
-                    <div className={styles.actionContent}>
-                      <span className={styles.actionTitle}>Travel Package</span>
-                      <span className={styles.actionDesc}>
-                        Hotels & activities
-                      </span>
-                    </div>
-                    <FiArrowUpRight className={styles.actionArrow} />
-                  </button>
-
-                  <button
-                    className={styles.actionButton}
-                    onClick={() => navigate("/dashboard/bookings")}>
-                    <div className={styles.actionIcon}>
-                      <FiCalendar />
-                    </div>
-                    <div className={styles.actionContent}>
-                      <span className={styles.actionTitle}>My Bookings</span>
-                      <span className={styles.actionDesc}>
-                        View all bookings
-                      </span>
-                    </div>
-                    <FiArrowUpRight className={styles.actionArrow} />
-                  </button>
-                </div>
-              </div>
+          <div
+            className={styles.statCard}
+            style={{ borderLeftColor: "#f97316" }}>
+            <div className={styles.statIconWrapper}>
+              <FiSend
+                className={styles.statIcon}
+                style={{ color: "#f97316" }}
+              />
             </div>
-
-            {/* Right Column */}
-            <div className={styles.rightColumn}>
-              {/* Recent Activities */}
-              <div className={styles.card}>
-                <div className={styles.cardHeader}>
-                  <div>
-                    <h3>Recent Activities</h3>
-                    <p>Your latest transactions</p>
-                  </div>
-                  <button
-                    className={styles.viewAllButton}
-                    onClick={() => navigate("/dashboard/transactions")}>
-                    View All
-                  </button>
-                </div>
-                <div className={styles.activitiesList}>
-                  {recentActivities.map((activity) => (
-                    <div key={activity.id} className={styles.activityItem}>
-                      <div
-                        className={styles.activityIcon}
-                        style={{ background: activity.color }}>
-                        {activity.icon}
-                      </div>
-                      <div className={styles.activityContent}>
-                        <div className={styles.activityHeader}>
-                          <h4>{activity.description}</h4>
-                          <span className={styles.activityAmount}>
-                            {activity.amount}
-                          </span>
-                        </div>
-                        <div className={styles.activityFooter}>
-                          <div className={styles.activityMeta}>
-                            <FiClock />
-                            <span>{activity.date}</span>
-                            <span className={styles.activitySavings}>
-                              Saved {activity.savings}
-                            </span>
-                          </div>
-                          <span
-                            className={`${styles.activityStatus} ${
-                              activity.status === "completed"
-                                ? styles.completed
-                                : styles.confirmed
-                            }`}>
-                            <FiCheckCircle />
-                            {activity.status}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+            <div className={styles.statContent}>
+              <h3>{stats.flightBookings}</h3>
+              <p>Flight Bookings</p>
+              <div className={styles.statTrend}>
+                <FiCalendar /> <span>2 upcoming trips</span>
               </div>
             </div>
           </div>
 
-          {/* Bottom Section */}
-          <div className={styles.bottomSection}>
-            {/* Upcoming Trips */}
-            <div className={styles.card}>
-              <div className={styles.cardHeader}>
+          <div
+            className={styles.statCard}
+            style={{ borderLeftColor: "#3b82f6" }}>
+            <div className={styles.statIconWrapper}>
+              <FiGlobe
+                className={styles.statIcon}
+                style={{ color: "#3b82f6" }}
+              />
+            </div>
+            <div className={styles.statContent}>
+              <h3>{stats.visaApplications}</h3>
+              <p>Visa Applications</p>
+              <div className={styles.statTrend}>
+                <FiClock /> <span>1 in review</span>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className={styles.statCard}
+            style={{ borderLeftColor: "#8b5cf6" }}>
+            <div className={styles.statIconWrapper}>
+              <FiMap className={styles.statIcon} style={{ color: "#8b5cf6" }} />
+            </div>
+            <div className={styles.statContent}>
+              <h3>{stats.travelBookings}</h3>
+              <p>Travel Packages</p>
+              <div className={styles.statTrend}>
+                <FiPackage /> <span>3 active packages</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content Grid */}
+        <div className={styles.contentGrid}>
+          {/* Left Column - Recent Activities */}
+          <div className={styles.leftColumn}>
+            <div className={styles.sectionCard}>
+              <div className={styles.sectionHeader}>
                 <div>
-                  <h3>Upcoming Trips</h3>
-                  <p>{upcomingTrips.length} trips scheduled</p>
+                  <h2>Recent Activities</h2>
+                  <p>Latest transactions across all services</p>
                 </div>
+                <button
+                  className={styles.viewAllButton}
+                  onClick={() => navigate("/dashboard/transactions")}>
+                  View All <FiChevronRight />
+                </button>
               </div>
-              <div className={styles.tripsGrid}>
-                {upcomingTrips.map((trip) => (
-                  <div key={trip.id} className={styles.tripCard}>
-                    <div className={styles.tripHeader}>
-                      <div className={styles.tripIcon}>{trip.icon}</div>
-                      <div className={styles.tripInfo}>
-                        <h4>{trip.destination}</h4>
-                        <p>{trip.date}</p>
+
+              <div className={styles.activitiesList}>
+                {recentActivities.map((activity) => (
+                  <div key={activity.id} className={styles.activityCard}>
+                    <div className={styles.activityHeader}>
+                      <div
+                        className={styles.activityType}
+                        style={{ color: activity.color }}>
+                        <div
+                          className={styles.typeIcon}
+                          style={{ backgroundColor: activity.color }}>
+                          {activity.icon}
+                        </div>
+                        <span className={styles.typeName}>
+                          {activity.type.toUpperCase()}
+                        </span>
+                      </div>
+                      <span className={styles.activityDate}>
+                        {activity.date}
+                      </span>
+                    </div>
+
+                    <div className={styles.activityContent}>
+                      <h4>{activity.description}</h4>
+                      <div className={styles.activityDetails}>
+                        <span className={styles.amount}>{activity.amount}</span>
+                        <span
+                          className={styles.statusBadge}
+                          style={{
+                            backgroundColor: getStatusColor(activity.status),
+                          }}>
+                          {activity.status}
+                        </span>
                       </div>
                     </div>
-                    <div className={styles.tripDetails}>
-                      <span className={styles.tripType}>{trip.type}</span>
-                      <span className={styles.tripPrice}>{trip.price}</span>
-                    </div>
-                    <div className={styles.tripFooter}>
-                      <span
-                        className={`${styles.tripStatus} ${
-                          trip.status === "confirmed"
-                            ? styles.confirmed
-                            : styles.upcoming
-                        }`}>
-                        {trip.status}
-                      </span>
+
+                    <div className={styles.activityFooter}>
+                      <div className={styles.processInfo}>
+                        <FiNavigation />{" "}
+                        <span>Process: {activity.processStep}</span>
+                      </div>
                       <button
-                        className={styles.tripButton}
-                        onClick={() => navigate("/dashboard/bookings")}>
-                        Details
+                        className={styles.detailsButton}
+                        onClick={() =>
+                          navigate(`/dashboard/${activity.category}`)
+                        }>
+                        View Details <FiArrowUpRight />
                       </button>
                     </div>
                   </div>
@@ -423,23 +421,201 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* Promo Banner */}
-            <div className={styles.promoCard}>
-              <div className={styles.promoContent}>
-                <FiUsers className={styles.promoIcon} />
-                <h3>Refer & Earn Rewards</h3>
-                <p>
-                  Get $25 for each friend who joins and completes a transaction
-                </p>
+            {/* Process Status */}
+            <div className={styles.sectionCard}>
+              <div className={styles.sectionHeader}>
+                <div>
+                  <h2>Process Status</h2>
+                  <p>Current status across all services</p>
+                </div>
               </div>
-              <button className={styles.promoButton}>
-                Invite Friends
-                <FiArrowUpRight />
-              </button>
+
+              <div className={styles.processGrid}>
+                {processStatus.map((process) => (
+                  <div key={process.id} className={styles.processCard}>
+                    <div
+                      className={styles.processIconWrapper}
+                      style={{ backgroundColor: `${process.color}15` }}>
+                      {process.icon}
+                    </div>
+                    <div className={styles.processInfo}>
+                      <h4>{process.title}</h4>
+                      <div className={styles.processStatus}>
+                        <span
+                          className={styles.statusDot}
+                          style={{ backgroundColor: process.color }}
+                        />
+                        <span className={styles.statusText}>
+                          {process.statusText}
+                        </span>
+                      </div>
+                    </div>
+                    <div className={styles.processCount}>
+                      <span>{process.count}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column - Quick Actions & Links */}
+          <div className={styles.rightColumn}>
+            {/* Quick Actions */}
+            <div className={styles.sectionCard}>
+              <div className={styles.sectionHeader}>
+                <div>
+                  <h2>Quick Actions</h2>
+                  <p>Start a new transaction</p>
+                </div>
+              </div>
+
+              <div className={styles.actionsGrid}>
+                <button
+                  className={styles.actionButton}
+                  onClick={() => navigate("/dashboard/exchange")}
+                  style={{ borderColor: "#10b981" }}>
+                  <div
+                    className={styles.actionIcon}
+                    style={{ backgroundColor: "#10b981" }}>
+                    <FiDollarSign />
+                  </div>
+                  <div className={styles.actionContent}>
+                    <span>Exchange Currency</span>
+                    <p>Best rates, fast transfer</p>
+                  </div>
+                  <FiArrowUpRight className={styles.actionArrow} />
+                </button>
+
+                <button
+                  className={styles.actionButton}
+                  onClick={() => navigate("/dashboard/flight")}
+                  style={{ borderColor: "#f97316" }}>
+                  <div
+                    className={styles.actionIcon}
+                    style={{ backgroundColor: "#f97316" }}>
+                    <FiSend />
+                  </div>
+                  <div className={styles.actionContent}>
+                    <span>Book Flight</span>
+                    <p>Domestic & international</p>
+                  </div>
+                  <FiArrowUpRight className={styles.actionArrow} />
+                </button>
+
+                <button
+                  className={styles.actionButton}
+                  onClick={() => navigate("/dashboard/visa")}
+                  style={{ borderColor: "#3b82f6" }}>
+                  <div
+                    className={styles.actionIcon}
+                    style={{ backgroundColor: "#3b82f6" }}>
+                    <FiGlobe />
+                  </div>
+                  <div className={styles.actionContent}>
+                    <span>Apply for Visa</span>
+                    <p>Worldwide visa services</p>
+                  </div>
+                  <FiArrowUpRight className={styles.actionArrow} />
+                </button>
+
+                <button
+                  className={styles.actionButton}
+                  onClick={() => navigate("/dashboard/travel-agency")}
+                  style={{ borderColor: "#8b5cf6" }}>
+                  <div
+                    className={styles.actionIcon}
+                    style={{ backgroundColor: "#8b5cf6" }}>
+                    <FiMap />
+                  </div>
+                  <div className={styles.actionContent}>
+                    <span>Travel Package</span>
+                    <p>Hotels & activities</p>
+                  </div>
+                  <FiArrowUpRight className={styles.actionArrow} />
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <div className={styles.sectionCard}>
+              <div className={styles.sectionHeader}>
+                <div>
+                  <h2>Quick Links</h2>
+                  <p>Navigate quickly</p>
+                </div>
+              </div>
+
+              <div className={styles.linksGrid}>
+                {quickLinks.map((link) => (
+                  <button
+                    key={link.id}
+                    className={styles.linkCard}
+                    onClick={() => navigate(link.path)}>
+                    <div
+                      className={styles.linkIcon}
+                      style={{ color: link.color }}>
+                      {link.icon}
+                    </div>
+                    <div className={styles.linkContent}>
+                      <h4>{link.title}</h4>
+                      <p>{link.description}</p>
+                    </div>
+                    <FiChevronRight className={styles.linkArrow} />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Upcoming Trips */}
+            <div className={styles.sectionCard}>
+              <div className={styles.sectionHeader}>
+                <div>
+                  <h2>Upcoming Trips</h2>
+                  <p>Your confirmed travels</p>
+                </div>
+                <button
+                  className={styles.viewAllButton}
+                  onClick={() => navigate("/dashboard/bookings")}>
+                  All Trips <FiChevronRight />
+                </button>
+              </div>
+
+              <div className={styles.tripCard}>
+                <div className={styles.tripContent}>
+                  <div className={styles.tripIcon}>
+                    <FiSend />
+                  </div>
+                  <div className={styles.tripInfo}>
+                    <h4>Paris, France</h4>
+                    <p>Dec 15-22, 2023 • Flight & Hotel</p>
+                  </div>
+                </div>
+                <div className={styles.tripActions}>
+                  <span className={styles.tripPrice}>$1,250</span>
+                  <button className={styles.tripButton}>Details</button>
+                </div>
+              </div>
+
+              <div className={styles.tripCard}>
+                <div className={styles.tripContent}>
+                  <div className={styles.tripIcon}>
+                    <FiMap />
+                  </div>
+                  <div className={styles.tripInfo}>
+                    <h4>Bali, Indonesia</h4>
+                    <p>Jan 10-20, 2024 • All-inclusive</p>
+                  </div>
+                </div>
+                <div className={styles.tripActions}>
+                  <span className={styles.tripPrice}>$1,800</span>
+                  <button className={styles.tripButton}>Details</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

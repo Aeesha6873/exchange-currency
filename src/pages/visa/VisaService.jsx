@@ -23,7 +23,6 @@ import {
   FaPrint,
   FaRobot,
   FaEye,
-  FaDownload,
   FaCheck,
   FaChevronDown,
   FaInfoCircle,
@@ -123,54 +122,73 @@ export default function VisaServicePage() {
       processing: "5-8 days",
     },
   ];
-
   const departureTimes = [
-    { id: "urgent", label: "Urgent", range: "24-48 hours", icon: <FaClock /> },
+    {
+      id: "urgent",
+      label: "Urgent",
+      time: "24-48 hours",
+      icon: <FaClock />,
+      badge: "Premium",
+    },
     {
       id: "express",
       label: "Express",
-      range: "3-5 days",
+      time: "3-5 days",
       icon: <FaCalendarDay />,
+      badge: "Fast",
     },
     {
       id: "standard",
       label: "Standard",
-      range: "7-10 days",
+      time: "7-10 days",
       icon: <FaCalendarAlt />,
+      badge: "Popular",
     },
     {
       id: "regular",
       label: "Regular",
-      range: "15-20 days",
+      time: "15-20 days",
       icon: <FaCalendarDay />,
+      badge: "Economy",
     },
   ];
 
+  // Update your durations array:
   const durations = [
     {
       id: "30",
       label: "Short Stay",
-      months: "1 month",
+      time: "1 month",
       icon: <FaCalendarDay />,
+      badge: "Quick",
     },
-    { id: "90", label: "Tourist", months: "3 months", icon: <FaCalendarAlt /> },
+    {
+      id: "90",
+      label: "Tourist",
+      time: "3 months",
+      icon: <FaCalendarAlt />,
+      badge: "Popular",
+    },
     {
       id: "180",
       label: "Business",
-      months: "6 months",
+      time: "6 months",
       icon: <FaCalendarDay />,
+      badge: "Work",
     },
     {
       id: "365",
       label: "Long Term",
-      months: "1 year",
+      time: "1 year",
       icon: <FaCalendarAlt />,
+      badge: "Extended",
     },
     {
       id: "730",
       label: "Residence",
-      months: "2 years",
+      time: "2 years",
       icon: <FaCalendarDay />,
+      badge: "Long-term",
     },
   ];
 
@@ -413,6 +431,15 @@ export default function VisaServicePage() {
                     style={{
                       "--step-color": step.color,
                       animationDelay: `${index * 100}ms`,
+                    }}
+                    onClick={() => {
+                      if (index < currentStep) {
+                        setIsAnimating(true);
+                        setTimeout(() => {
+                          setCurrentStep(index + 1);
+                          setIsAnimating(false);
+                        }, 400);
+                      }
                     }}>
                     <div className="visaIndicatorRing">
                       <div className="visaIndicatorDot"></div>
@@ -437,6 +464,7 @@ export default function VisaServicePage() {
             {/* Side Panel */}
             <div className="visaSidePanel">
               <div className="visaSidePanelSticky">
+                {/* This is hidden on mobile */}
                 <div className="visaCurrentStepInfo">
                   <motion.div
                     className="visaStepNumber"
@@ -466,39 +494,30 @@ export default function VisaServicePage() {
                   </div>
                 </div>
 
-                {currentStep !== 7 && (
-                  <div className="visaQuickHelp">
-                    <div className="visaHelpHeader">
-                      <span className="visaHelpIcon">
-                        <FaRobot />
-                      </span>
-                      <span>Visa Tips</span>
-                    </div>
-                    <ul className="visaTipsList">
-                      <li>Ensure passport is valid for 6+ months</li>
-                      <li>Clear scan of passport data page required</li>
-                      <li>Processing time depends on selected duration</li>
-                      <li>Keep reference number for tracking</li>
-                    </ul>
-                  </div>
-                )}
-
-                {/* Pricing Summary */}
+                {/* Pricing Summary - Shown first */}
                 {applicationData.country && (
                   <div className="pricing-summary">
                     <div className="pricing-header">
                       <div className="pricing-title">Estimated Total</div>
                       <div className="pricing-total">
-                        {getCountryCurrency()}
-                        {calculateTotalPrice()}
+                        <span className="currency-symbols">
+                          {getCountryCurrency()}
+                        </span>
+                        <span className="price-amount">
+                          {calculateTotalPrice()}
+                        </span>
                       </div>
                     </div>
                     <div className="pricing-details">
                       <div className="pricing-item">
                         <span className="pricing-label">Visa Fee</span>
                         <span className="pricing-value">
-                          {getCountryCurrency()}
-                          {calculateTotalPrice()}
+                          <span className="currency-symbols">
+                            {getCountryCurrency()}
+                          </span>
+                          <span className="price-amount">
+                            {calculateTotalPrice()}
+                          </span>
                         </span>
                       </div>
                       {applicationData.departureTime && (
@@ -520,16 +539,34 @@ export default function VisaServicePage() {
                     </div>
                   </div>
                 )}
+
+                {/* Quick Help - Moved to last position */}
+                {currentStep !== 7 && (
+                  <div className="visaQuickHelp">
+                    <div className="visaHelpHeader">
+                      <span className="visaHelpIcon">
+                        <FaRobot />
+                      </span>
+                      <span>Visa Tips</span>
+                    </div>
+                    <ul className="visaTipsList">
+                      <li>Ensure passport is valid for 6+ months</li>
+                      <li>Clear scan of passport data page required</li>
+                      <li>Processing time depends on selected duration</li>
+                      <li>Keep reference number for tracking</li>
+                    </ul>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Main Content Card */}
+            {/* Main Content Card - NO SCROLL */}
             <div className="visaMainCard">
               <div className="visaCardHeader">
                 <div className="visaCardGlow"></div>
                 <h2 className="visaCardTitle">
                   {currentStep === 1 && "Select Destination"}
-                  {currentStep === 2 && "Expected Departure"}
+                  {currentStep === 2 && "Expected Departure Time"}
                   {currentStep === 3 && "Visa Duration"}
                   {currentStep === 4 && "Personal Details"}
                   {currentStep === 5 && "Upload Passport"}
@@ -541,8 +578,8 @@ export default function VisaServicePage() {
                   <span className="visaSubtitleText">
                     {currentStep === 1 && "Choose your destination country"}
                     {currentStep === 2 &&
-                      "Select your preferred processing time"}
-                    {currentStep === 3 && "Choose your visa duration"}
+                      "When do you need your visa processed?"}
+                    {currentStep === 3 && "How long do you need the visa for?"}
                     {currentStep === 4 && "Enter your personal information"}
                     {currentStep === 5 && "Upload passport data page"}
                     {currentStep === 6 && "Complete your payment"}
@@ -560,7 +597,7 @@ export default function VisaServicePage() {
                     animate="visible"
                     exit="exit"
                     className="visaContentWrapper">
-                    {isAnimating ? (
+                    {isAnimating ?
                       <div className="visaLoadingState">
                         <div className="visaNeonSpinner">
                           <div className="visaSpinnerCore"></div>
@@ -573,16 +610,13 @@ export default function VisaServicePage() {
                           <span></span>
                         </div>
                       </div>
-                    ) : (
-                      <>
+                    : <>
                         {/* Step 1: Country Selection */}
                         {currentStep === 1 && (
                           <div className="visaForm">
                             <div className="form-section">
                               <h3 className="section-title">
-                                <FaMapMarkerAlt
-                                  style={{ marginRight: "10px" }}
-                                />
+                                <FaMapMarkerAlt />
                                 Select Your Destination
                               </h3>
                               <p className="section-subtitle">
@@ -633,15 +667,15 @@ export default function VisaServicePage() {
                                     </h3>
                                     <div className="selected-country-price">
                                       <div className="price-tag">
-                                        <span className="currency-symbol">
+                                        <span className="currency-symbols">
                                           {getCountryCurrency()}
                                         </span>
-                                        <span>{calculateTotalPrice()}</span>
+                                        <span className="price-amount">
+                                          {calculateTotalPrice()}
+                                        </span>
                                       </div>
                                       <div className="processing-info">
-                                        <FaInfoCircle
-                                          style={{ marginRight: "6px" }}
-                                        />
+                                        <FaInfoCircle />
                                         Standard processing:{" "}
                                         {getCountryProcessing()}
                                       </div>
@@ -657,48 +691,59 @@ export default function VisaServicePage() {
                                 className="visaPrimaryButton"
                                 onClick={handleNext}
                                 disabled={!applicationData.country}>
-                                Next: Departure Time{" "}
-                                <FaArrowRight style={{ marginLeft: "8px" }} />
+                                Next: Departure Time
+                                <FaArrowRight />
                               </button>
                             </div>
                           </div>
                         )}
-
-                        {/* Step 2: Departure Time Selection */}
                         {currentStep === 2 && (
                           <div className="visaForm">
                             <div className="form-section">
                               <h3 className="section-title">
-                                <FaPlaneDeparture
-                                  style={{ marginRight: "10px" }}
-                                />
-                                Expected Departure Time
+                                <FaPlaneDeparture />
+                                Processing Time
                               </h3>
                               <p className="section-subtitle">
-                                Select how urgently you need your visa
-                                processed.
+                                Select how quickly you need your visa processed
                               </p>
 
-                              <div className="departure-time-grid">
+                              <div className="quick-info-section">
+                                <FaInfoCircle />
+                                <p className="quick-info-text">
+                                  <strong>Tip:</strong> Choose based on your
+                                  travel date. Express and Urgent options have
+                                  additional fees.
+                                </p>
+                              </div>
+
+                              <div className="departure-time-grid-compact">
                                 {departureTimes.map((time) => (
                                   <div
                                     key={time.id}
-                                    className={`time-slot ${
-                                      applicationData.departureTime === time.id
-                                        ? "selected"
-                                        : ""
+                                    className={`departure-option-compact ${
+                                      (
+                                        applicationData.departureTime ===
+                                        time.id
+                                      ) ?
+                                        "selected"
+                                      : ""
                                     }`}
                                     onClick={() =>
                                       handleDepartureSelect(time.id)
                                     }>
-                                    <div className="time-slot-icon">
+                                    <div className="selection-indicator orange-indicator"></div>
+                                    <div className="departure-icon-compact">
                                       {time.icon}
                                     </div>
-                                    <div className="time-label">
+                                    <div className="departure-title-compact">
                                       {time.label}
                                     </div>
-                                    <div className="time-range">
-                                      {time.range}
+                                    <div className="departure-time-compact">
+                                      {time.time}
+                                    </div>
+                                    <div className="departure-badge">
+                                      {time.badge}
                                     </div>
                                   </div>
                                 ))}
@@ -709,86 +754,87 @@ export default function VisaServicePage() {
                               <button
                                 className="visaSecondaryButton"
                                 onClick={handleStepBack}>
-                                <FaArrowLeft style={{ marginRight: "8px" }} />
+                                <FaArrowLeft />
                                 Back
                               </button>
                               <button
                                 className="visaPrimaryButton"
                                 onClick={handleNext}
                                 disabled={!applicationData.departureTime}>
-                                Next: Duration{" "}
-                                <FaArrowRight style={{ marginLeft: "8px" }} />
+                                Next: Duration
+                                <FaArrowRight />
                               </button>
                             </div>
                           </div>
                         )}
 
-                        {/* Step 3: Duration Selection */}
                         {currentStep === 3 && (
                           <div className="visaForm">
                             <div className="form-section">
                               <h3 className="section-title">
-                                <FaCalendarAlt
-                                  style={{ marginRight: "10px" }}
-                                />
+                                <FaCalendarAlt />
                                 Visa Duration
                               </h3>
                               <p className="section-subtitle">
-                                Select how long you need the visa for.
+                                Select how long you need the visa for
                               </p>
 
-                              <div className="duration-cards">
+                              <div className="quick-info-section">
+                                <FaInfoCircle />
+                                <p className="quick-info-text">
+                                  <strong>Note:</strong> Longer durations may
+                                  require additional documentation. All visas
+                                  allow multiple entries unless specified.
+                                </p>
+                              </div>
+
+                              <div className="duration-grid-compact">
                                 {durations.map((duration) => (
                                   <div
                                     key={duration.id}
-                                    className={`duration-card ${
-                                      applicationData.duration === duration.id
-                                        ? "selected"
-                                        : ""
+                                    className={`duration-option-compact ${
+                                      applicationData.duration === duration.id ?
+                                        "selected"
+                                      : ""
                                     }`}
                                     onClick={() =>
                                       handleDurationSelect(duration.id)
                                     }>
-                                    <div className="duration-icon">
+                                    <div className="selection-indicator"></div>
+                                    <div className="duration-icon-compact">
                                       {duration.icon}
                                     </div>
-                                    <div className="duration-label">
+                                    <div className="duration-title-compact">
                                       {duration.label}
                                     </div>
-                                    <div className="duration-months">
-                                      {duration.months}
+                                    <div className="duration-time-compact">
+                                      {duration.time}
+                                    </div>
+                                    <div className="duration-badge">
+                                      {duration.badge}
                                     </div>
                                   </div>
                                 ))}
                               </div>
                             </div>
 
-                            <div className="duration-note">
-                              <p className="duration-note-text">
-                                <strong>Note:</strong> Processing time depends
-                                on selected duration. Longer durations may
-                                require additional documentation.
-                              </p>
-                            </div>
-
                             <div className="visaActionButtons">
                               <button
                                 className="visaSecondaryButton"
                                 onClick={handleStepBack}>
-                                <FaArrowLeft style={{ marginRight: "8px" }} />
+                                <FaArrowLeft />
                                 Back
                               </button>
                               <button
                                 className="visaPrimaryButton"
                                 onClick={handleNext}
                                 disabled={!applicationData.duration}>
-                                Next: Details{" "}
-                                <FaArrowRight style={{ marginLeft: "8px" }} />
+                                Next: Details
+                                <FaArrowRight />
                               </button>
                             </div>
                           </div>
                         )}
-
                         {/* Step 4: Personal Details */}
                         {currentStep === 4 && (
                           <form
@@ -796,7 +842,7 @@ export default function VisaServicePage() {
                             onSubmit={handleDetailsSubmit}>
                             <div className="form-section">
                               <h3 className="section-title">
-                                <FaUserCircle style={{ marginRight: "10px" }} />
+                                <FaUserCircle />
                                 Personal Information
                               </h3>
                               <p className="section-subtitle">
@@ -807,7 +853,7 @@ export default function VisaServicePage() {
                               <div className="formGrid">
                                 <div className="formField">
                                   <label>
-                                    <FaUser style={{ marginRight: "8px" }} />
+                                    <FaUser />
                                     First Name *
                                   </label>
                                   <input
@@ -825,7 +871,7 @@ export default function VisaServicePage() {
                                 </div>
                                 <div className="formField">
                                   <label>
-                                    <FaUser style={{ marginRight: "8px" }} />
+                                    <FaUser />
                                     Last Name *
                                   </label>
                                   <input
@@ -846,9 +892,7 @@ export default function VisaServicePage() {
                               <div className="formGrid">
                                 <div className="formField">
                                   <label>
-                                    <FaEnvelope
-                                      style={{ marginRight: "8px" }}
-                                    />
+                                    <FaEnvelope />
                                     Email Address *
                                   </label>
                                   <input
@@ -866,7 +910,7 @@ export default function VisaServicePage() {
                                 </div>
                                 <div className="formField">
                                   <label>
-                                    <FaPhone style={{ marginRight: "8px" }} />
+                                    <FaPhone />
                                     Phone Number *
                                   </label>
                                   <input
@@ -887,9 +931,7 @@ export default function VisaServicePage() {
                               <div className="formGrid">
                                 <div className="formField">
                                   <label>
-                                    <FaPassport
-                                      style={{ marginRight: "8px" }}
-                                    />
+                                    <FaPassport />
                                     Passport Number *
                                   </label>
                                   <input
@@ -907,7 +949,7 @@ export default function VisaServicePage() {
                                 </div>
                                 <div className="formField">
                                   <label>
-                                    <FaGlobe style={{ marginRight: "8px" }} />
+                                    <FaGlobe />
                                     Nationality *
                                   </label>
                                   <input
@@ -931,7 +973,7 @@ export default function VisaServicePage() {
                                 type="button"
                                 className="visaSecondaryButton"
                                 onClick={handleStepBack}>
-                                <FaArrowLeft style={{ marginRight: "8px" }} />
+                                <FaArrowLeft />
                                 Back
                               </button>
                               <button
@@ -945,20 +987,19 @@ export default function VisaServicePage() {
                                   !applicationData.passportNumber ||
                                   !applicationData.nationality
                                 }>
-                                Next: Upload Passport{" "}
-                                <FaArrowRight style={{ marginLeft: "8px" }} />
+                                Next: Upload Passport
+                                <FaArrowRight />
                               </button>
                             </div>
                           </form>
                         )}
-
                         {/* Step 5: Passport Upload */}
                         {currentStep === 5 && (
                           <div className="visaForm">
                             <div className="upload-data-section">
                               <div className="upload-data-header">
                                 <h4>
-                                  <FaPassport style={{ marginRight: "10px" }} />
+                                  <FaPassport />
                                   Passport Data Page Upload
                                 </h4>
                                 <p>
@@ -978,14 +1019,14 @@ export default function VisaServicePage() {
                                   <FaUpload />
                                 </div>
                                 <div className="upload-zone-title">
-                                  {applicationData.passportFile
-                                    ? "Upload Complete"
-                                    : "Upload Passport"}
+                                  {applicationData.passportFile ?
+                                    "Upload Complete"
+                                  : "Upload Passport"}
                                 </div>
                                 <div className="upload-zone-subtitle">
-                                  {applicationData.passportFile
-                                    ? "Passport data page uploaded successfully"
-                                    : "Click to browse or drag & drop"}
+                                  {applicationData.passportFile ?
+                                    "Passport data page uploaded successfully"
+                                  : "Click to browse or drag & drop"}
                                 </div>
                                 <div className="upload-zone-instructions">
                                   PDF, JPG, or PNG • Max 10MB
@@ -1022,9 +1063,7 @@ export default function VisaServicePage() {
                                           .toUpperCase()}
                                       </span>
                                       <span style={{ color: "var(--green)" }}>
-                                        <FaCheck
-                                          style={{ marginRight: "4px" }}
-                                        />
+                                        <FaCheck />
                                         Ready for submission
                                       </span>
                                     </div>
@@ -1035,18 +1074,18 @@ export default function VisaServicePage() {
                                       onClick={() =>
                                         window.open(
                                           applicationData.passportFile.url,
-                                          "_blank"
+                                          "_blank",
                                         )
                                       }
                                       style={{ padding: "10px 20px" }}>
-                                      <FaEye style={{ marginRight: "8px" }} />
+                                      <FaEye />
                                       View
                                     </button>
                                     <button
                                       className="visaSecondaryButton"
                                       onClick={handleRemovePassport}
                                       style={{ padding: "10px 20px" }}>
-                                      <FaTrash style={{ marginRight: "8px" }} />
+                                      <FaTrash />
                                       Remove
                                     </button>
                                   </div>
@@ -1075,26 +1114,25 @@ export default function VisaServicePage() {
                               <button
                                 className="visaSecondaryButton"
                                 onClick={handleStepBack}>
-                                <FaArrowLeft style={{ marginRight: "8px" }} />
+                                <FaArrowLeft />
                                 Back
                               </button>
                               <button
                                 className="visaPrimaryButton"
                                 onClick={handleUploadSubmit}
                                 disabled={!applicationData.passportFile}>
-                                Next: Payment{" "}
-                                <FaArrowRight style={{ marginLeft: "8px" }} />
+                                Next: Payment
+                                <FaArrowRight />
                               </button>
                             </div>
                           </div>
                         )}
-
                         {/* Step 6: Payment */}
                         {currentStep === 6 && (
                           <div className="visaForm">
                             <div className="form-section">
                               <h3 className="section-title">
-                                <FaCreditCard style={{ marginRight: "10px" }} />
+                                <FaCreditCard />
                                 Payment Details
                               </h3>
 
@@ -1104,8 +1142,12 @@ export default function VisaServicePage() {
                                     Payment Summary
                                   </div>
                                   <div className="pricing-total">
-                                    {getCountryCurrency()}
-                                    {calculateTotalPrice()}
+                                    <span className="currency-symbol">
+                                      {getCountryCurrency()}
+                                    </span>
+                                    <span className="price-amount">
+                                      {calculateTotalPrice()}
+                                    </span>
                                   </div>
                                 </div>
                                 <div className="pricing-details">
@@ -1138,8 +1180,12 @@ export default function VisaServicePage() {
                                       Total Amount
                                     </span>
                                     <span className="pricing-value">
-                                      {getCountryCurrency()}
-                                      {calculateTotalPrice()}
+                                      <span className="currency-symbol">
+                                        {getCountryCurrency()}
+                                      </span>
+                                      <span className="price-amount">
+                                        {calculateTotalPrice()}
+                                      </span>
                                     </span>
                                   </div>
                                 </div>
@@ -1189,20 +1235,24 @@ export default function VisaServicePage() {
                               <button
                                 className="visaSecondaryButton"
                                 onClick={handleStepBack}>
-                                <FaArrowLeft style={{ marginRight: "8px" }} />
+                                <FaArrowLeft />
                                 Back
                               </button>
                               <button
                                 className="visaPrimaryButton"
                                 onClick={handlePaymentSubmit}>
-                                Pay {getCountryCurrency()}
-                                {calculateTotalPrice()}{" "}
-                                <FaArrowRight style={{ marginLeft: "8px" }} />
+                                Pay{" "}
+                                <span className="currency-symbol">
+                                  {getCountryCurrency()}
+                                </span>
+                                <span className="price-amount">
+                                  {calculateTotalPrice()}
+                                </span>
+                                <FaArrowRight />
                               </button>
                             </div>
                           </div>
                         )}
-
                         {/* Step 7: Success */}
                         {currentStep === 7 && (
                           <div className="visaSuccessContainer">
@@ -1330,7 +1380,9 @@ export default function VisaServicePage() {
                                           color: "var(--green)",
                                           fontWeight: "800",
                                         }}>
-                                        {getCountryCurrency()}
+                                        <span className="currency-symbol">
+                                          {getCountryCurrency()}
+                                        </span>
                                         {calculateTotalPrice()}
                                       </span>
                                     </div>
@@ -1360,7 +1412,7 @@ export default function VisaServicePage() {
                                 <button
                                   className="visaSecondaryButton"
                                   onClick={() => window.print()}>
-                                  <FaPrint style={{ marginRight: "8px" }} />
+                                  <FaPrint />
                                   Print Receipt
                                 </button>
                                 <button
@@ -1373,7 +1425,7 @@ export default function VisaServicePage() {
                           </div>
                         )}
                       </>
-                    )}
+                    }
                   </motion.div>
                 </AnimatePresence>
               </div>
@@ -1397,7 +1449,9 @@ export default function VisaServicePage() {
                       <span
                         className="visaStatValue"
                         style={{ color: "var(--green)" }}>
-                        {getCountryCurrency()}
+                        <span className="currency-symbols">
+                          {getCountryCurrency()}
+                        </span>
                         {calculateTotalPrice()}
                       </span>
                     </div>

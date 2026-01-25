@@ -16,7 +16,6 @@ import Profile from "./pages/user/Profile";
 import Transactions from "./pages/user/Transactions";
 import Bookings from "./pages/user/Bookings";
 import Settings from "./pages/user/Settings";
-import Security from "./pages/user/Security";
 
 import Footer from "./components/Footer";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -133,7 +132,6 @@ function App() {
           <Route path="my-visa" element={<UserVisaRecords />} />
           <Route path="bookings" element={<Bookings />} />
           <Route path="settings" element={<Settings />} />
-          <Route path="security" element={<Security />} />
         </Route>
 
         {/* ========== ADMIN DASHBOARD ROUTES ========== */}

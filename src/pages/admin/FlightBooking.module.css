@@ -1,30 +1,25 @@
-/* FlightBooking.module.css */
-
 .allBookings {
   padding: 1.5rem;
   min-height: 100vh;
   background: #f8fafc;
+  margin-top: 50px;
 }
 
-/* Header */
 .header {
-  background: linear-gradient(135deg, var(--dark-green), var(--green));
-  border-radius: 16px;
-  padding: 2rem;
-  margin-bottom: 2rem;
-  color: white;
-  position: relative;
-  overflow: hidden;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
 }
 
-.header::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+.header h1 {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
 }
 
 .headerLeft {
@@ -73,7 +68,7 @@
   align-items: center;
   gap: 8px;
   padding: 10px 20px;
-  background: rgba(255, 255, 255, 0.2);
+  background: #047857;
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 10px;
@@ -243,7 +238,6 @@
   width: 100%;
 }
 
-/* Table Container - FIXED & PERFECTLY BALANCED */
 .tableContainer {
   background: white;
   border-radius: 12px;
@@ -261,7 +255,6 @@
   border-bottom: 1px solid #e5e7eb;
 }
 
-/* PERFECTLY BALANCED: Fixed width percentages that add up to 100% */
 .tableHeaderRow {
   display: grid;
   grid-template-columns: 8% 12% 8% 15% 15% 8% 8% 8% 10%;
@@ -633,12 +626,10 @@
   .header {
     flex-direction: column;
     gap: 1rem;
-    text-align: center;
   }
 
   .headerRight {
     width: 100%;
-    justify-content: center;
   }
 
   .statsGrid {
