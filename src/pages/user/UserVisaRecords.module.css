@@ -21,7 +21,7 @@
 }
 
 .visaProcessContainer {
-  padding: 2rem;
+  padding: 3rem 2rem;
   max-width: 1400px;
   margin: 0 auto;
   background: var(--off-white);
@@ -909,10 +909,10 @@
 }
 
 @media (max-width: 768px) {
-  .visaProcessContainer {
-    padding: 1rem;
+  .header {
+    display: flex;
+    flex-direction: column;
   }
-
   .applicationsGrid {
     grid-template-columns: 1fr;
   }

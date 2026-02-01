@@ -459,10 +459,6 @@ function UserVisaRecords() {
             <FiPlus />
             New Application
           </Link>
-          <button
-            onClick={addNewApplication}
-            className={styles.refreshBtn}
-            title="Add Test Application"></button>
         </div>
       </div>
 

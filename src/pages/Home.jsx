@@ -6,7 +6,6 @@ import "../pages/home.css";
 export default function Home() {
   const [activeSlide, setActiveSlide] = useState(0);
 
-
   const heroSlides = [
     {
       image:
@@ -112,11 +111,11 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="services-indicator">
+        <div className="services-indicators">
           {heroSlides.map((_, index) => (
             <button
               key={index}
-              className={`service-dot ${index === activeSlide ? "active" : ""}`}
+              className={`service-dots ${index === activeSlide ? "active" : ""}`}
               onClick={() => setActiveSlide(index)}
               aria-label={`View ${heroSlides[index].title}`}
             />
@@ -126,7 +125,7 @@ export default function Home() {
 
       {/* Services Section - 4 Equal Cards */}
       <section className="section services-section">
-        <div className="section-header">
+        <div className="section-headers">
           <h2 className="section-title">Our Services</h2>
           <p className="section-subtitle">
             Comprehensive solutions for all your travel and financial needs
@@ -200,7 +199,7 @@ export default function Home() {
 
       {/* Offers Section - 3 Equal Cards */}
       <section className="offers-section">
-        <div className="section-header">
+        <div className="section-headers">
           <h2 className="section-title">Special Offers</h2>
           <p className="section-subtitle">
             Limited time deals for our valued customers
@@ -264,7 +263,7 @@ export default function Home() {
 
       {/* Why Choose Us - 4 Equal Cards */}
       <section className="features-section">
-        <div className="section-header">
+        <div className="section-headers">
           <h2 className="section-title">Why Choose Us</h2>
           <p className="section-subtitle">
             Experience the difference with our premium services
@@ -309,8 +308,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-
     </>
   );
 }

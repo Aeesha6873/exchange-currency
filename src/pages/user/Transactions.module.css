@@ -21,9 +21,8 @@
 }
 
 .transactionsContainer {
-  padding: 1rem;
+  padding: 3rem 1rem;
   max-width: 1400px;
-  /* margin: 0 auto; */
   background: var(--off-white);
   min-height: calc(100vh - 72px);
   margin-top: 34px;

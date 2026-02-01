@@ -1,69 +1,91 @@
 .adminLayout {
   display: flex;
   min-height: 100vh;
-  width: 100%;
-  overflow-y: hidden;
-  background-color: var(--light-gray);
+  background-color: #f8fafc;
   position: relative;
-  transition: all 0.3s ease;
 }
 
 .mainContent {
   flex: 1;
   display: flex;
   flex-direction: column;
-  margin-left: 280px;
-  min-width: 0;
-  width: calc(100vw - 280px);
-  max-width: calc(100vw - 280px);
-  position: relative;
-  transition: all 0.3s ease;
-}
-
-.mainContent.sidebarCollapsed {
-  margin-left: 70px;
-  width: calc(100vw - 70px);
-  max-width: calc(100vw - 70px);
-}
-
-.contentArea {
-  flex: 1;
-  padding: 24px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  background-color: var(--light-gray);
-  min-height: calc(100vh - 80px);
   width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-  transition: all 0.3s ease;
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
+}
+
+@media (min-width: 1025px) {
+  .mainContent {
+    margin-left: 280px;
+    width: calc(100% - 280px);
+  }
+
+  .mainContent.sidebarCollapsed {
+    margin-left: 80px;
+    width: calc(100% - 80px);
+  }
 }
 
 @media (max-width: 1024px) {
+  .adminLayout {
+    flex-direction: column;
+  }
+
   .mainContent {
     margin-left: 0 !important;
-    width: 100vw !important;
-    max-width: 100vw !important;
+    width: 100%;
   }
 
-  .adminSidebar {
-    transform: translateX(-100%);
-  }
-
-  .adminSidebar.mobileOpen {
-    transform: translateX(0);
+  .mainContent.mobile {
+    margin-left: 0;
+    width: 100%;
   }
 }
 
-@media (max-width: 768px) {
-  .contentArea {
-    padding: 16px;
-    min-height: calc(100vh - 70px);
-  }
+.contentWrapper {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  background-color: #f8fafc;
+  margin-top: 0;
 }
 
-.contentArea > * {
+.contentArea {
   max-width: 100%;
-  width: 100%;
-  box-sizing: border-box;
+  margin: 0 auto;
+  padding: 0;
+}
+
+@media (min-width: 1025px) {
+  .contentArea {
+    padding: 0 20px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .contentWrapper {
+    padding: 15px;
+    padding-top: 70px;
+  }
+
+  .contentArea {
+    padding: 0;
+  }
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  font-size: 1.2rem;
+  color: #64748b;
+}
+
+:global(.admin-navbar) {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }

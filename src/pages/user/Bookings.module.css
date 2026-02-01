@@ -21,12 +21,11 @@
 }
 
 .bookingsContainer {
-  padding: 2rem;
+  padding: 5rem 2rem;
   max-width: 1400px;
   margin: 0 auto;
   background: var(--off-white);
   min-height: calc(100vh - 72px);
-  margin-top: 24px;
 }
 
 .loadingContainer {
@@ -1082,7 +1081,7 @@
 
 @media (max-width: 768px) {
   .bookingsContainer {
-    padding: 1rem;
+    /* padding: 1rem; */
   }
 
   .header {

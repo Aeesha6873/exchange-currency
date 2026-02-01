@@ -6,7 +6,6 @@
   box-shadow: var(--neon-glow);
 }
 
-/* Navigation Header */
 .navigationHeader {
   display: flex;
   justify-content: space-between;
@@ -637,7 +636,6 @@
 
 @media (max-width: 768px) {
   .navigationHeader {
-    flex-direction: column;
     gap: 15px;
     text-align: center;
   }
@@ -670,7 +668,10 @@
 }
 
 @media (max-width: 480px) {
-  .membersGrid {
+  .memberAvatar {
+    display: none;
+  }
+  .memberCard {
     grid-template-columns: 1fr;
   }
 

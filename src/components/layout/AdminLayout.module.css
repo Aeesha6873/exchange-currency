@@ -1,5 +1,4 @@
-/* components/admin/AdminLayout.module.css */
-.adminLayout {
+/* components/admin/AdminLayout.module.css .adminLayout {
   display: flex;
   min-height: 100vh;
   background: var(--light-gray);
@@ -24,7 +23,6 @@
   overflow-y: auto;
 }
 
-/* Responsive */
 @media (max-width: 1024px) {
   .mainContent {
     margin-left: 0;
@@ -33,4 +31,4 @@
   .mainContent.expanded {
     margin-left: 0;
   }
-}
+} */

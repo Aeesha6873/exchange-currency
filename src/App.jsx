@@ -140,6 +140,8 @@ function App() {
           <Route path="dashboard" element={<AdminDashboard />} />
 
           <Route path="manage-users" element={<ManagerUsers />} />
+          <Route path="manage-users/:userId" element={<ManagerUsers />} />
+
           <Route path="transactions" element={<ExchangeTransaction />} />
           <Route path="all-users" element={<AllUsers />} />
           <Route path="flight-bookings" element={<FlightBookings />} />

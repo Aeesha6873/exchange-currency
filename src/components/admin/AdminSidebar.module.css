@@ -272,6 +272,8 @@
   position: relative;
   white-space: nowrap;
   overflow: hidden;
+  pointer-events: auto !important;
+  cursor: pointer;
 }
 
 .navLink:hover {
@@ -470,6 +472,7 @@
     width: 280px;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 8px 0 30px rgba(0, 0, 0, 0.2);
+    pointer-events: auto !important;
   }
 
   .adminSidebar.mobileOpen {
@@ -724,5 +727,99 @@
   .adminSidebar {
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Prevent body scroll when sidebar is open on mobile */
+body.sidebarOpen {
+  overflow: hidden;
+}
+/* Add this to your AdminSidebar.module.css */
+.navLink.activeItem {
+  background: linear-gradient(135deg, var(--green), #059669) !important;
+  color: var(--white) !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
+}
+
+.navLink.activeItem .navIcon {
+  opacity: 1 !important;
+}
+
+/* Make sure nav links are clickable on mobile */
+@media (max-width: 1024px) {
+  .navLink {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    z-index: 10 !important;
+    position: relative !important;
+  }
+
+  .adminSidebar.mobileOpen {
+    pointer-events: auto !important;
+  }
+
+  .adminSidebar.mobileOpen * {
+    pointer-events: auto !important;
+  }
+}
+/* Mobile-specific fixes */
+@media (max-width: 1024px) {
+  .adminSidebar.mobileOpen {
+    transform: translateX(0);
+    pointer-events: auto !important;
+  }
+
+  .adminSidebar.mobileOpen * {
+    pointer-events: auto !important;
+  }
+
+  /* Ensure nav links are clickable */
+  .navLink {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    z-index: 1001 !important;
+    position: relative !important;
+  }
+
+  /* Fix overlay z-index */
+  .mobileOverlay {
+    display: block !important;
+    z-index: 1099 !important; /* Below sidebar but above everything else */
+    pointer-events: auto !important;
+  }
+
+  /* Ensure buttons are clickable */
+  .logoutBtn,
+  .desktopToggleBtn,
+  .mobileMenuToggle {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    z-index: 1101 !important;
+  }
+
+  /* Prevent body scroll when sidebar is open */
+  body.sidebarOpen {
+    overflow: hidden !important;
+    position: fixed !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* Make sure links are large enough for touch */
+  .navLink {
+    min-height: 48px !important;
+    padding: 14px 16px !important;
+  }
+}
+
+/* Touch device improvements */
+@media (hover: none) and (pointer: coarse) {
+  .navLink {
+    padding: 16px 20px !important;
+  }
+
+  .navLink:active {
+    background: rgba(255, 255, 255, 0.15) !important;
+    transform: scale(0.98) !important;
   }
 }

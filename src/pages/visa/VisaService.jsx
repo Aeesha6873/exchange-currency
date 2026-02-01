@@ -503,7 +503,7 @@ export default function VisaServicePage() {
                         <span className="currency-symbols">
                           {getCountryCurrency()}
                         </span>
-                        <span className="price-amount">
+                        <span className="price-amounts">
                           {calculateTotalPrice()}
                         </span>
                       </div>
@@ -515,7 +515,7 @@ export default function VisaServicePage() {
                           <span className="currency-symbols">
                             {getCountryCurrency()}
                           </span>
-                          <span className="price-amount">
+                          <span className="price-amounts">
                             {calculateTotalPrice()}
                           </span>
                         </span>
@@ -670,7 +670,7 @@ export default function VisaServicePage() {
                                         <span className="currency-symbols">
                                           {getCountryCurrency()}
                                         </span>
-                                        <span className="price-amount">
+                                        <span className="price-amounts">
                                           {calculateTotalPrice()}
                                         </span>
                                       </div>
@@ -1142,10 +1142,10 @@ export default function VisaServicePage() {
                                     Payment Summary
                                   </div>
                                   <div className="pricing-total">
-                                    <span className="currency-symbol">
+                                    <span className="currency-symbols">
                                       {getCountryCurrency()}
                                     </span>
-                                    <span className="price-amount">
+                                    <span className="price-amounts">
                                       {calculateTotalPrice()}
                                     </span>
                                   </div>
@@ -1180,10 +1180,10 @@ export default function VisaServicePage() {
                                       Total Amount
                                     </span>
                                     <span className="pricing-value">
-                                      <span className="currency-symbol">
+                                      <span className="currency-symbols">
                                         {getCountryCurrency()}
                                       </span>
-                                      <span className="price-amount">
+                                      <span className="price-amounts">
                                         {calculateTotalPrice()}
                                       </span>
                                     </span>
@@ -1242,10 +1242,10 @@ export default function VisaServicePage() {
                                 className="visaPrimaryButton"
                                 onClick={handlePaymentSubmit}>
                                 Pay{" "}
-                                <span className="currency-symbol">
+                                <span className="currency-symbols">
                                   {getCountryCurrency()}
                                 </span>
-                                <span className="price-amount">
+                                <span className="price-amounts">
                                   {calculateTotalPrice()}
                                 </span>
                                 <FaArrowRight />
@@ -1380,7 +1380,7 @@ export default function VisaServicePage() {
                                           color: "var(--green)",
                                           fontWeight: "800",
                                         }}>
-                                        <span className="currency-symbol">
+                                        <span className="currency-symbols">
                                           {getCountryCurrency()}
                                         </span>
                                         {calculateTotalPrice()}

@@ -161,8 +161,7 @@ body {
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* Services Indicator */
-.services-indicator {
+.services-indicators {
   position: absolute;
   bottom: 30px;
   left: 50%;
@@ -172,7 +171,7 @@ body {
   z-index: 4;
 }
 
-.service-dot {
+.service-dots {
   width: 10px;
   height: 10px;
   border-radius: 50%;
@@ -183,19 +182,18 @@ body {
   padding: 0;
 }
 
-.service-dot.active {
+.service-dots.active {
   background: var(--orange);
   transform: scale(1.2);
 }
 
-/* Services Section - Balanced Grid */
 .section {
   padding: 4rem 2rem;
   max-width: 1200px;
   margin: 0 auto;
 }
 
-.section-header {
+.section-headers {
   text-align: center;
   margin-bottom: 3rem;
 }

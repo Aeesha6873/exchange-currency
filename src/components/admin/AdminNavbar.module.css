@@ -973,6 +973,7 @@
     height: 60px;
     padding: 0 10px;
     gap: 8px;
+    position: fixed;
   }
 
   .sidebarToggle {

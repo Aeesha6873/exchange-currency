@@ -1,5 +1,3 @@
-/* TravelBookings.module.css - Perfectly Balanced Table */
-
 :root {
   --dark-green: #047857;
   --green: #10b981;
@@ -11,15 +9,10 @@
 }
 
 .travelBookings {
-  padding: 1.5rem;
   min-height: 100vh;
   background: #f8fafc;
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
-    sans-serif;
 }
 
-/* ============ HEADER ============ */
 .header {
   background: white;
   border-radius: 12px;
@@ -905,7 +898,6 @@
   }
 }
 
-/* Focus styles for accessibility */
 .searchInput:focus,
 .filterGroup:focus,
 .actionBtn:focus,
@@ -914,7 +906,6 @@
   outline-offset: 2px;
 }
 
-/* Screen reader only */
 .srOnly {
   position: absolute;
   width: 1px;

@@ -152,7 +152,6 @@ function AdminNavbar({ user, isSidebarCollapsed, onToggleSidebar }) {
       <div className={styles.leftSection}>
         <div className={styles.brandSection}>
           <div className={styles.brandLogo}>
-            <span className={styles.logoIcon}>💱✈️</span>
             <h1 className={styles.brandName}>TravelFin</h1>
           </div>
           <div className={styles.brandTagline}>Admin Dashboard</div>

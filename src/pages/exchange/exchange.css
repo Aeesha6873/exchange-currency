@@ -988,14 +988,11 @@
   }
 
   .stepIndicators {
-    /* flex-direction: column; */
-    /* align-items: flex-start; */
     gap: 10px;
     justify-content: center;
   }
 
   .stepIndicator {
-    /* flex-direction: row; */
     gap: 15px;
     width: 100%;
   }

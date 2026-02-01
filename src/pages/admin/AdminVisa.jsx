@@ -43,6 +43,8 @@ import {
   FaRobot,
   FaArrowLeft,
   FaArrowRight,
+  FaSave,
+  FaTimes,
 } from "react-icons/fa";
 import "./AdminVisa.css";
 
@@ -63,6 +65,29 @@ const AdminVisa = () => {
   const [editingPrice, setEditingPrice] = useState(null);
   const [sortField, setSortField] = useState("applicationDate");
   const [sortOrder, setSortOrder] = useState("desc");
+  const [newCountry, setNewCountry] = useState({
+    id: "",
+    name: "",
+    flag: "",
+    basePrice: 0,
+    currency: "$",
+    processingTime: "7-14 days",
+    isActive: true,
+    visaTypes: [],
+    requirements: [],
+  });
+  const [newPricing, setNewPricing] = useState({
+    id: Date.now(),
+    countryId: "",
+    visaType: "tourist",
+    duration: "30",
+    price: 0,
+    processingFee: 0,
+    expressFee: 0,
+    urgentFee: 0,
+  });
+  const [newVisaType, setNewVisaType] = useState("");
+  const [newRequirement, setNewRequirement] = useState("");
   const [stats, setStats] = useState({
     totalApplications: 0,
     pending: 0,
@@ -427,14 +452,77 @@ const AdminVisa = () => {
     alert(`Exporting data in ${format.toUpperCase()} format...`);
   };
 
+  // Country Management Functions
   const handleAddCountry = () => {
+    setNewCountry({
+      id: "",
+      name: "",
+      flag: "",
+      basePrice: 0,
+      currency: "$",
+      processingTime: "7-14 days",
+      isActive: true,
+      visaTypes: [],
+      requirements: [],
+    });
     setEditingCountry(null);
     setShowCountryModal(true);
   };
 
   const handleEditCountry = (country) => {
+    setNewCountry(country);
     setEditingCountry(country);
     setShowCountryModal(true);
+  };
+
+  const handleSaveCountry = () => {
+    if (!newCountry.name.trim() || !newCountry.id.trim()) {
+      alert("Country name and ID are required");
+      return;
+    }
+
+    if (editingCountry) {
+      // Update existing country
+      setCountries(
+        countries.map((c) =>
+          c.id === editingCountry.id ? { ...newCountry } : c,
+        ),
+      );
+      alert("Country updated successfully!");
+    } else {
+      // Add new country
+      if (countries.some((c) => c.id === newCountry.id)) {
+        alert("Country ID already exists");
+        return;
+      }
+      setCountries([...countries, newCountry]);
+      alert("Country added successfully!");
+    }
+    setShowCountryModal(false);
+    setEditingCountry(null);
+    setNewCountry({
+      id: "",
+      name: "",
+      flag: "",
+      basePrice: 0,
+      currency: "$",
+      processingTime: "7-14 days",
+      isActive: true,
+      visaTypes: [],
+      requirements: [],
+    });
+  };
+
+  const handleDeleteCountry = (countryId) => {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this country? This will also delete associated pricing.",
+      )
+    ) {
+      setCountries(countries.filter((c) => c.id !== countryId));
+      setPricing(pricing.filter((p) => p.countryId !== countryId));
+      alert("Country deleted successfully!");
+    }
   };
 
   const handleToggleCountryActive = (countryId) => {
@@ -445,14 +533,89 @@ const AdminVisa = () => {
     );
   };
 
+  const handleAddVisaType = () => {
+    if (newVisaType.trim()) {
+      setNewCountry({
+        ...newCountry,
+        visaTypes: [...newCountry.visaTypes, newVisaType.trim()],
+      });
+      setNewVisaType("");
+    }
+  };
+
+  const handleRemoveVisaType = (index) => {
+    const updatedVisaTypes = [...newCountry.visaTypes];
+    updatedVisaTypes.splice(index, 1);
+    setNewCountry({ ...newCountry, visaTypes: updatedVisaTypes });
+  };
+
+  const handleAddRequirement = () => {
+    if (newRequirement.trim()) {
+      setNewCountry({
+        ...newCountry,
+        requirements: [...newCountry.requirements, newRequirement.trim()],
+      });
+      setNewRequirement("");
+    }
+  };
+
+  const handleRemoveRequirement = (index) => {
+    const updatedRequirements = [...newCountry.requirements];
+    updatedRequirements.splice(index, 1);
+    setNewCountry({ ...newCountry, requirements: updatedRequirements });
+  };
+
+  // Pricing Management Functions
   const handleAddPricing = () => {
+    setNewPricing({
+      id: Date.now(),
+      countryId: "",
+      visaType: "tourist",
+      duration: "30",
+      price: 0,
+      processingFee: 0,
+      expressFee: 0,
+      urgentFee: 0,
+    });
     setEditingPrice(null);
     setShowPricingModal(true);
   };
 
   const handleEditPricing = (price) => {
+    setNewPricing(price);
     setEditingPrice(price);
     setShowPricingModal(true);
+  };
+
+  const handleSavePricing = () => {
+    if (!newPricing.countryId || !newPricing.visaType) {
+      alert("Please select a country and visa type");
+      return;
+    }
+
+    if (editingPrice) {
+      // Update existing pricing
+      setPricing(
+        pricing.map((p) => (p.id === editingPrice.id ? { ...newPricing } : p)),
+      );
+      alert("Pricing updated successfully!");
+    } else {
+      // Add new pricing
+      setPricing([...pricing, newPricing]);
+      alert("Pricing added successfully!");
+    }
+    setShowPricingModal(false);
+    setEditingPrice(null);
+    setNewPricing({
+      id: Date.now(),
+      countryId: "",
+      visaType: "tourist",
+      duration: "30",
+      price: 0,
+      processingFee: 0,
+      expressFee: 0,
+      urgentFee: 0,
+    });
   };
 
   const handleDeletePricing = (priceId) => {
@@ -851,6 +1014,12 @@ const AdminVisa = () => {
                         <FaEdit /> Edit
                       </button>
                       <button
+                        className="btn-delete-country"
+                        onClick={() => handleDeleteCountry(country.id)}
+                        title="Delete Country">
+                        <FaTrash />
+                      </button>
+                      <button
                         className={`btn-toggle-status ${
                           country.isActive ? "deactivate" : ""
                         }`}
@@ -1223,6 +1392,414 @@ const AdminVisa = () => {
                     </button>
                   </>
                 )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Country Management Modal */}
+      <AnimatePresence>
+        {showCountryModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="modal-overlay"
+            onClick={() => setShowCountryModal(false)}>
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="modal-content country-modal"
+              onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2 className="modal-title">
+                  {editingCountry ? "Edit Country" : "Add New Country"}
+                </h2>
+                <button
+                  className="modal-close"
+                  onClick={() => setShowCountryModal(false)}>
+                  ×
+                </button>
+              </div>
+
+              <div className="modal-body">
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label htmlFor="countryId">Country ID *</label>
+                    <input
+                      type="text"
+                      id="countryId"
+                      value={newCountry.id}
+                      onChange={(e) =>
+                        setNewCountry({ ...newCountry, id: e.target.value })
+                      }
+                      placeholder="e.g., uk, usa, china"
+                      disabled={editingCountry}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="countryName">Country Name *</label>
+                    <input
+                      type="text"
+                      id="countryName"
+                      value={newCountry.name}
+                      onChange={(e) =>
+                        setNewCountry({ ...newCountry, name: e.target.value })
+                      }
+                      placeholder="e.g., United Kingdom"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="countryFlag">Flag Emoji</label>
+                    <input
+                      type="text"
+                      id="countryFlag"
+                      value={newCountry.flag}
+                      onChange={(e) =>
+                        setNewCountry({ ...newCountry, flag: e.target.value })
+                      }
+                      placeholder="e.g., 🇬🇧"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="currency">Currency</label>
+                    <input
+                      type="text"
+                      id="currency"
+                      value={newCountry.currency}
+                      onChange={(e) =>
+                        setNewCountry({
+                          ...newCountry,
+                          currency: e.target.value,
+                        })
+                      }
+                      placeholder="e.g., £, $, €"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="basePrice">Base Price</label>
+                    <input
+                      type="number"
+                      id="basePrice"
+                      value={newCountry.basePrice}
+                      onChange={(e) =>
+                        setNewCountry({
+                          ...newCountry,
+                          basePrice: Number(e.target.value),
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="processingTime">Processing Time</label>
+                    <input
+                      type="text"
+                      id="processingTime"
+                      value={newCountry.processingTime}
+                      onChange={(e) =>
+                        setNewCountry({
+                          ...newCountry,
+                          processingTime: e.target.value,
+                        })
+                      }
+                      placeholder="e.g., 5-7 days"
+                    />
+                  </div>
+
+                  <div className="form-group full-width">
+                    <label>Visa Types</label>
+                    <div className="tag-input-group">
+                      <input
+                        type="text"
+                        value={newVisaType}
+                        onChange={(e) => setNewVisaType(e.target.value)}
+                        placeholder="Add visa type (e.g., tourist, business)"
+                        onKeyPress={(e) =>
+                          e.key === "Enter" && handleAddVisaType()
+                        }
+                      />
+                      <button
+                        type="button"
+                        className="btn-add-tag"
+                        onClick={handleAddVisaType}>
+                        <FaPlus />
+                      </button>
+                    </div>
+                    <div className="tags-container">
+                      {newCountry.visaTypes.map((type, index) => (
+                        <span key={index} className="tag">
+                          {type}
+                          <button
+                            type="button"
+                            className="tag-remove"
+                            onClick={() => handleRemoveVisaType(index)}>
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="form-group full-width">
+                    <label>Requirements</label>
+                    <div className="tag-input-group">
+                      <input
+                        type="text"
+                        value={newRequirement}
+                        onChange={(e) => setNewRequirement(e.target.value)}
+                        placeholder="Add requirement"
+                        onKeyPress={(e) =>
+                          e.key === "Enter" && handleAddRequirement()
+                        }
+                      />
+                      <button
+                        type="button"
+                        className="btn-add-tag"
+                        onClick={handleAddRequirement}>
+                        <FaPlus />
+                      </button>
+                    </div>
+                    <div className="tags-container">
+                      {newCountry.requirements.map((req, index) => (
+                        <span key={index} className="tag">
+                          {req}
+                          <button
+                            type="button"
+                            className="tag-remove"
+                            onClick={() => handleRemoveRequirement(index)}>
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={newCountry.isActive}
+                        onChange={(e) =>
+                          setNewCountry({
+                            ...newCountry,
+                            isActive: e.target.checked,
+                          })
+                        }
+                      />
+                      <span>Active Country</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button
+                  className="btn-secondary"
+                  onClick={() => setShowCountryModal(false)}>
+                  Cancel
+                </button>
+                <button className="btn-primary" onClick={handleSaveCountry}>
+                  <FaSave /> {editingCountry ? "Update Country" : "Add Country"}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Pricing Management Modal */}
+      <AnimatePresence>
+        {showPricingModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="modal-overlay"
+            onClick={() => setShowPricingModal(false)}>
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="modal-content pricing-modal"
+              onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2 className="modal-title">
+                  {editingPrice ? "Edit Pricing" : "Add New Pricing"}
+                </h2>
+                <button
+                  className="modal-close"
+                  onClick={() => setShowPricingModal(false)}>
+                  ×
+                </button>
+              </div>
+
+              <div className="modal-body">
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label htmlFor="countryId">Country *</label>
+                    <select
+                      id="countryId"
+                      value={newPricing.countryId}
+                      onChange={(e) =>
+                        setNewPricing({
+                          ...newPricing,
+                          countryId: e.target.value,
+                        })
+                      }>
+                      <option value="">Select Country</option>
+                      {countries.map((country) => (
+                        <option key={country.id} value={country.id}>
+                          {country.flag} {country.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="visaType">Visa Type *</label>
+                    <select
+                      id="visaType"
+                      value={newPricing.visaType}
+                      onChange={(e) =>
+                        setNewPricing({
+                          ...newPricing,
+                          visaType: e.target.value,
+                        })
+                      }>
+                      <option value="tourist">Tourist</option>
+                      <option value="business">Business</option>
+                      <option value="student">Student</option>
+                      <option value="work">Work</option>
+                      <option value="transit">Transit</option>
+                      <option value="religious">Religious</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="duration">Duration (days)</label>
+                    <select
+                      id="duration"
+                      value={newPricing.duration}
+                      onChange={(e) =>
+                        setNewPricing({
+                          ...newPricing,
+                          duration: e.target.value,
+                        })
+                      }>
+                      <option value="30">30 days</option>
+                      <option value="60">60 days</option>
+                      <option value="90">90 days</option>
+                      <option value="180">180 days</option>
+                      <option value="365">1 year</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="price">Base Price</label>
+                    <input
+                      type="number"
+                      id="price"
+                      value={newPricing.price}
+                      onChange={(e) =>
+                        setNewPricing({
+                          ...newPricing,
+                          price: Number(e.target.value),
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="processingFee">Processing Fee</label>
+                    <input
+                      type="number"
+                      id="processingFee"
+                      value={newPricing.processingFee}
+                      onChange={(e) =>
+                        setNewPricing({
+                          ...newPricing,
+                          processingFee: Number(e.target.value),
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="expressFee">Express Fee</label>
+                    <input
+                      type="number"
+                      id="expressFee"
+                      value={newPricing.expressFee}
+                      onChange={(e) =>
+                        setNewPricing({
+                          ...newPricing,
+                          expressFee: Number(e.target.value),
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="urgentFee">Urgent Fee</label>
+                    <input
+                      type="number"
+                      id="urgentFee"
+                      value={newPricing.urgentFee}
+                      onChange={(e) =>
+                        setNewPricing({
+                          ...newPricing,
+                          urgentFee: Number(e.target.value),
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="form-group full-width">
+                    <div className="price-summary">
+                      <h4>Price Summary</h4>
+                      <div className="summary-row">
+                        <span>Base Price:</span>
+                        <span>${newPricing.price}</span>
+                      </div>
+                      <div className="summary-row">
+                        <span>Processing Fee:</span>
+                        <span>${newPricing.processingFee}</span>
+                      </div>
+                      <div className="summary-row">
+                        <span>Express Fee:</span>
+                        <span>${newPricing.expressFee}</span>
+                      </div>
+                      <div className="summary-row">
+                        <span>Urgent Fee:</span>
+                        <span>${newPricing.urgentFee}</span>
+                      </div>
+                      <div className="summary-row total">
+                        <strong>Total (Base + Processing):</strong>
+                        <strong>
+                          ${newPricing.price + newPricing.processingFee}
+                        </strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button
+                  className="btn-secondary"
+                  onClick={() => setShowPricingModal(false)}>
+                  Cancel
+                </button>
+                <button className="btn-primary" onClick={handleSavePricing}>
+                  <FaSave /> {editingPrice ? "Update Pricing" : "Add Pricing"}
+                </button>
               </div>
             </motion.div>
           </motion.div>

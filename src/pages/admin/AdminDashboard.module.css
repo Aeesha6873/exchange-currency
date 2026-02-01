@@ -1,8 +1,8 @@
 .dashboard {
-  padding: 1rem;
+  /* padding: 1rem; */
   background: #f8fafc;
   min-height: 100vh;
-  margin-top: 50px;
+  /* margin-top: 50px; */
 }
 
 .header {
@@ -431,10 +431,6 @@
 
 /* Responsive */
 @media (min-width: 640px) {
-  .dashboard {
-    padding: 1.5rem;
-  }
-
   .title {
     font-size: 28px;
   }
@@ -480,10 +476,6 @@
 }
 
 @media (min-width: 1024px) {
-  .dashboard {
-    padding: 2rem;
-  }
-
   .servicesGrid {
     grid-template-columns: repeat(5, 1fr);
   }
