@@ -228,7 +228,7 @@ function Register() {
                 className={`${styles.formInput} ${
                   errors.fullName ? styles.error : ""
                 }`}
-                placeholder="John Doe"
+                placeholder="Enter your full name"
                 autoComplete="name"
                 disabled={isLoading}
                 autoFocus
@@ -253,7 +253,7 @@ function Register() {
                 className={`${styles.formInput} ${
                   errors.email ? styles.error : ""
                 }`}
-                placeholder="john@example.com"
+                placeholder="Enter your email"
                 autoComplete="email"
                 disabled={isLoading}
               />
@@ -289,17 +289,19 @@ function Register() {
                   disabled={isLoading}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                   tabIndex={-1}>
-                  {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+                  {showPassword ?
+                    <FiEyeOff size={16} />
+                  : <FiEye size={16} />}
                 </button>
               </div>
               {formData.password && passwordStrength && (
                 <div
                   className={`${styles.passwordStrength} ${styles[passwordStrength]}`}>
-                  {passwordStrength === "strong"
-                    ? "Strong password ✓"
-                    : passwordStrength === "medium"
-                    ? "Medium password"
-                    : "Weak password"}
+                  {passwordStrength === "strong" ?
+                    "Strong password ✓"
+                  : passwordStrength === "medium" ?
+                    "Medium password"
+                  : "Weak password"}
                 </div>
               )}
               {errors.password && (
@@ -336,11 +338,9 @@ function Register() {
                     showConfirmPassword ? "Hide password" : "Show password"
                   }
                   tabIndex={-1}>
-                  {showConfirmPassword ? (
+                  {showConfirmPassword ?
                     <FiEyeOff size={16} />
-                  ) : (
-                    <FiEye size={16} />
-                  )}
+                  : <FiEye size={16} />}
                 </button>
               </div>
               {errors.confirmPassword && (
@@ -383,15 +383,14 @@ function Register() {
               type="submit"
               className={styles.submitBtn}
               disabled={isLoading}>
-              {isLoading ? (
+              {isLoading ?
                 <>
                   <span className={styles.loading}></span> Creating Account...
                 </>
-              ) : (
-                <>
+              : <>
                   <FiCheckCircle size={16} /> Create Account
                 </>
-              )}
+              }
             </button>
 
             <div className={styles.loginLink}>

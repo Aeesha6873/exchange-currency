@@ -106,7 +106,7 @@ function Login() {
       const adminUser = ADMIN_USERS.find(
         (admin) =>
           admin.email.toLowerCase() === formData.email.toLowerCase() &&
-          admin.password === formData.password
+          admin.password === formData.password,
       );
 
       if (adminUser) {
@@ -125,7 +125,7 @@ function Login() {
             permissions: adminUser.permissions,
             createdAt: new Date().toISOString(),
             lastLogin: new Date().toISOString(),
-          })
+          }),
         );
 
         // Redirect to ADMIN dashboard
@@ -140,7 +140,7 @@ function Login() {
       const user = users.find(
         (u) =>
           u.email.toLowerCase() === formData.email.toLowerCase() &&
-          u.password === formData.password
+          u.password === formData.password,
       );
 
       if (!user) {
@@ -163,7 +163,7 @@ function Login() {
           isAdmin: false,
           createdAt: user.createdAt,
           lastLogin: new Date().toISOString(),
-        })
+        }),
       );
 
       // Redirect to USER dashboard
@@ -258,7 +258,7 @@ function Login() {
                 className={`${styles.formInput} ${
                   errors.email ? styles.error : ""
                 }`}
-                placeholder="you@example.com"
+                placeholder="Enter your email"
                 autoComplete="email"
                 disabled={isLoading}
                 autoFocus
@@ -295,7 +295,9 @@ function Login() {
                   disabled={isLoading}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                   tabIndex={-1}>
-                  {showPassword ? <FiEyeOff /> : <FiEye />}
+                  {showPassword ?
+                    <FiEyeOff />
+                  : <FiEye />}
                 </button>
               </div>
               {errors.password && (
@@ -318,11 +320,11 @@ function Login() {
               type="submit"
               className={styles.submitBtn}
               disabled={isLoading || loginSuccess}>
-              {isLoading
-                ? "Signing in..."
-                : loginSuccess
-                ? "Success!"
-                : "Sign in"}
+              {isLoading ?
+                "Signing in..."
+              : loginSuccess ?
+                "Success!"
+              : "Sign in"}
             </button>
 
             <div className={styles.loginOptions}>Or continue with</div>
