@@ -7,6 +7,7 @@ import ConverterCard from "../../components/exchange/ConverterCard";
 import PaymentAccount from "../../components/exchange/PaymentAccount";
 import PaymentStatus from "../../components/exchange/PaymentStatus";
 import UserBankForm from "../../components/exchange/UserBankForm";
+import { authApi, transactionsApi } from "../../services/api";
 
 export default function ExchangePage() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -66,14 +67,56 @@ export default function ExchangePage() {
     }, 400);
   };
 
-  const handleBankFormSubmit = () => {
+  const handleBankFormSubmit = async () => {
+    const currentUser = authApi.getCurrentUser();
+
+    if (!currentUser) {
+      alert("Please log in to complete the exchange.");
+      return;
+    }
+
     setIsAnimating(true);
+
+    // Save the transaction to localStorage so it shows up in
+    // Dashboard / Transactions
+    const fromCountry = currencyInfo[exchangeData.from];
+    const toCountry = currencyInfo[exchangeData.to];
+
+    const fromAmount = parseFloat(exchangeData.amount) || 0;
+    const toAmount = parseFloat(exchangeData.convertedAmount) || 0;
+
+    const exchangeRate = fromAmount > 0 ? toAmount / fromAmount : 0;
+    const fee = +(fromAmount * 0.005).toFixed(2); // 0.5% fee — matches your UI
+
+    await transactionsApi.create(currentUser.id, {
+      type: "exchange",
+      direction: "out", // money leaving the user's account
+      amount: fromAmount,
+      date: new Date().toISOString().slice(0, 10), // YYYY-MM-DD
+      time: new Date().toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      }),
+      status: "completed",
+      reference: `EX-${Date.now().toString().slice(-6)}`,
+      rate: exchangeRate.toFixed(4),
+      fee,
+      description: `${exchangeData.from} to ${exchangeData.to} Exchange`,
+      bank: "TravelFin", // or whatever you want to show
+      account: "****0000",
+      exchangeRate: +exchangeRate.toFixed(4),
+      fromAmount,
+      fromCurrency: exchangeData.from,
+      toAmount,
+      toCurrency: exchangeData.to,
+    });
+
     setTimeout(() => {
       setCurrentStep(5);
       setIsAnimating(false);
     }, 400);
   };
-
   const handleStepBack = () => {
     setIsAnimating(true);
     setTimeout(() => {
@@ -147,11 +190,9 @@ export default function ExchangePage() {
           }}
           style={{
             background:
-              i % 3 === 0
-                ? "var(--green)"
-                : i % 3 === 1
-                ? "var(--orange)"
-                : "var(--dark-green)",
+              i % 3 === 0 ? "var(--green)"
+              : i % 3 === 1 ? "var(--orange)"
+              : "var(--dark-green)",
           }}
         />
       ))}
@@ -312,7 +353,7 @@ export default function ExchangePage() {
                     animate="visible"
                     exit="exit"
                     className="contentWrapper">
-                    {isAnimating ? (
+                    {isAnimating ?
                       <div className="loadingState">
                         <div className="neonSpinner">
                           <div className="spinnerCore"></div>
@@ -325,8 +366,7 @@ export default function ExchangePage() {
                           <span></span>
                         </div>
                       </div>
-                    ) : (
-                      <>
+                    : <>
                         {currentStep === 1 && (
                           <ConverterCard
                             data={exchangeData}
@@ -467,7 +507,7 @@ export default function ExchangePage() {
                                     <div className="currencyAmount">
                                       {currencyInfo[exchangeData.from]?.symbol}
                                       {parseFloat(
-                                        exchangeData.amount
+                                        exchangeData.amount,
                                       ).toLocaleString(undefined, {
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2,
@@ -500,7 +540,7 @@ export default function ExchangePage() {
                                     <div className="currencyAmount">
                                       {currencyInfo[exchangeData.to]?.symbol}
                                       {parseFloat(
-                                        exchangeData.convertedAmount
+                                        exchangeData.convertedAmount,
                                       ).toLocaleString(undefined, {
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2,
@@ -519,13 +559,17 @@ export default function ExchangePage() {
                                     </div>
                                     <div className="detailValue">
                                       1 {exchangeData.from} ={" "}
-                                      {exchangeData.from === "NGN" &&
-                                      exchangeData.to === "USD"
-                                        ? "0.00067"
-                                        : exchangeData.from === "USD" &&
-                                          exchangeData.to === "NGN"
-                                        ? "1500"
-                                        : "1.0000"}{" "}
+                                      {(
+                                        exchangeData.from === "NGN" &&
+                                        exchangeData.to === "USD"
+                                      ) ?
+                                        "0.00067"
+                                      : (
+                                        exchangeData.from === "USD" &&
+                                        exchangeData.to === "NGN"
+                                      ) ?
+                                        "1500"
+                                      : "1.0000"}{" "}
                                       {exchangeData.to}
                                     </div>
                                   </div>
@@ -578,7 +622,7 @@ export default function ExchangePage() {
                           </div>
                         )}
                       </>
-                    )}
+                    }
                   </motion.div>
                 </AnimatePresence>
               </div>
@@ -597,12 +641,6 @@ export default function ExchangePage() {
                     </span>
                   </div>
                 </div>
-                {currentStep !== 5 && (
-                  <button className="assistButton">
-                    <span className="assistIcon">⟳</span>
-                    AI Assist
-                  </button>
-                )}
               </div>
             </div>
           </div>

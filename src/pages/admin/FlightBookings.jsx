@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   FiCalendar,
   FiSearch,
@@ -18,13 +18,63 @@ import {
   FiUsers,
   FiAirplay,
   FiPackage,
+  FiHome,
+  FiTruck,
 } from "react-icons/fi";
 import styles from "./FlightBooking.module.css";
+
+const KEYS = {
+  BOOKINGS: "bookings",
+  USERS: "users",
+};
+
+const read = (key, fallback = []) => {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const write = (key, value) => {
+  localStorage.setItem(key, JSON.stringify(value));
+};
+
+const fmtDate = (iso) => {
+  if (!iso) return "—";
+  try {
+    return new Date(iso).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  } catch {
+    return iso;
+  }
+};
+
+const fmtDateTime = (iso) => {
+  if (!iso) return "—";
+  try {
+    return new Date(iso).toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return iso;
+  }
+};
 
 const FlightBookings = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Modal states
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -33,166 +83,137 @@ const FlightBookings = () => {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [cancelReason, setCancelReason] = useState("");
 
-  const bookings = [
-    {
-      id: "BK-001",
-      user: "John Smith",
-      userEmail: "john@example.com",
-      userPhone: "+1 (555) 123-4567",
-      type: "flight",
-      destination: "New York (JFK)",
-      departure: "New Delhi (DEL)",
-      airline: "Delta Airlines",
-      flightNo: "DL123",
-      departureTime: "2024-01-20 08:30",
-      arrivalTime: "2024-01-20 11:45",
-      status: "confirmed",
-      amount: 850,
-      passengers: 1,
-      bookingDate: "2024-01-15",
-      paymentMethod: "Credit Card",
-      seatClass: "Business",
-      baggage: "2 x 23kg",
-    },
-    {
-      id: "BK-002",
-      user: "Emma Wilson",
-      userEmail: "emma@example.com",
-      userPhone: "+44 7911 123456",
-      type: "tour",
-      destination: "Bali, Indonesia",
-      package: "7-Day Luxury Tour",
-      duration: "7 days",
-      status: "confirmed",
-      amount: 3200,
-      travelers: 2,
-      bookingDate: "2024-01-14",
-      paymentMethod: "Bank Transfer",
-      inclusions: ["Hotel", "Meals", "Transport", "Guide"],
-    },
-    {
-      id: "BK-003",
-      user: "David Chen",
-      userEmail: "david@example.com",
-      userPhone: "+86 138 0013 8000",
-      type: "flight",
-      destination: "London (LHR)",
-      departure: "Shanghai (PVG)",
-      airline: "British Airways",
-      flightNo: "BA456",
-      departureTime: "2024-01-25 14:00",
-      arrivalTime: "2024-01-25 18:30",
-      status: "pending",
-      amount: 1200,
-      passengers: 2,
-      bookingDate: "2024-01-14",
-      paymentMethod: "PayPal",
-      seatClass: "Economy",
-      baggage: "1 x 20kg",
-    },
-    {
-      id: "BK-004",
-      user: "Sarah Johnson",
-      userEmail: "sarah@example.com",
-      userPhone: "+1 (555) 987-6543",
-      type: "tour",
-      destination: "Paris, France",
-      package: "Romantic Weekend",
-      duration: "3 days",
-      status: "confirmed",
-      amount: 1800,
-      travelers: 2,
-      bookingDate: "2024-01-13",
-      paymentMethod: "Credit Card",
-      inclusions: ["Hotel", "Breakfast", "City Tour"],
-    },
-    {
-      id: "BK-005",
-      user: "Michael Brown",
-      userEmail: "michael@example.com",
-      userPhone: "+61 412 345 678",
-      type: "flight",
-      destination: "Tokyo (NRT)",
-      departure: "Sydney (SYD)",
-      airline: "Japan Airlines",
-      flightNo: "JL789",
-      departureTime: "2024-02-01 10:30",
-      arrivalTime: "2024-02-01 20:15",
-      status: "cancelled",
-      amount: 1500,
-      passengers: 1,
-      bookingDate: "2024-01-12",
-      paymentMethod: "Credit Card",
-      seatClass: "Premium Economy",
-      baggage: "2 x 23kg",
-      cancelReason: "Schedule change",
-    },
-    {
-      id: "BK-006",
-      user: "Lisa Wang",
-      userEmail: "lisa@example.com",
-      userPhone: "+65 8123 4567",
-      type: "tour",
-      destination: "Swiss Alps",
-      package: "Ski Adventure",
-      duration: "5 days",
-      status: "confirmed",
-      amount: 2500,
-      travelers: 4,
-      bookingDate: "2024-01-11",
-      paymentMethod: "Bank Transfer",
-      inclusions: ["Hotel", "Ski Pass", "Equipment", "Transport"],
-    },
-    {
-      id: "BK-007",
-      user: "Robert Garcia",
-      userEmail: "robert@example.com",
-      userPhone: "+34 612 345 678",
-      type: "flight",
-      destination: "Dubai (DXB)",
-      departure: "Madrid (MAD)",
-      airline: "Emirates",
-      flightNo: "EK101",
-      departureTime: "2024-01-28 22:15",
-      arrivalTime: "2024-01-29 07:30",
-      status: "confirmed",
-      amount: 950,
-      passengers: 1,
-      bookingDate: "2024-01-10",
-      paymentMethod: "Credit Card",
-      seatClass: "Economy",
-      baggage: "1 x 20kg",
-    },
-    {
-      id: "BK-008",
-      user: "Maria Rodriguez",
-      userEmail: "maria@example.com",
-      userPhone: "+52 55 1234 5678",
-      type: "tour",
-      destination: "Greek Islands",
-      package: "Island Hopping",
-      duration: "10 days",
-      status: "pending",
-      amount: 4200,
-      travelers: 3,
-      bookingDate: "2024-01-09",
-      paymentMethod: "Bank Transfer",
-      inclusions: ["Hotels", "Ferries", "Meals", "Guided Tours"],
-    },
-  ];
+  /* ------------------------------------------------------------------ */
+  /* Load bookings + join with users                                     */
+  /* ------------------------------------------------------------------ */
 
-  // Calculate stats
-  const stats = {
-    total: bookings.length,
-    confirmed: bookings.filter((b) => b.status === "confirmed").length,
-    revenue: bookings
-      .filter((b) => b.status === "confirmed")
-      .reduce((sum, b) => sum + b.amount, 0),
-    today: 4,
-    pending: bookings.filter((b) => b.status === "pending").length,
+  const load = () => {
+    const users = read(KEYS.USERS, []);
+    const raw = read(KEYS.BOOKINGS, []);
+
+    const enriched = raw
+      .map((b) => {
+        const user = users.find((u) => String(u.id) === String(b.userId));
+        return {
+          id: b.id,
+          reference: b.reference || b.id,
+          userId: b.userId,
+          // User info (fallbacks in case user record is missing)
+          user: user?.fullName || user?.email || b.user || "Unknown User",
+          userEmail: user?.email || b.userEmail || "—",
+          userPhone: user?.phone || b.userPhone || "—",
+          // Booking identity
+          type: b.type || "flight",
+          status: b.status || "pending",
+          amount: Number(b.price) || 0,
+          currency: b.currency || "USD",
+          bookingDate: b.bookingDate || b.createdAt || null,
+          // Flight-specific
+          destination: b.destination || "—",
+          departure: b.departure || "",
+          arrival: b.arrival || "",
+          airline: b.airline || "",
+          flightNo: b.flight || "",
+          departureTime:
+            b.date ?
+              `${b.date} ${b.time || ""}`.trim()
+            : b.departureTime || "—",
+          arrivalTime: b.arrivalTime || "",
+          seatClass: b.class || b.seatClass || "",
+          baggage: b.baggage || "",
+          passengers:
+            Array.isArray(b.passengers) ?
+              b.passengers.length
+            : Number(b.passengers) || 1,
+          passengerList: Array.isArray(b.passengers) ? b.passengers : [],
+          // Hotel/tour/car
+          package: b.package || b.hotel || b.tourName || b.carModel || "",
+          duration: b.duration || "",
+          travelers: Number(b.guests) || Number(b.participants) || 0,
+          inclusions: b.amenities || [],
+          // Payment
+          paymentMethod: b.paymentMethod || b.bank || "—",
+          // Cancellation
+          cancelReason: b.cancelReason || b.cancellationReason || "",
+        };
+      })
+      .sort((a, b) => {
+        const av = new Date(a.bookingDate || 0).getTime();
+        const bv = new Date(b.bookingDate || 0).getTime();
+        return bv - av;
+      });
+
+    setBookings(enriched);
+    setLoading(false);
   };
 
-  // Modal functions
+  useEffect(() => {
+    load();
+    const onStorage = (e) => {
+      if (["bookings", "users"].includes(e.key)) load();
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
+  /* ------------------------------------------------------------------ */
+  /* Stats                                                               */
+  /* ------------------------------------------------------------------ */
+
+  const stats = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return {
+      total: bookings.length,
+      confirmed: bookings.filter((b) => b.status === "confirmed").length,
+      pending: bookings.filter((b) => b.status === "pending").length,
+      revenue: bookings
+        .filter((b) => b.status === "confirmed")
+        .reduce((sum, b) => sum + b.amount, 0),
+      today: bookings.filter(
+        (b) => b.bookingDate && new Date(b.bookingDate) >= today,
+      ).length,
+    };
+  }, [bookings]);
+
+  /* ------------------------------------------------------------------ */
+  /* Filtering                                                           */
+  /* ------------------------------------------------------------------ */
+
+  const filteredBookings = useMemo(() => {
+    const q = searchTerm.toLowerCase();
+    return bookings.filter((b) => {
+      const matchesSearch =
+        !q ||
+        b.user.toLowerCase().includes(q) ||
+        b.reference.toLowerCase().includes(q) ||
+        b.destination.toLowerCase().includes(q) ||
+        (b.airline || "").toLowerCase().includes(q);
+
+      const matchesStatus = statusFilter === "all" || b.status === statusFilter;
+      const matchesType = typeFilter === "all" || b.type === typeFilter;
+
+      return matchesSearch && matchesStatus && matchesType;
+    });
+  }, [bookings, searchTerm, statusFilter, typeFilter]);
+
+  /* ------------------------------------------------------------------ */
+  /* Persistence                                                         */
+  /* ------------------------------------------------------------------ */
+
+  const updateBooking = (id, patch) => {
+    const all = read(KEYS.BOOKINGS, []);
+    const next = all.map((b) =>
+      String(b.id) === String(id) ? { ...b, ...patch } : b,
+    );
+    write(KEYS.BOOKINGS, next);
+    load();
+  };
+
+  /* ------------------------------------------------------------------ */
+  /* Modals                                                              */
+  /* ------------------------------------------------------------------ */
+
   const openDetailsModal = (booking) => {
     setSelectedBooking(booking);
     setShowDetailsModal(true);
@@ -217,9 +238,12 @@ const FlightBookings = () => {
     setCancelReason("");
   };
 
-  // Action functions
+  /* ------------------------------------------------------------------ */
+  /* Actions                                                             */
+  /* ------------------------------------------------------------------ */
+
   const handleExportReport = () => {
-    const dataStr = JSON.stringify(bookings, null, 2);
+    const dataStr = JSON.stringify(filteredBookings, null, 2);
     const dataUri =
       "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
     const link = document.createElement("a");
@@ -232,27 +256,44 @@ const FlightBookings = () => {
   };
 
   const handleConfirmBooking = () => {
-    // In real app, you would update the booking status via API
-    console.log(`Confirmed booking: ${selectedBooking?.id}`);
+    if (!selectedBooking) return;
+    updateBooking(selectedBooking.id, {
+      status: "confirmed",
+      confirmedAt: new Date().toISOString(),
+    });
     closeAllModals();
   };
 
   const handleCancelBooking = () => {
-    if (!cancelReason.trim()) {
-      alert("Please enter a cancellation reason.");
-      return;
-    }
-    // In real app, you would update the booking status via API
-    console.log(
-      `Cancelled booking: ${selectedBooking?.id}, Reason: ${cancelReason}`,
-    );
+    if (!selectedBooking || !cancelReason.trim()) return;
+    updateBooking(selectedBooking.id, {
+      status: "cancelled",
+      cancelReason: cancelReason.trim(),
+      cancelledAt: new Date().toISOString(),
+    });
     closeAllModals();
   };
 
   const handleSendReminder = (booking) => {
-    console.log(`Sent reminder for booking: ${booking.id}`);
-    alert(`Reminder sent to ${booking.userEmail} about booking ${booking.id}`);
+    const subject = `Reminder: your booking ${booking.reference}`;
+    const body = `Hi ${booking.user},\n\nThis is a reminder about your booking ${booking.reference} for ${booking.destination}.\n\nThanks.`;
+    window.open(
+      `mailto:${booking.userEmail}?subject=${encodeURIComponent(
+        subject,
+      )}&body=${encodeURIComponent(body)}`,
+      "_blank",
+    );
   };
+
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("all");
+    setTypeFilter("all");
+  };
+
+  /* ------------------------------------------------------------------ */
+  /* Display helpers                                                     */
+  /* ------------------------------------------------------------------ */
 
   const getStatusColor = (status) => {
     const colors = {
@@ -265,22 +306,57 @@ const FlightBookings = () => {
   };
 
   const getTypeColor = (type) => {
-    return type === "flight" ? "#3b82f6" : "var(--orange)";
+    const colors = {
+      flight: "#3b82f6",
+      hotel: "#10b981",
+      tour: "var(--orange)",
+      car: "#8b5cf6",
+    };
+    return colors[type] || "#64748b";
   };
 
-  // Filter bookings
-  const filteredBookings = bookings.filter((booking) => {
-    const matchesSearch =
-      booking.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.destination.toLowerCase().includes(searchTerm.toLowerCase());
+  const getTypeIcon = (type) => {
+    switch (type) {
+      case "flight":
+        return <FiAirplay />;
+      case "hotel":
+        return <FiHome />;
+      case "car":
+        return <FiTruck />;
+      case "tour":
+      default:
+        return <FiPackage />;
+    }
+  };
 
-    const matchesStatus =
-      statusFilter === "all" || booking.status === statusFilter;
-    const matchesType = typeFilter === "all" || booking.type === typeFilter;
+  const getTypeLabel = (type) => {
+    switch (type) {
+      case "flight":
+        return "✈️ Flight";
+      case "hotel":
+        return "🏨 Hotel";
+      case "car":
+        return "🚗 Car";
+      case "tour":
+      default:
+        return "🏖️ Tour";
+    }
+  };
 
-    return matchesSearch && matchesStatus && matchesType;
-  });
+  if (loading) {
+    return (
+      <div className={styles.allBookings}>
+        <div
+          style={{
+            padding: "4rem",
+            textAlign: "center",
+            color: "#64748b",
+          }}>
+          Loading bookings...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.allBookings}>
@@ -292,7 +368,7 @@ const FlightBookings = () => {
             All Bookings
           </h1>
           <p className={styles.subtitle}>
-            Manage and track all flight and tour bookings
+            Manage and track all bookings across your platform
           </p>
         </div>
         <div className={styles.headerRight}>
@@ -312,7 +388,7 @@ const FlightBookings = () => {
           <div className={styles.statContent}>
             <div className={styles.statValue}>{stats.total}</div>
             <div className={styles.statLabel}>Total Bookings</div>
-            <div className={styles.statSub}>This month</div>
+            <div className={styles.statSub}>All time</div>
           </div>
         </div>
         <div className={styles.statCard}>
@@ -323,7 +399,9 @@ const FlightBookings = () => {
             <div className={styles.statValue}>{stats.confirmed}</div>
             <div className={styles.statLabel}>Confirmed</div>
             <div className={styles.statSub}>
-              {((stats.confirmed / stats.total) * 100).toFixed(0)}% rate
+              {stats.total === 0 ?
+                "0% rate"
+              : `${Math.round((stats.confirmed / stats.total) * 100)}% rate`}
             </div>
           </div>
         </div>
@@ -336,7 +414,7 @@ const FlightBookings = () => {
               ${stats.revenue.toLocaleString()}
             </div>
             <div className={styles.statLabel}>Revenue</div>
-            <div className={styles.statSub}>From bookings</div>
+            <div className={styles.statSub}>From confirmed</div>
           </div>
         </div>
         <div className={styles.statCard}>
@@ -386,20 +464,22 @@ const FlightBookings = () => {
               className={styles.filterSelect}>
               <option value="all">All Types</option>
               <option value="flight">Flights</option>
+              <option value="hotel">Hotels</option>
               <option value="tour">Tours</option>
+              <option value="car">Car Rentals</option>
             </select>
           </div>
         </div>
       </div>
 
-      {/* Bookings Table */}
+      {/* Table */}
       <div className={styles.tableContainer}>
         <div className={styles.tableHeader}>
           <div className={styles.tableHeaderRow}>
             <div className={styles.tableCell}>Booking ID</div>
             <div className={styles.tableCell}>User</div>
             <div className={styles.tableCell}>Type</div>
-            <div className={styles.tableCell}>Destination / Flight</div>
+            <div className={styles.tableCell}>Destination</div>
             <div className={styles.tableCell}>Details</div>
             <div className={styles.tableCell}>Amount</div>
             <div className={styles.tableCell}>Status</div>
@@ -413,18 +493,18 @@ const FlightBookings = () => {
             filteredBookings.map((booking) => (
               <div key={booking.id} className={styles.tableRow}>
                 <div className={styles.tableCell}>
-                  <div className={styles.bookingId}>{booking.id}</div>
+                  <div className={styles.bookingId}>{booking.reference}</div>
                 </div>
 
                 <div className={styles.tableCell}>
                   <div className={styles.userInfo}>
                     <div className={styles.userAvatar}>
-                      {booking.user.charAt(0)}
+                      {booking.user.charAt(0).toUpperCase()}
                     </div>
-                    <div>
+                    <div style={{ minWidth: 0 }}>
                       <div className={styles.userName}>{booking.user}</div>
                       <div className={styles.bookingDate}>
-                        Booked: {booking.bookingDate}
+                        Booked: {fmtDate(booking.bookingDate)}
                       </div>
                     </div>
                   </div>
@@ -437,7 +517,7 @@ const FlightBookings = () => {
                       background: `${getTypeColor(booking.type)}15`,
                       color: getTypeColor(booking.type),
                     }}>
-                    {booking.type === "flight" ? "✈️ Flight" : "🏖️ Tour"}
+                    {getTypeLabel(booking.type)}
                   </span>
                 </div>
 
@@ -447,13 +527,14 @@ const FlightBookings = () => {
                       <FiMapPin className={styles.destinationIcon} />
                       {booking.destination}
                     </div>
-                    {booking.type === "flight" && (
+                    {booking.type === "flight" && booking.airline && (
                       <div className={styles.flightDetails}>
                         <FiBriefcase className={styles.flightIcon} />
-                        {booking.airline} • {booking.flightNo}
+                        {booking.airline}
+                        {booking.flightNo ? ` • ${booking.flightNo}` : ""}
                       </div>
                     )}
-                    {booking.type === "tour" && (
+                    {booking.type !== "flight" && booking.package && (
                       <div className={styles.tourDetails}>
                         {booking.package}
                       </div>
@@ -466,7 +547,7 @@ const FlightBookings = () => {
                     {booking.type === "flight" ?
                       <>
                         <div className={styles.detailItem}>
-                          <span className={styles.detailLabel}>Departure:</span>
+                          <span className={styles.detailLabel}>Date:</span>
                           <span className={styles.detailValue}>
                             {booking.departureTime}
                           </span>
@@ -481,16 +562,24 @@ const FlightBookings = () => {
                         </div>
                       </>
                     : <>
+                        {booking.duration && (
+                          <div className={styles.detailItem}>
+                            <span className={styles.detailLabel}>
+                              Duration:
+                            </span>
+                            <span className={styles.detailValue}>
+                              {booking.duration}
+                            </span>
+                          </div>
+                        )}
                         <div className={styles.detailItem}>
-                          <span className={styles.detailLabel}>Duration:</span>
-                          <span className={styles.detailValue}>
-                            {booking.duration}
+                          <span className={styles.detailLabel}>
+                            {booking.type === "hotel" ?
+                              "Guests:"
+                            : "Travelers:"}
                           </span>
-                        </div>
-                        <div className={styles.detailItem}>
-                          <span className={styles.detailLabel}>Travelers:</span>
                           <span className={styles.detailValue}>
-                            {booking.travelers}
+                            {booking.travelers || booking.passengers || 1}
                           </span>
                         </div>
                       </>
@@ -500,11 +589,11 @@ const FlightBookings = () => {
 
                 <div className={styles.tableCell}>
                   <div className={styles.amountInfo}>
-                    <div className={styles.amountValue}>${booking.amount}</div>
+                    <div className={styles.amountValue}>
+                      {booking.currency} {booking.amount.toLocaleString()}
+                    </div>
                     <div className={styles.amountLabel}>
-                      {booking.type === "flight" ?
-                        "Flight Fare"
-                      : "Tour Package"}
+                      {booking.type === "flight" ? "Flight" : "Package"}
                     </div>
                   </div>
                 </div>
@@ -525,7 +614,9 @@ const FlightBookings = () => {
                 </div>
 
                 <div className={styles.tableCell}>
-                  <div className={styles.dateInfo}>{booking.bookingDate}</div>
+                  <div className={styles.dateInfo}>
+                    {fmtDate(booking.bookingDate)}
+                  </div>
                 </div>
 
                 <div className={styles.tableCellActions}>
@@ -538,21 +629,20 @@ const FlightBookings = () => {
                     </button>
 
                     {booking.status === "pending" && (
-                      <button
-                        className={styles.actionBtnConfirm}
-                        title="Confirm"
-                        onClick={() => openConfirmModal(booking)}>
-                        <FiCheck />
-                      </button>
-                    )}
-
-                    {booking.status === "pending" && (
-                      <button
-                        className={styles.actionBtnCancel}
-                        title="Cancel"
-                        onClick={() => openCancelModal(booking)}>
-                        <FiX />
-                      </button>
+                      <>
+                        <button
+                          className={styles.actionBtnConfirm}
+                          title="Confirm"
+                          onClick={() => openConfirmModal(booking)}>
+                          <FiCheck />
+                        </button>
+                        <button
+                          className={styles.actionBtnCancel}
+                          title="Cancel"
+                          onClick={() => openCancelModal(booking)}>
+                          <FiX />
+                        </button>
+                      </>
                     )}
 
                     {booking.status === "confirmed" && (
@@ -570,33 +660,37 @@ const FlightBookings = () => {
           : <div className={styles.noResults}>
               <div className={styles.noResultsContent}>
                 <FiCalendar className={styles.noResultsIcon} />
-                <h3>No bookings found</h3>
-                <p>Try adjusting your search or filters</p>
-                <button
-                  className={styles.clearFiltersBtn}
-                  onClick={() => {
-                    setSearchTerm("");
-                    setStatusFilter("all");
-                    setTypeFilter("all");
-                  }}>
-                  Clear All Filters
-                </button>
+                <h3>
+                  {bookings.length === 0 ?
+                    "No bookings yet"
+                  : "No matching bookings"}
+                </h3>
+                <p>
+                  {bookings.length === 0 ?
+                    "Bookings made by users will appear here."
+                  : "Try adjusting your search or filters."}
+                </p>
+                {bookings.length > 0 && (
+                  <button
+                    className={styles.clearFiltersBtn}
+                    onClick={handleClearFilters}>
+                    Clear All Filters
+                  </button>
+                )}
               </div>
             </div>
           }
         </div>
       </div>
 
-      {/* Booking Details Modal */}
+      {/* Details Modal */}
       {showDetailsModal && selectedBooking && (
         <div className={styles.modalOverlay} onClick={closeAllModals}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <h2 className={styles.modalTitle}>
-                {selectedBooking.type === "flight" ?
-                  <FiAirplay />
-                : <FiPackage />}
-                Booking Details - {selectedBooking.id}
+                {getTypeIcon(selectedBooking.type)}
+                Booking Details - {selectedBooking.reference}
               </h2>
               <button className={styles.modalClose} onClick={closeAllModals}>
                 <FiX />
@@ -631,10 +725,7 @@ const FlightBookings = () => {
 
                 <div className={styles.modalSection}>
                   <h3 className={styles.modalSectionTitle}>
-                    {selectedBooking.type === "flight" ?
-                      <FiAirplay />
-                    : <FiPackage />}
-                    Booking Information
+                    {getTypeIcon(selectedBooking.type)} Booking Information
                   </h3>
                   <div className={styles.detailRow}>
                     <span className={styles.detailLabel}>Type:</span>
@@ -645,7 +736,8 @@ const FlightBookings = () => {
                           background: `${getTypeColor(selectedBooking.type)}15`,
                           color: getTypeColor(selectedBooking.type),
                         }}>
-                        {selectedBooking.type === "flight" ? "Flight" : "Tour"}
+                        {selectedBooking.type.charAt(0).toUpperCase() +
+                          selectedBooking.type.slice(1)}
                       </span>
                     </span>
                   </div>
@@ -655,7 +747,9 @@ const FlightBookings = () => {
                       <span
                         className={styles.statusBadgeModal}
                         style={{
-                          background: `${getStatusColor(selectedBooking.status)}15`,
+                          background: `${getStatusColor(
+                            selectedBooking.status,
+                          )}15`,
                           color: getStatusColor(selectedBooking.status),
                         }}>
                         {selectedBooking.status.charAt(0).toUpperCase() +
@@ -666,7 +760,7 @@ const FlightBookings = () => {
                   <div className={styles.detailRow}>
                     <span className={styles.detailLabel}>Booking Date:</span>
                     <span className={styles.detailValue}>
-                      {selectedBooking.bookingDate}
+                      {fmtDate(selectedBooking.bookingDate)}
                     </span>
                   </div>
                 </div>
@@ -676,73 +770,103 @@ const FlightBookings = () => {
                     <h3 className={styles.modalSectionTitle}>
                       <FiGlobe /> Flight Details
                     </h3>
-                    <div className={styles.detailRow}>
-                      <span className={styles.detailLabel}>Airline:</span>
-                      <span className={styles.detailValue}>
-                        {selectedBooking.airline}
-                      </span>
-                    </div>
-                    <div className={styles.detailRow}>
-                      <span className={styles.detailLabel}>Flight No:</span>
-                      <span className={styles.detailValue}>
-                        {selectedBooking.flightNo}
-                      </span>
-                    </div>
-                    <div className={styles.detailRow}>
-                      <span className={styles.detailLabel}>Departure:</span>
-                      <span className={styles.detailValue}>
-                        {selectedBooking.departure} at{" "}
-                        {selectedBooking.departureTime}
-                      </span>
-                    </div>
-                    <div className={styles.detailRow}>
-                      <span className={styles.detailLabel}>Arrival:</span>
-                      <span className={styles.detailValue}>
-                        {selectedBooking.destination} at{" "}
-                        {selectedBooking.arrivalTime}
-                      </span>
-                    </div>
-                    <div className={styles.detailRow}>
-                      <span className={styles.detailLabel}>Class:</span>
-                      <span className={styles.detailValue}>
-                        {selectedBooking.seatClass}
-                      </span>
-                    </div>
-                    <div className={styles.detailRow}>
-                      <span className={styles.detailLabel}>Baggage:</span>
-                      <span className={styles.detailValue}>
-                        {selectedBooking.baggage}
-                      </span>
-                    </div>
+                    {selectedBooking.airline && (
+                      <div className={styles.detailRow}>
+                        <span className={styles.detailLabel}>Airline:</span>
+                        <span className={styles.detailValue}>
+                          {selectedBooking.airline}
+                        </span>
+                      </div>
+                    )}
+                    {selectedBooking.flightNo && (
+                      <div className={styles.detailRow}>
+                        <span className={styles.detailLabel}>Flight No:</span>
+                        <span className={styles.detailValue}>
+                          {selectedBooking.flightNo}
+                        </span>
+                      </div>
+                    )}
+                    {selectedBooking.departure && (
+                      <div className={styles.detailRow}>
+                        <span className={styles.detailLabel}>Departure:</span>
+                        <span className={styles.detailValue}>
+                          {selectedBooking.departure}
+                        </span>
+                      </div>
+                    )}
+                    {selectedBooking.destination && (
+                      <div className={styles.detailRow}>
+                        <span className={styles.detailLabel}>Arrival:</span>
+                        <span className={styles.detailValue}>
+                          {selectedBooking.destination}
+                        </span>
+                      </div>
+                    )}
+                    {selectedBooking.departureTime && (
+                      <div className={styles.detailRow}>
+                        <span className={styles.detailLabel}>Date/Time:</span>
+                        <span className={styles.detailValue}>
+                          {selectedBooking.departureTime}
+                        </span>
+                      </div>
+                    )}
+                    {selectedBooking.seatClass && (
+                      <div className={styles.detailRow}>
+                        <span className={styles.detailLabel}>Class:</span>
+                        <span className={styles.detailValue}>
+                          {selectedBooking.seatClass}
+                        </span>
+                      </div>
+                    )}
+                    {selectedBooking.baggage && (
+                      <div className={styles.detailRow}>
+                        <span className={styles.detailLabel}>Baggage:</span>
+                        <span className={styles.detailValue}>
+                          {selectedBooking.baggage}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 : <div className={styles.modalSection}>
                     <h3 className={styles.modalSectionTitle}>
-                      <FiPackage /> Tour Details
+                      {getTypeIcon(selectedBooking.type)} Booking Details
                     </h3>
-                    <div className={styles.detailRow}>
-                      <span className={styles.detailLabel}>Package:</span>
-                      <span className={styles.detailValue}>
-                        {selectedBooking.package}
-                      </span>
-                    </div>
+                    {selectedBooking.package && (
+                      <div className={styles.detailRow}>
+                        <span className={styles.detailLabel}>
+                          {selectedBooking.type === "hotel" ?
+                            "Hotel:"
+                          : selectedBooking.type === "car" ?
+                            "Vehicle:"
+                          : "Package:"}
+                        </span>
+                        <span className={styles.detailValue}>
+                          {selectedBooking.package}
+                        </span>
+                      </div>
+                    )}
                     <div className={styles.detailRow}>
                       <span className={styles.detailLabel}>Destination:</span>
                       <span className={styles.detailValue}>
                         {selectedBooking.destination}
                       </span>
                     </div>
-                    <div className={styles.detailRow}>
-                      <span className={styles.detailLabel}>Duration:</span>
-                      <span className={styles.detailValue}>
-                        {selectedBooking.duration}
-                      </span>
-                    </div>
-                    <div className={styles.detailRow}>
-                      <span className={styles.detailLabel}>Inclusions:</span>
-                      <span className={styles.detailValue}>
-                        {selectedBooking.inclusions?.join(", ")}
-                      </span>
-                    </div>
+                    {selectedBooking.duration && (
+                      <div className={styles.detailRow}>
+                        <span className={styles.detailLabel}>Duration:</span>
+                        <span className={styles.detailValue}>
+                          {selectedBooking.duration}
+                        </span>
+                      </div>
+                    )}
+                    {selectedBooking.inclusions.length > 0 && (
+                      <div className={styles.detailRow}>
+                        <span className={styles.detailLabel}>Inclusions:</span>
+                        <span className={styles.detailValue}>
+                          {selectedBooking.inclusions.join(", ")}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 }
 
@@ -754,7 +878,8 @@ const FlightBookings = () => {
                     <span className={styles.detailLabel}>Amount:</span>
                     <span className={styles.detailValue}>
                       <strong style={{ color: "var(--green)" }}>
-                        ${selectedBooking.amount}
+                        {selectedBooking.currency}{" "}
+                        {selectedBooking.amount.toLocaleString()}
                       </strong>
                     </span>
                   </div>
@@ -774,10 +899,32 @@ const FlightBookings = () => {
                       <FiUsers style={{ marginRight: "4px" }} />
                       {selectedBooking.type === "flight" ?
                         selectedBooking.passengers
-                      : selectedBooking.travelers}
+                      : selectedBooking.travelers ||
+                        selectedBooking.passengers ||
+                        1
+                      }
                     </span>
                   </div>
                 </div>
+
+                {selectedBooking.passengerList.length > 0 && (
+                  <div className={styles.modalSection}>
+                    <h3 className={styles.modalSectionTitle}>
+                      <FiUser /> Passenger Details
+                    </h3>
+                    {selectedBooking.passengerList.map((p, i) => (
+                      <div key={i} className={styles.detailRow}>
+                        <span className={styles.detailLabel}>
+                          {p.title || "Mr"}:
+                        </span>
+                        <span className={styles.detailValue}>
+                          {p.firstName} {p.lastName}
+                          {p.passport ? ` • ${p.passport}` : ""}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 {selectedBooking.cancelReason && (
                   <div className={styles.modalSection}>
@@ -785,9 +932,7 @@ const FlightBookings = () => {
                       <FiX /> Cancellation Information
                     </h3>
                     <div className={styles.detailRow}>
-                      <span className={styles.detailLabel}>
-                        Cancellation Reason:
-                      </span>
+                      <span className={styles.detailLabel}>Reason:</span>
                       <span className={styles.detailValue}>
                         {selectedBooking.cancelReason}
                       </span>
@@ -803,12 +948,35 @@ const FlightBookings = () => {
                 onClick={closeAllModals}>
                 Close
               </button>
+              {selectedBooking.status === "pending" && (
+                <>
+                  <button
+                    className={styles.modalBtnSuccess}
+                    onClick={() => {
+                      updateBooking(selectedBooking.id, {
+                        status: "confirmed",
+                        confirmedAt: new Date().toISOString(),
+                      });
+                      closeAllModals();
+                    }}>
+                    Confirm
+                  </button>
+                  <button
+                    className={styles.modalBtnDanger}
+                    onClick={() => {
+                      closeAllModals();
+                      openCancelModal(selectedBooking);
+                    }}>
+                    Cancel Booking
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
       )}
 
-      {/* Confirm Booking Modal */}
+      {/* Confirm Modal */}
       {showConfirmModal && selectedBooking && (
         <div className={styles.modalOverlay} onClick={closeAllModals}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -824,7 +992,7 @@ const FlightBookings = () => {
             <div className={styles.modalContent}>
               <p className={styles.modalText}>
                 Are you sure you want to confirm booking{" "}
-                <strong>{selectedBooking.id}</strong>?
+                <strong>{selectedBooking.reference}</strong>?
               </p>
 
               <div className={styles.bookingPreview}>
@@ -835,13 +1003,15 @@ const FlightBookings = () => {
                 <div className={styles.previewItem}>
                   <span>Type:</span>
                   <strong>
-                    {selectedBooking.type === "flight" ? "Flight" : "Tour"}
+                    {selectedBooking.type.charAt(0).toUpperCase() +
+                      selectedBooking.type.slice(1)}
                   </strong>
                 </div>
                 <div className={styles.previewItem}>
                   <span>Amount:</span>
                   <strong style={{ color: "var(--green)" }}>
-                    ${selectedBooking.amount}
+                    {selectedBooking.currency}{" "}
+                    {selectedBooking.amount.toLocaleString()}
                   </strong>
                 </div>
               </div>
@@ -863,7 +1033,7 @@ const FlightBookings = () => {
         </div>
       )}
 
-      {/* Cancel Booking Modal */}
+      {/* Cancel Modal */}
       {showCancelModal && selectedBooking && (
         <div className={styles.modalOverlay} onClick={closeAllModals}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -879,7 +1049,7 @@ const FlightBookings = () => {
             <div className={styles.modalContent}>
               <p className={styles.modalText}>
                 Are you sure you want to cancel booking{" "}
-                <strong>{selectedBooking.id}</strong>?
+                <strong>{selectedBooking.reference}</strong>?
               </p>
 
               <div className={styles.formGroup}>

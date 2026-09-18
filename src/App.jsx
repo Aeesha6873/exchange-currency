@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import UserLayout from "./layouts/UserLayout";
 import AdminLayout from "./layouts/AdminLayout";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
 import Home from "./pages/Home";
 import Exchange from "./pages/exchange/Exchange";
 import VisaService from "./pages/visa/VisaService";
@@ -49,7 +51,27 @@ function App() {
             </>
           }
         />
+        <Route
+          path="/about"
+          element={
+            <>
+              <Navbar />
+              <About />
+              <Footer />
+            </>
+          }
+        />
 
+        <Route
+          path="/contact"
+          element={
+            <>
+              <Navbar />
+              <Contact />
+              <Footer />
+            </>
+          }
+        />
         <Route
           path="/exchange"
           element={

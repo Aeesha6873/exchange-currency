@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styles from "./UserVisaRecords.module.css";
 import {
   FiClock,
@@ -11,7 +11,6 @@ import {
   FiEye,
   FiMessageSquare,
   FiCalendar,
-  FiFilter,
   FiSearch,
   FiPlus,
   FiUser,
@@ -22,323 +21,43 @@ import {
   FiCheckSquare,
   FiAlertTriangle,
   FiGlobe,
-  FiCreditCard,
 } from "react-icons/fi";
+import { authApi, visaApi } from "../../services/api";
 
 function UserVisaRecords() {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedVisa, setSelectedVisa] = useState(null);
   const [showModal, setShowModal] = useState(false);
-
-  // Get visa applications from localStorage (from your VisaService)
   const [visaApplications, setVisaApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
 
+  // ---- Load this user's applications from the API ----
   useEffect(() => {
-    // Load visa applications from localStorage
-    const loadVisaApplications = () => {
-      try {
-        const savedApplications =
-          JSON.parse(localStorage.getItem("visaApplications")) || [];
-        const sampleApplications = getSampleApplications(); // Fallback if none exist
-
-        if (savedApplications.length > 0) {
-          setVisaApplications(savedApplications);
-        } else {
-          setVisaApplications(sampleApplications);
-          // Save sample applications for demo
-          localStorage.setItem(
-            "visaApplications",
-            JSON.stringify(sampleApplications),
-          );
-        }
-      } catch (error) {
-        console.error("Error loading visa applications:", error);
-        setVisaApplications(getSampleApplications());
-      }
-    };
-
-    loadVisaApplications();
-
-    // Listen for new applications from VisaService
-    const handleStorageChange = () => {
-      loadVisaApplications();
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
-
-  // Helper function to create sample applications matching your VisaService
-  const getSampleApplications = () => {
-    const countries = [
-      { id: "uk", name: "United Kingdom", flag: "🇬🇧", currency: "£" },
-      { id: "china", name: "China", flag: "🇨🇳", currency: "¥" },
-      { id: "umarah", name: "Umarah", flag: "🇸🇦", currency: "SAR" },
-      { id: "qatar", name: "Qatar", flag: "🇶🇦", currency: "QAR" },
-      { id: "dubai", name: "Dubai", flag: "🇦🇪", currency: "AED" },
-      { id: "algeria", name: "Algeria", flag: "🇩🇿", currency: "DZD" },
-    ];
-
-    const processingTimes = [
-      { id: "urgent", label: "Urgent", time: "24-48 hours" },
-      { id: "express", label: "Express", time: "3-5 days" },
-      { id: "standard", label: "Standard", time: "7-10 days" },
-      { id: "regular", label: "Regular", time: "15-20 days" },
-    ];
-
-    const durations = [
-      { id: "30", label: "Short Stay", time: "1 month" },
-      { id: "90", label: "Tourist", time: "3 months" },
-      { id: "180", label: "Business", time: "6 months" },
-      { id: "365", label: "Long Term", time: "1 year" },
-      { id: "730", label: "Residence", time: "2 years" },
-    ];
-
-    const statuses = ["review", "approved", "pending", "rejected"];
-    const statusTexts = {
-      review: "Under Review",
-      approved: "Approved",
-      pending: "Pending Documents",
-      rejected: "Rejected",
-    };
-
-    const getRandomElement = (arr) =>
-      arr[Math.floor(Math.random() * arr.length)];
-    const getRandomDate = (daysAgo) => {
-      const date = new Date();
-      date.setDate(date.getDate() - daysAgo);
-      return date.toISOString().split("T")[0];
-    };
-
-    return Array.from({ length: 6 }, (_, i) => {
-      const country = getRandomElement(countries);
-      const processingTime = getRandomElement(processingTimes);
-      const duration = getRandomElement(durations);
-      const status = statuses[i % statuses.length];
-      const submittedDate = getRandomDate(Math.floor(Math.random() * 30) + 1);
-
-      // Calculate progress based on status
-      let progress = 0;
-      switch (status) {
-        case "review":
-          progress = 60;
-          break;
-        case "approved":
-          progress = 100;
-          break;
-        case "pending":
-          progress = 30;
-          break;
-        case "rejected":
-          progress = 100;
-          break;
-      }
-
-      // Color based on country ID
-      const colors = {
-        uk: "#4f46e5",
-        china: "#dc2626",
-        umarah: "#059669",
-        qatar: "#7c3aed",
-        dubai: "#ea580c",
-        algeria: "#0891b2",
-      };
-
-      return {
-        id: `VISA-${Date.now().toString().slice(-8)}-${i}`,
-        country: country.name,
-        countryCode: country.flag,
-        countryId: country.id,
-        type:
-          duration.id <= "90" ? "Tourist Visa"
-          : duration.id <= "180" ? "Business Visa"
-          : duration.id <= "365" ? "Student Visa"
-          : "Work Visa",
-        status: status,
-        statusText: statusTexts[status],
-        submittedDate: submittedDate,
-        processingTime: processingTime.time,
-        duration: duration.time,
-        fees: `${country.currency}${Math.floor(Math.random() * 200) + 200}`,
-        ref: `VISA-${country.id.toUpperCase()}-${new Date().getFullYear()}-${String(i + 1).padStart(4, "0")}`,
-        color: colors[country.id] || "#4f46e5",
-        progress: progress,
-        applicantName: `Applicant ${i + 1}`,
-        email: `applicant${i + 1}@example.com`,
-        passportNumber: `P${String(Math.floor(Math.random() * 1000000)).padStart(6, "0")}`,
-        documents: [
-          {
-            name: "Passport Copy",
-            status: Math.random() > 0.2 ? "approved" : "pending",
-            uploaded: true,
-          },
-          {
-            name: "Photograph",
-            status: Math.random() > 0.3 ? "approved" : "pending",
-            uploaded: true,
-          },
-          {
-            name: "Supporting Documents",
-            status: status === "pending" ? "pending" : "approved",
-            uploaded: status !== "pending",
-          },
-        ],
-        timeline: generateTimeline(status, submittedDate),
-        consulate: `${country.name} Embassy`,
-        officer: ["John Davis", "Sarah Miller", "Michael Brown", "Emma Wilson"][
-          i % 4
-        ],
-        notes: getStatusNotes(status, country.name),
-        nextSteps: getNextSteps(status),
-      };
-    });
-  };
-
-  const generateTimeline = (status, submittedDate) => {
-    const baseSteps = [
-      {
-        step: 1,
-        name: "Application Submitted",
-        date: submittedDate,
-        status: "completed",
-      },
-      {
-        step: 2,
-        name: "Document Verification",
-        date: addDays(submittedDate, 2),
-        status: "completed",
-      },
-    ];
-
-    switch (status) {
-      case "approved":
-        return [
-          ...baseSteps,
-          {
-            step: 3,
-            name: "Under Review",
-            date: addDays(submittedDate, 5),
-            status: "completed",
-          },
-          {
-            step: 4,
-            name: "Approval",
-            date: addDays(submittedDate, 7),
-            status: "completed",
-          },
-          {
-            step: 5,
-            name: "Visa Issued",
-            date: addDays(submittedDate, 8),
-            status: "completed",
-          },
-        ];
-      case "review":
-        return [
-          ...baseSteps,
-          { step: 3, name: "Under Review", date: "Current", status: "current" },
-          {
-            step: 4,
-            name: "Processing",
-            date: addDays(submittedDate, 10),
-            status: "upcoming",
-          },
-          {
-            step: 5,
-            name: "Decision",
-            date: addDays(submittedDate, 14),
-            status: "upcoming",
-          },
-        ];
-      case "pending":
-        return [
-          ...baseSteps,
-          {
-            step: 3,
-            name: "Awaiting Documents",
-            date: "Current",
-            status: "current",
-          },
-          {
-            step: 4,
-            name: "Document Review",
-            date: "Pending",
-            status: "upcoming",
-          },
-          { step: 5, name: "Processing", date: "Pending", status: "upcoming" },
-        ];
-      case "rejected":
-        return [
-          ...baseSteps,
-          {
-            step: 3,
-            name: "Under Review",
-            date: addDays(submittedDate, 5),
-            status: "completed",
-          },
-          {
-            step: 4,
-            name: "Additional Review",
-            date: addDays(submittedDate, 7),
-            status: "completed",
-          },
-          {
-            step: 5,
-            name: "Application Rejected",
-            date: addDays(submittedDate, 10),
-            status: "completed",
-          },
-        ];
-      default:
-        return baseSteps;
+    const currentUser = authApi.getCurrentUser();
+    if (!currentUser) {
+      navigate("/login");
+      return;
     }
-  };
 
-  const addDays = (dateString, days) => {
-    const date = new Date(dateString);
-    date.setDate(date.getDate() + days);
-    return date.toISOString().split("T")[0];
-  };
+    const load = async () => {
+      const rows = await visaApi.listForUser(currentUser.id);
+      setVisaApplications(rows);
+      setLoading(false);
+    };
 
-  const getStatusNotes = (status, country) => {
-    switch (status) {
-      case "approved":
-        return `Visa for ${country} has been approved. Your passport is ready for collection.`;
-      case "review":
-        return `Your application for ${country} is currently under review. We will notify you once a decision is made.`;
-      case "pending":
-        return `Additional documents required for your ${country} visa application. Please check the required documents list.`;
-      case "rejected":
-        return `Your application for ${country} was rejected due to incomplete documentation. You may reapply after addressing the issues.`;
-      default:
-        return "Application submitted successfully.";
-    }
-  };
+    load();
 
-  const getNextSteps = (status) => {
-    switch (status) {
-      case "approved":
-        return ["Collect passport from visa center", "Review visa conditions"];
-      case "review":
-        return ["Monitor application status", "Prepare for possible interview"];
-      case "pending":
-        return [
-          "Upload required documents",
-          "Complete biometric appointment",
-          "Submit additional information",
-        ];
-      case "rejected":
-        return [
-          "Review rejection reasons",
-          "Gather required documents",
-          "Reapply after 30 days",
-        ];
-      default:
-        return ["Check application status", "Contact support if needed"];
-    }
-  };
+    // Re-load when another tab writes to visaApplications
+    const onStorage = (e) => {
+      if (e.key === "visaApplications") load();
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [navigate]);
 
+  // ---- Status helpers (unchanged) ----
   const getStatusIcon = (status) => {
     switch (status) {
       case "approved":
@@ -377,12 +96,150 @@ function UserVisaRecords() {
         return <FiXCircle className={styles.docRejected} />;
       case "review":
         return <FiClock className={styles.docReview} />;
-      case "pending":
-        return <FiAlertCircle className={styles.docPending} />;
       default:
         return <FiAlertCircle className={styles.docPending} />;
     }
   };
+
+  // ---- Derive display fields from a stored application ----
+  // The wizard stores raw IDs; here we turn them into human labels.
+  const friendlyStatus = (status) => {
+    switch (status) {
+      case "approved":
+        return "Approved";
+      case "rejected":
+        return "Rejected";
+      case "pending":
+        return "Pending Documents";
+      case "review":
+      case "processing":
+      default:
+        return "Under Review";
+    }
+  };
+
+  const progressFor = (status) => {
+    switch (status) {
+      case "approved":
+      case "rejected":
+        return 100;
+      case "pending":
+        return 30;
+      case "review":
+      case "processing":
+      default:
+        return 60;
+    }
+  };
+
+  const visaTypeFromDuration = (durationId) => {
+    const id = String(durationId || "");
+    if (id === "30") return "Short Stay Visa";
+    if (id === "90") return "Tourist Visa";
+    if (id === "180") return "Business Visa";
+    if (id === "365") return "Long Term Visa";
+    if (id === "730") return "Residence Visa";
+    return "Visa";
+  };
+
+  const countryColor = (countryId) => {
+    const colors = {
+      uk: "#4f46e5",
+      china: "#dc2626",
+      umarah: "#059669",
+      qatar: "#7c3aed",
+      dubai: "#ea580c",
+      algeria: "#0891b2",
+    };
+    return colors[countryId] || "#10b981";
+  };
+
+  const formatDate = (iso) => {
+    if (!iso) return "—";
+    try {
+      return new Date(iso).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+    } catch {
+      return iso;
+    }
+  };
+
+  // Build a view-model for each stored application so the JSX can stay
+  // mostly the same as before.
+  const viewApplications = visaApplications.map((app) => {
+    const status =
+      app.status === "processing" ? "review" : app.status || "review";
+    const currency = app.countryCurrency || "$";
+    const amount = app.amountPaid ?? 0;
+
+    return {
+      id: app.id,
+      applicationId: app.applicationId,
+      country: app.countryName || "—",
+      countryCode: app.countryFlag || "🌐",
+      countryId: app.countryId,
+      color: countryColor(app.countryId),
+      type: visaTypeFromDuration(app.durationId),
+      status,
+      statusText: friendlyStatus(status),
+      submittedDate: formatDate(app.submittedAt),
+      processingTime: app.departureLabel || "—",
+      duration: app.durationLabel || "—",
+      fees: `${currency}${amount}`,
+      ref: app.applicationId,
+      progress: progressFor(status),
+      applicantName:
+        `${app.firstName || ""} ${app.lastName || ""}`.trim() || "—",
+      email: app.email || "—",
+      passportNumber: app.passportNumber || "—",
+      consulate: app.countryName ? `${app.countryName} Embassy` : "—",
+      officer: "—", // filled in by admin later
+      notes: "",
+      nextSteps: [],
+      documents:
+        app.passportFile ?
+          [
+            {
+              name: app.passportFile.name,
+              status: "approved",
+              uploaded: true,
+            },
+          ]
+        : [],
+      timeline: [
+        {
+          step: 1,
+          name: "Application Submitted",
+          date: formatDate(app.submittedAt),
+          status: "completed",
+        },
+        {
+          step: 2,
+          name: "Under Review",
+          date: "Current",
+          status:
+            status === "review" || status === "processing" ?
+              "current"
+            : "completed",
+        },
+        {
+          step: 3,
+          name: "Decision",
+          date:
+            status === "approved" || status === "rejected" ?
+              "Complete"
+            : "Pending",
+          status:
+            status === "approved" || status === "rejected" ?
+              "completed"
+            : "upcoming",
+        },
+      ],
+    };
+  });
 
   const handleViewDetails = (visa) => {
     setSelectedVisa(visa);
@@ -394,54 +251,36 @@ function UserVisaRecords() {
     setSelectedVisa(null);
   };
 
-  const filteredApplications = visaApplications.filter((visa) => {
+  const filteredApplications = viewApplications.filter((visa) => {
     if (filter !== "all" && visa.status !== filter) return false;
     if (searchTerm) {
+      const q = searchTerm.toLowerCase();
       return (
-        visa.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        visa.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        visa.ref.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        visa.applicantName.toLowerCase().includes(searchTerm.toLowerCase())
+        visa.country.toLowerCase().includes(q) ||
+        visa.type.toLowerCase().includes(q) ||
+        visa.ref.toLowerCase().includes(q) ||
+        visa.applicantName.toLowerCase().includes(q)
       );
     }
     return true;
   });
 
   const stats = {
-    total: visaApplications.length,
-    approved: visaApplications.filter((v) => v.status === "approved").length,
-    review: visaApplications.filter((v) => v.status === "review").length,
-    pending: visaApplications.filter((v) => v.status === "pending").length,
+    total: viewApplications.length,
+    approved: viewApplications.filter((v) => v.status === "approved").length,
+    review: viewApplications.filter((v) => v.status === "review").length,
+    pending: viewApplications.filter((v) => v.status === "pending").length,
   };
 
-  const addNewApplication = () => {
-    // This would be called when a new application is submitted via VisaService
-    const newApp = {
-      id: `VISA-${Date.now().toString().slice(-8)}-${visaApplications.length}`,
-      country: "New Country",
-      countryCode: "🇺🇸",
-      type: "Tourist Visa",
-      status: "review",
-      statusText: "Under Review",
-      submittedDate: new Date().toISOString().split("T")[0],
-      processingTime: "7-10 days",
-      duration: "3 months",
-      fees: "$250",
-      ref: `VISA-NEW-${new Date().getFullYear()}-${String(visaApplications.length + 1).padStart(4, "0")}`,
-      color: "#4f46e5",
-      progress: 10,
-      applicantName: "New Applicant",
-      email: "new@example.com",
-      passportNumber: "P123456",
-    };
-
-    const updatedApplications = [newApp, ...visaApplications];
-    setVisaApplications(updatedApplications);
-    localStorage.setItem(
-      "visaApplications",
-      JSON.stringify(updatedApplications),
+  if (loading) {
+    return (
+      <div className={styles.visaProcessContainer}>
+        <div style={{ padding: "4rem", textAlign: "center", color: "#64748b" }}>
+          Loading your applications...
+        </div>
+      </div>
     );
-  };
+  }
 
   return (
     <div className={styles.visaProcessContainer}>
@@ -450,12 +289,12 @@ function UserVisaRecords() {
         <div className={styles.headerContent}>
           <h1 className={styles.title}>Visa Process</h1>
           <p className={styles.subtitle}>
-            Track your visa applications from {visaApplications.length}{" "}
-            submitted applications
+            Track your visa applications from {viewApplications.length}{" "}
+            submitted application{viewApplications.length === 1 ? "" : "s"}
           </p>
         </div>
         <div className={styles.headerActions}>
-          <Link to="/dashboard/my-visa" className={styles.newVisaBtn}>
+          <Link to="/dashboard/visa" className={styles.newVisaBtn}>
             <FiPlus />
             New Application
           </Link>
@@ -608,7 +447,7 @@ function UserVisaRecords() {
               <div className={styles.documentsPreview}>
                 <div className={styles.documentsLabel}>Documents:</div>
                 <div className={styles.documentsStatus}>
-                  {visa.documents ?
+                  {visa.documents && visa.documents.length > 0 ?
                     visa.documents.map((doc, index) => (
                       <div
                         key={index}
@@ -652,9 +491,15 @@ function UserVisaRecords() {
         <div className={styles.emptyState}>
           <FiFileText className={styles.emptyIcon} />
           <h3>No visa applications found</h3>
-          <p>Try adjusting your search or start a new application</p>
+          <p>
+            {viewApplications.length === 0 ?
+              "You haven't applied for any visa yet. Start a new application to get going."
+            : "Try adjusting your search or filter."}
+          </p>
           <Link to="/dashboard/visa" className={styles.emptyBtn}>
-            Apply for Visa
+            {viewApplications.length === 0 ?
+              "Apply for Visa"
+            : "Start New Application"}
           </Link>
         </div>
       )}
@@ -700,14 +545,6 @@ function UserVisaRecords() {
                         <strong>Submitted:</strong> {selectedVisa.submittedDate}
                       </span>
                     </div>
-                    {selectedVisa.approvedDate && (
-                      <div className={styles.dateInfo}>
-                        <FiCheckCircle />
-                        <span>
-                          <strong>Approved:</strong> {selectedVisa.approvedDate}
-                        </span>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
@@ -767,20 +604,16 @@ function UserVisaRecords() {
                       <span>Consulate:</span>
                       <span>{selectedVisa.consulate}</span>
                     </div>
-                    <div className={styles.detailRow}>
-                      <span>Visa Officer:</span>
-                      <span>{selectedVisa.officer}</span>
-                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Documents */}
-              {selectedVisa.documents && (
+              {selectedVisa.documents && selectedVisa.documents.length > 0 && (
                 <div className={styles.modalSection}>
                   <h3>
                     <FiFileText />
-                    Required Documents
+                    Submitted Documents
                   </h3>
                   <div className={styles.documentsList}>
                     {selectedVisa.documents.map((doc, index) => (
@@ -804,55 +637,24 @@ function UserVisaRecords() {
               )}
 
               {/* Timeline */}
-              {selectedVisa.timeline && (
-                <div className={styles.modalSection}>
-                  <h3>
-                    <FiClock />
-                    Application Timeline
-                  </h3>
-                  <div className={styles.timeline}>
-                    {selectedVisa.timeline.map((step) => (
-                      <div
-                        key={step.step}
-                        className={`${styles.timelineStep} ${styles[step.status]}`}>
-                        <div className={styles.timelineDot}></div>
-                        <div className={styles.timelineContent}>
-                          <div className={styles.timelineTitle}>
-                            {step.name}
-                          </div>
-                          <div className={styles.timelineDate}>{step.date}</div>
-                        </div>
-                        <FiChevronRight className={styles.timelineArrow} />
+              <div className={styles.modalSection}>
+                <h3>
+                  <FiClock />
+                  Application Timeline
+                </h3>
+                <div className={styles.timeline}>
+                  {selectedVisa.timeline.map((step) => (
+                    <div
+                      key={step.step}
+                      className={`${styles.timelineStep} ${styles[step.status]}`}>
+                      <div className={styles.timelineDot}></div>
+                      <div className={styles.timelineContent}>
+                        <div className={styles.timelineTitle}>{step.name}</div>
+                        <div className={styles.timelineDate}>{step.date}</div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Notes & Next Steps */}
-              <div className={styles.modalGrid}>
-                <div className={styles.detailCard}>
-                  <h3>
-                    <FiAlertTriangle />
-                    Notes
-                  </h3>
-                  <p className={styles.notesText}>{selectedVisa.notes}</p>
-                </div>
-
-                <div className={styles.detailCard}>
-                  <h3>
-                    <FiCheckSquare />
-                    Next Steps
-                  </h3>
-                  <ul className={styles.nextStepsList}>
-                    {selectedVisa.nextSteps &&
-                      selectedVisa.nextSteps.map((step, index) => (
-                        <li key={index}>
-                          <FiChevronRight />
-                          {step}
-                        </li>
-                      ))}
-                  </ul>
+                      <FiChevronRight className={styles.timelineArrow} />
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -866,12 +668,6 @@ function UserVisaRecords() {
                 <FiDownload />
                 Download Documents
               </button>
-              {selectedVisa.status === "pending" && (
-                <button className={`${styles.modalBtn} ${styles.primaryBtn}`}>
-                  <FiPlus />
-                  Upload Documents
-                </button>
-              )}
             </div>
           </div>
         </div>

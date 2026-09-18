@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   FiGlobe,
   FiSearch,
@@ -13,174 +13,227 @@ import {
 } from "react-icons/fi";
 import styles from "./TravelBookings.module.css";
 
+const read = (key, fallback = []) => {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const write = (key, value) => {
+  localStorage.setItem(key, JSON.stringify(value));
+};
+
+const fmtDate = (iso) => {
+  if (!iso) return "—";
+  try {
+    return new Date(iso).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  } catch {
+    return iso;
+  }
+};
+
 const TravelBookings = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const bookings = [
-    {
-      id: "TB-001",
-      user: "John Smith",
-      tour: "Bali Luxury Retreat",
-      destination: "Bali, Indonesia",
-      startDate: "Feb 15, 2024",
-      endDate: "Feb 22, 2024",
-      duration: "7 days",
-      travelers: 2,
-      totalAmount: 5600,
-      paidAmount: 5600,
-      status: "confirmed",
-      bookingDate: "Jan 15, 2024",
-      guide: "Wayan S.",
-      contact: "+1234567890",
-      type: "luxury",
-    },
-    {
-      id: "TB-002",
-      user: "Emma Wilson",
-      tour: "Swiss Alps Adventure",
-      destination: "Swiss Alps",
-      startDate: "Feb 20, 2024",
-      endDate: "Feb 25, 2024",
-      duration: "5 days",
-      travelers: 4,
-      totalAmount: 10000,
-      paidAmount: 5000,
-      status: "pending",
-      bookingDate: "Jan 14, 2024",
-      guide: "Hans M.",
-      contact: "+1234567891",
-      type: "adventure",
-    },
-    {
-      id: "TB-003",
-      user: "David Chen",
-      tour: "Greek Island Hopping",
-      destination: "Greek Islands",
-      startDate: "Mar 5, 2024",
-      endDate: "Mar 15, 2024",
-      duration: "10 days",
-      travelers: 3,
-      totalAmount: 11400,
-      paidAmount: 11400,
-      status: "confirmed",
-      bookingDate: "Jan 13, 2024",
-      guide: "Maria K.",
-      contact: "+1234567892",
-      type: "cultural",
-    },
-    {
-      id: "TB-004",
-      user: "Sarah Johnson",
-      tour: "Japanese Cherry Blossom",
-      destination: "Japan",
-      startDate: "Apr 1, 2024",
-      endDate: "Apr 9, 2024",
-      duration: "8 days",
-      travelers: 2,
-      totalAmount: 7000,
-      paidAmount: 3500,
-      status: "pending",
-      bookingDate: "Jan 12, 2024",
-      guide: "Takashi Y.",
-      contact: "+1234567893",
-      type: "cultural",
-    },
-    {
-      id: "TB-005",
-      user: "Michael Brown",
-      tour: "Safari Expedition",
-      destination: "Kenya",
-      startDate: "Mar 10, 2024",
-      endDate: "Mar 16, 2024",
-      duration: "6 days",
-      travelers: 2,
-      totalAmount: 5400,
-      paidAmount: 5400,
-      status: "completed",
-      bookingDate: "Dec 15, 2023",
-      guide: "Joseph K.",
-      contact: "+1234567894",
-      type: "adventure",
-    },
-    {
-      id: "TB-006",
-      user: "Lisa Wang",
-      tour: "Romantic Paris Getaway",
-      destination: "Paris, France",
-      startDate: "Feb 14, 2024",
-      endDate: "Feb 17, 2024",
-      duration: "3 days",
-      travelers: 2,
-      totalAmount: 3000,
-      paidAmount: 3000,
-      status: "confirmed",
-      bookingDate: "Jan 10, 2024",
-      guide: "Pierre L.",
-      contact: "+1234567895",
-      type: "luxury",
-    },
-  ];
+  /* ------------------------------------------------------------------ */
+  /* Load + enrich                                                       */
+  /* ------------------------------------------------------------------ */
 
-  const stats = {
-    total: bookings.length,
-    confirmed: bookings.filter((b) => b.status === "confirmed").length,
-    pending: bookings.filter((b) => b.status === "pending").length,
-    revenue: bookings
-      .filter((b) => b.status === "confirmed" || b.status === "completed")
-      .reduce((sum, b) => sum + b.paidAmount, 0),
+  const load = () => {
+    const users = read("users", []);
+    const raw = read("bookings", []);
+
+    const enriched = raw
+      .filter((b) => b.type === "tour")
+      .map((b) => {
+        const user = users.find((u) => String(u.id) === String(b.userId));
+        const total = Number(b.price) || 0;
+        const paid =
+          b.paidAmount !== undefined ? Number(b.paidAmount)
+          : b.status === "confirmed" || b.status === "completed" ? total
+          : 0;
+
+        return {
+          id: b.id,
+          reference: b.reference || b.id,
+          userId: b.userId,
+          user: user?.fullName || user?.email || "Unknown User",
+          contact: user?.phone || user?.email || "—",
+          userEmail: user?.email || "—",
+          tour: b.package || b.tourName || b.hotel || "Tour Package",
+          destination: b.destination || "—",
+          duration: b.duration || "—",
+          travelers: Number(b.travelers) || Number(b.guests) || 1,
+          startDate: b.startDate || b.date || null,
+          endDate: b.endDate || null,
+          totalAmount: total,
+          paidAmount: paid,
+          currency: b.currency || "USD",
+          status: b.status || "pending",
+          bookingDate: b.bookingDate || b.createdAt || null,
+          type: b.category || "luxury",
+          guide: b.guide || "",
+          customised: b.customised || false,
+          inclusions: b.inclusions || [],
+        };
+      })
+      .sort((a, b) => {
+        const av = new Date(a.bookingDate || 0).getTime();
+        const bv = new Date(b.bookingDate || 0).getTime();
+        return bv - av;
+      });
+
+    setBookings(enriched);
+    setLoading(false);
   };
 
-  const filteredBookings = bookings.filter((booking) => {
-    const matchesSearch =
-      searchTerm === "" ||
-      booking.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.tour.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.destination.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.id.toLowerCase().includes(searchTerm.toLowerCase());
+  useEffect(() => {
+    load();
+    const onStorage = (e) => {
+      if (["bookings", "users"].includes(e.key)) load();
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
 
-    const matchesStatus =
-      statusFilter === "all" || booking.status === statusFilter;
-    const matchesType = typeFilter === "all" || booking.type === typeFilter;
+  /* ------------------------------------------------------------------ */
+  /* Stats                                                               */
+  /* ------------------------------------------------------------------ */
 
-    return matchesSearch && matchesStatus && matchesType;
-  });
+  const stats = useMemo(
+    () => ({
+      total: bookings.length,
+      confirmed: bookings.filter((b) => b.status === "confirmed").length,
+      pending: bookings.filter((b) => b.status === "pending").length,
+      revenue: bookings
+        .filter((b) => b.status === "confirmed" || b.status === "completed")
+        .reduce((sum, b) => sum + b.paidAmount, 0),
+    }),
+    [bookings],
+  );
 
-  const getPaymentStatus = (booking) => {
-    if (booking.paidAmount === 0) return { status: "unpaid", label: "Unpaid" };
-    if (booking.paidAmount < booking.totalAmount)
+  /* ------------------------------------------------------------------ */
+  /* Filtering                                                           */
+  /* ------------------------------------------------------------------ */
+
+  const filteredBookings = useMemo(() => {
+    const q = searchTerm.toLowerCase();
+    return bookings.filter((b) => {
+      const matchesSearch =
+        !q ||
+        b.user.toLowerCase().includes(q) ||
+        b.tour.toLowerCase().includes(q) ||
+        b.destination.toLowerCase().includes(q) ||
+        b.reference.toLowerCase().includes(q);
+
+      const matchesStatus = statusFilter === "all" || b.status === statusFilter;
+      const matchesType = typeFilter === "all" || b.type === typeFilter;
+
+      return matchesSearch && matchesStatus && matchesType;
+    });
+  }, [bookings, searchTerm, statusFilter, typeFilter]);
+
+  /* ------------------------------------------------------------------ */
+  /* Actions                                                             */
+  /* ------------------------------------------------------------------ */
+
+  const updateBooking = (id, patch) => {
+    const all = read("bookings", []);
+    const next = all.map((b) =>
+      String(b.id) === String(id) ? { ...b, ...patch } : b,
+    );
+    write("bookings", next);
+    load();
+  };
+
+  const handleViewDetails = (booking) => {
+    alert(
+      `Booking ${booking.reference}\n\n` +
+        `Customer: ${booking.user}\n` +
+        `Tour: ${booking.tour}\n` +
+        `Destination: ${booking.destination}\n` +
+        `Duration: ${booking.duration}\n` +
+        `Travelers: ${booking.travelers}\n` +
+        `Total: $${booking.totalAmount}\n` +
+        `Paid: $${booking.paidAmount}\n` +
+        `Status: ${booking.status}`,
+    );
+  };
+
+  const handleConfirm = (booking) => {
+    if (!window.confirm(`Confirm booking ${booking.reference}?`)) return;
+    updateBooking(booking.id, {
+      status: "confirmed",
+      confirmedAt: new Date().toISOString(),
+      paidAmount: booking.totalAmount,
+    });
+  };
+
+  const handleCancel = (booking) => {
+    if (!window.confirm(`Cancel booking ${booking.reference}?`)) return;
+    updateBooking(booking.id, {
+      status: "cancelled",
+      cancelledAt: new Date().toISOString(),
+    });
+  };
+
+  const handleExport = () => {
+    const dataStr = JSON.stringify(filteredBookings, null, 2);
+    const dataUri =
+      "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+    const link = document.createElement("a");
+    link.setAttribute("href", dataUri);
+    link.setAttribute(
+      "download",
+      `travel_bookings_${new Date().toISOString().split("T")[0]}.json`,
+    );
+    link.click();
+  };
+
+  /* ------------------------------------------------------------------ */
+  /* Helpers                                                             */
+  /* ------------------------------------------------------------------ */
+
+  const getPaymentStatus = (b) => {
+    if (b.paidAmount === 0) return { status: "unpaid", label: "Unpaid" };
+    if (b.paidAmount < b.totalAmount)
       return { status: "partial", label: "Partial" };
     return { status: "paid", label: "Paid" };
   };
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("en-US", {
+  const formatCurrency = (n) =>
+    new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
       minimumFractionDigits: 0,
-    }).format(amount);
+    }).format(Number(n) || 0);
+
+  const formatDateRange = (b) => {
+    if (!b.startDate) return "—";
+    if (!b.endDate) return fmtDate(b.startDate);
+    return `${fmtDate(b.startDate)} - ${fmtDate(b.endDate)}`;
   };
 
-  const handleViewDetails = (booking) => {
-    alert(`Viewing details for booking ${booking.id}`);
-  };
-
-  const handleConfirm = (booking) => {
-    if (window.confirm(`Confirm booking ${booking.id}?`)) {
-      alert(`Booking ${booking.id} confirmed!`);
-    }
-  };
-
-  const handleCancel = (booking) => {
-    if (window.confirm(`Cancel booking ${booking.id}?`)) {
-      alert(`Booking ${booking.id} cancelled!`);
-    }
-  };
-
-  const handleExport = () => {
-    alert("Exporting bookings data...");
-  };
+  if (loading) {
+    return (
+      <div className={styles.travelBookings}>
+        <div style={{ padding: "4rem", textAlign: "center", color: "#64748b" }}>
+          Loading travel bookings...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.travelBookings}>
@@ -224,7 +277,7 @@ const TravelBookings = () => {
         <div className={styles.statCard}>
           <div className={styles.statContent}>
             <div className={styles.statValue}>
-              ${(stats.revenue / 1000).toFixed(1)}k
+              ${stats.revenue.toLocaleString()}
             </div>
             <div className={styles.statLabel}>Revenue</div>
           </div>
@@ -260,19 +313,20 @@ const TravelBookings = () => {
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
             className={styles.filterGroup}>
-            <option value="all">All Tours</option>
+            <option value="all">All Types</option>
             <option value="luxury">Luxury</option>
             <option value="adventure">Adventure</option>
             <option value="cultural">Cultural</option>
+            <option value="seasonal">Seasonal</option>
+            <option value="budget">Budget</option>
           </select>
         </div>
       </div>
 
-      {/* Bookings Table - PERFECTLY BALANCED */}
+      {/* Table */}
       <div className={styles.tableContainer}>
-        <table className={styles.table}>
-          {/* Table Header */}
-          <thead className={styles.tableHeader}>
+        <div className={styles.table}>
+          <div className={styles.tableHeader}>
             <div className={styles.tableHeaderRow}>
               <div className={styles.tableHeaderCell}>Booking ID</div>
               <div className={styles.tableHeaderCell}>User</div>
@@ -281,143 +335,149 @@ const TravelBookings = () => {
               <div className={styles.tableHeaderCell}>Amount</div>
               <div className={styles.tableHeaderCell}>Status & Actions</div>
             </div>
-          </thead>
+          </div>
 
-          {/* Table Body */}
-          <tbody className={styles.tableBody}>
-            {filteredBookings.map((booking) => {
-              const payment = getPaymentStatus(booking);
-
-              return (
-                <div key={booking.id} className={styles.tableRow}>
-                  {/* Column 1: Booking ID */}
-                  <div className={styles.bookingIdCell}>
-                    <div className={styles.bookingId}>{booking.id}</div>
-                  </div>
-
-                  {/* Column 2: User Info */}
-                  <div className={styles.userCell}>
-                    <div className={styles.userInfo}>
-                      <div className={styles.userAvatar}>
-                        {booking.user.charAt(0)}
+          <div className={styles.tableBody}>
+            {filteredBookings.length > 0 ?
+              filteredBookings.map((booking) => {
+                const payment = getPaymentStatus(booking);
+                return (
+                  <div key={booking.id} className={styles.tableRow}>
+                    <div className={styles.bookingIdCell}>
+                      <div className={styles.bookingId}>
+                        {booking.reference}
                       </div>
-                      <div className={styles.userDetails}>
-                        <div className={styles.userName}>{booking.user}</div>
-                        <div className={styles.userContact}>
-                          {booking.contact}
+                    </div>
+
+                    <div className={styles.userCell}>
+                      <div className={styles.userInfo}>
+                        <div className={styles.userAvatar}>
+                          {booking.user.charAt(0).toUpperCase()}
+                        </div>
+                        <div className={styles.userDetails}>
+                          <div className={styles.userName}>{booking.user}</div>
+                          <div className={styles.userContact}>
+                            {booking.contact}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Column 3: Tour Details */}
-                  <div className={styles.tourCell}>
-                    <div className={styles.tourDetails}>
-                      <div className={styles.tourName}>{booking.tour}</div>
-                      <div className={styles.tourMeta}>
-                        <FiMapPin size={12} />
-                        {booking.destination}
+                    <div className={styles.tourCell}>
+                      <div className={styles.tourDetails}>
+                        <div className={styles.tourName}>{booking.tour}</div>
+                        <div className={styles.tourMeta}>
+                          <FiMapPin size={12} />
+                          {booking.destination}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Column 4: Dates */}
-                  <div className={styles.datesCell}>
-                    <div className={styles.datesInfo}>
-                      <div className={styles.dateRange}>
-                        {booking.startDate} - {booking.endDate}
+                    <div className={styles.datesCell}>
+                      <div className={styles.datesInfo}>
+                        <div className={styles.dateRange}>
+                          {formatDateRange(booking)}
+                        </div>
+                        <div className={styles.dateMeta}>
+                          <span>
+                            <FiUsers size={12} />
+                            {booking.travelers}
+                          </span>
+                          <span>
+                            <FiCalendar size={12} />
+                            {booking.duration}
+                          </span>
+                        </div>
                       </div>
-                      <div className={styles.dateMeta}>
-                        <span>
-                          <FiUsers size={12} />
-                          {booking.travelers}
+                    </div>
+
+                    <div className={styles.amountCell}>
+                      <div className={styles.amountInfo}>
+                        <div className={styles.amount}>
+                          {formatCurrency(booking.totalAmount)}
+                        </div>
+                        <div
+                          className={`${styles.paymentStatus} ${styles[payment.status]}`}>
+                          {payment.label} • {formatCurrency(booking.paidAmount)}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className={styles.statusActionsCell}>
+                      <div className={styles.statusBadgeWrapper}>
+                        <span
+                          className={`${styles.statusBadge} ${styles[booking.status]}`}>
+                          {booking.status === "confirmed" && (
+                            <FiCheck size={12} />
+                          )}
+                          {booking.status === "pending" && (
+                            <FiClock size={12} />
+                          )}
+                          {booking.status === "completed" && (
+                            <FiCheck size={12} />
+                          )}
+                          {booking.status === "cancelled" && <FiX size={12} />}
+                          {booking.status.charAt(0).toUpperCase() +
+                            booking.status.slice(1)}
                         </span>
-                        <span>
-                          <FiCalendar size={12} />
-                          {booking.duration}
-                        </span>
                       </div>
-                    </div>
-                  </div>
 
-                  {/* Column 5: Amount */}
-                  <div className={styles.amountCell}>
-                    <div className={styles.amountInfo}>
-                      <div className={styles.amount}>
-                        {formatCurrency(booking.totalAmount)}
-                      </div>
-                      <div
-                        className={`${styles.paymentStatus} ${styles[payment.status]}`}>
-                        {payment.label} • {formatCurrency(booking.paidAmount)}
-                      </div>
-                    </div>
-                  </div>
+                      <div className={styles.actions}>
+                        <button
+                          className={styles.actionBtn}
+                          onClick={() => handleViewDetails(booking)}
+                          title="View Details">
+                          <FiEye />
+                        </button>
 
-                  {/* Column 6: Status & Actions - PERFECTLY BALANCED */}
-                  <div className={styles.statusActionsCell}>
-                    <div className={styles.statusBadgeWrapper}>
-                      <span
-                        className={`${styles.statusBadge} ${styles[booking.status]}`}>
-                        {booking.status === "confirmed" && (
-                          <FiCheck size={12} />
+                        {booking.status === "pending" && (
+                          <>
+                            <button
+                              className={`${styles.actionBtn} ${styles.primary}`}
+                              onClick={() => handleConfirm(booking)}
+                              title="Confirm">
+                              <FiCheck />
+                            </button>
+                            <button
+                              className={`${styles.actionBtn} ${styles.danger}`}
+                              onClick={() => handleCancel(booking)}
+                              title="Cancel">
+                              <FiX />
+                            </button>
+                          </>
                         )}
-                        {booking.status === "pending" && <FiClock size={12} />}
-                        {booking.status === "completed" && (
-                          <FiCheck size={12} />
-                        )}
-                        {booking.status.charAt(0).toUpperCase() +
-                          booking.status.slice(1)}
-                      </span>
-                    </div>
-
-                    <div className={styles.actions}>
-                      <button
-                        className={styles.actionBtn}
-                        onClick={() => handleViewDetails(booking)}
-                        title="View Details">
-                        <FiEye />
-                      </button>
-
-                      {booking.status === "pending" && (
-                        <>
-                          <button
-                            className={`${styles.actionBtn} ${styles.primary}`}
-                            onClick={() => handleConfirm(booking)}
-                            title="Confirm">
-                            <FiCheck />
-                          </button>
-                          <button
-                            className={`${styles.actionBtn} ${styles.danger}`}
-                            onClick={() => handleCancel(booking)}
-                            title="Cancel">
-                            <FiX />
-                          </button>
-                        </>
-                      )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-
-            {filteredBookings.length === 0 && (
-              <div className={styles.emptyState}>
+                );
+              })
+            : <div className={styles.emptyState}>
                 <FiSearch className={styles.emptyIcon} />
-                <h3>No bookings found</h3>
-                <p>Try adjusting your search or filters</p>
-                <button
-                  className={styles.clearFiltersBtn}
-                  onClick={() => {
-                    setSearchTerm("");
-                    setStatusFilter("all");
-                    setTypeFilter("all");
-                  }}>
-                  Clear All Filters
-                </button>
+                <h3>
+                  {bookings.length === 0 ?
+                    "No travel bookings yet"
+                  : "No bookings match your filters"}
+                </h3>
+                <p>
+                  {bookings.length === 0 ?
+                    "Bookings made through the travel agency flow will appear here."
+                  : "Try adjusting your search or filters."}
+                </p>
+                {bookings.length > 0 && (
+                  <button
+                    className={styles.clearFiltersBtn}
+                    onClick={() => {
+                      setSearchTerm("");
+                      setStatusFilter("all");
+                      setTypeFilter("all");
+                    }}>
+                    Clear All Filters
+                  </button>
+                )}
               </div>
-            )}
-          </tbody>
-        </table>
+            }
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -8,37 +8,27 @@ import {
   FiMapPin,
   FiCalendar,
   FiGlobe,
-  FiCreditCard,
   FiShield,
   FiBell,
   FiSave,
   FiEdit2,
   FiCamera,
-  FiCheck,
-  FiStar,
-  FiAward,
-  FiTrendingUp,
   FiSettings,
   FiLock,
   FiEye,
   FiEyeOff,
-  FiDownload,
-  FiDollarSign,
   FiMap,
-  FiSend,
   FiCheckCircle,
   FiKey,
-  FiSmartphone,
   FiAlertCircle,
-  FiX,
 } from "react-icons/fi";
+import { MdFlight, MdWifiPassword, MdCompareArrows } from "react-icons/md";
 import {
-  MdFlight,
-  MdSecurity,
-  MdVerifiedUser,
-  MdWifiPassword,
-  MdCompareArrows,
-} from "react-icons/md";
+  authApi,
+  profileApi,
+  bookingsApi,
+  transactionsApi,
+} from "../../services/api";
 
 function Profile() {
   const navigate = useNavigate();
@@ -50,30 +40,9 @@ function Profile() {
     confirm: false,
   });
   const [user, setUser] = useState(null);
+  const [stats, setStats] = useState(null);
+  const [recentActivities, setRecentActivities] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    setTimeout(() => {
-      const userData = JSON.parse(localStorage.getItem("currentUser")) ||
-        JSON.parse(localStorage.getItem("registeredUser")) ||
-        JSON.parse(localStorage.getItem("user")) || {
-          fullName: "Alex Johnson",
-          email: "alex.johnson@example.com",
-          phone: "+1 (555) 123-4567",
-          address: "123 Main Street, New York, NY 10001",
-          dateOfBirth: "1990-05-15",
-          nationality: "United States",
-          profileImage: null,
-          joinDate: "2023-01-15",
-          isVerified: true,
-          isPhoneVerified: true,
-          isEmailVerified: true,
-        };
-
-      setUser(userData);
-      setLoading(false);
-    }, 800);
-  }, []);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -99,52 +68,58 @@ function Profile() {
   });
 
   useEffect(() => {
-    if (user) {
-      setFormData({
-        fullName: user.fullName || "",
-        email: user.email || "",
-        phone: user.phone || "",
-        address: user.address || "",
-        dateOfBirth: user.dateOfBirth || "",
-        nationality: user.nationality || "",
-        profileImage: user.profileImage || null,
-      });
+    const current = authApi.getCurrentUser();
+    if (!current) {
+      navigate("/login");
+      return;
     }
-  }, [user]);
 
-  const stats = {
-    totalTrips: 3,
-    countriesVisited: 2,
-    totalSpent: "$1,850.00",
-    loyaltyPoints: 450,
-    rank: "Silver",
-    exchangeCount: 5,
-    bookingCount: 3,
-  };
+    (async () => {
+      const [me, bookings, transactions] = await Promise.all([
+        profileApi.get(current.id),
+        bookingsApi.list(current.id),
+        transactionsApi.list(current.id),
+      ]);
 
-  const recentActivities = [
-    {
-      id: 1,
-      action: "Booked flight to Tokyo",
-      date: "Today",
-      icon: <MdFlight />,
-      color: "#10b981",
-    },
-    {
-      id: 2,
-      action: "Exchanged $500 to EUR",
-      date: "Yesterday",
-      icon: <MdCompareArrows />,
-      color: "#3b82f6",
-    },
-    {
-      id: 3,
-      action: "Added new payment method",
-      date: "2 days ago",
-      icon: <FiCreditCard />,
-      color: "#8b5cf6",
-    },
-  ];
+      setUser(me);
+      setFormData({
+        fullName: me.fullName || "",
+        email: me.email || "",
+        phone: me.phone || "",
+        address: me.address || "",
+        dateOfBirth: me.dateOfBirth || "",
+        nationality: me.nationality || "",
+        profileImage: me.profileImage || null,
+      });
+
+      setStats({
+        totalTrips: bookings.length,
+        exchangeCount: transactions.length,
+        bookingCount: bookings.length,
+        loyaltyPoints: me.loyaltyPoints ?? 0,
+      });
+
+      const feed = [
+        ...transactions.slice(0, 2).map((t) => ({
+          id: t.id,
+          action: `Exchanged ${t.fromAmount} ${t.fromCurrency} to ${t.toCurrency}`,
+          date: t.date,
+          icon: <MdCompareArrows />,
+          color: "#3b82f6",
+        })),
+        ...bookings.slice(0, 3).map((b) => ({
+          id: b.id,
+          action: `Booked ${b.type} to ${b.destination}`,
+          date: b.bookingDate,
+          icon: <MdFlight />,
+          color: "#10b981",
+        })),
+      ].slice(0, 3);
+
+      setRecentActivities(feed);
+      setLoading(false);
+    })();
+  }, [navigate]);
 
   const quickActions = [
     {
@@ -172,23 +147,13 @@ function Profile() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
-    const newData = {
-      ...passwordData,
-      [name]: value,
-    };
-    setPasswordData(newData);
-
-    if (name === "new") {
-      calculatePasswordStrength(value);
-    }
+    setPasswordData((prev) => ({ ...prev, [name]: value }));
+    if (name === "new") calculatePasswordStrength(value);
   };
 
   const calculatePasswordStrength = (password) => {
@@ -200,8 +165,7 @@ function Profile() {
 
     let message = "Very weak";
     let color = "#ef4444";
-    let width = "25%";
-
+    let width = "0%";
     if (score === 4) {
       message = "Strong";
       color = "#10b981";
@@ -218,56 +182,40 @@ function Profile() {
       message = "Weak";
       color = "#ef4444";
       width = "25%";
-    } else {
-      width = "0%";
     }
 
     setPasswordStrength({ score, message, color, width });
   };
 
-  const togglePasswordVisibility = (field) => {
-    setShowPassword((prev) => ({
-      ...prev,
-      [field]: !prev[field],
-    }));
-  };
+  const togglePasswordVisibility = (field) =>
+    setShowPassword((prev) => ({ ...prev, [field]: !prev[field] }));
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert("Image size should be less than 5MB");
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const updatedFormData = {
-          ...formData,
-          profileImage: reader.result,
-        };
-        setFormData(updatedFormData);
-
-        const updatedUser = { ...user, profileImage: reader.result };
-        setUser(updatedUser);
-        localStorage.setItem("currentUser", JSON.stringify(updatedUser));
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Image size should be less than 5MB");
+      return;
     }
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const updated = await profileApi.update(user.id, {
+        profileImage: reader.result,
+      });
+      setUser(updated);
+      setFormData((prev) => ({ ...prev, profileImage: reader.result }));
+    };
+    reader.readAsDataURL(file);
   };
 
-  const handleSave = () => {
-    const updatedUser = { ...user, ...formData };
-    setUser(updatedUser);
-
-    localStorage.setItem("currentUser", JSON.stringify(updatedUser));
-    localStorage.setItem("registeredUser", JSON.stringify(updatedUser));
-
+  const handleSave = async () => {
+    const updated = await profileApi.update(user.id, formData);
+    setUser(updated);
     setIsEditing(false);
     alert("Profile updated successfully!");
   };
 
-  const handlePasswordUpdate = () => {
+  const handlePasswordUpdate = async () => {
     if (passwordData.new !== passwordData.confirm) {
       alert("New passwords don't match!");
       return;
@@ -276,7 +224,7 @@ function Profile() {
       alert("Password must be at least 8 characters!");
       return;
     }
-
+    await profileApi.update(user.id, { password: passwordData.new });
     alert("Password updated successfully!");
     setPasswordData({ current: "", new: "", confirm: "" });
     setPasswordStrength({
@@ -287,7 +235,16 @@ function Profile() {
     });
   };
 
-  if (loading) {
+  const getInitials = (name) =>
+    name ?
+      name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+    : "AJ";
+
+  if (loading || !user || !stats) {
     return (
       <div className={styles.loadingContainer}>
         <div className={styles.loadingSpinner}></div>
@@ -296,19 +253,8 @@ function Profile() {
     );
   }
 
-  const getInitials = (name) => {
-    return name ?
-        name
-          .split(" ")
-          .map((n) => n[0])
-          .join("")
-          .toUpperCase()
-      : "AJ";
-  };
-
   return (
     <div className={styles.profileContainer}>
-      {/* Header */}
       <div className={styles.header}>
         <div className={styles.headerContent}>
           <h1 className={styles.title}>My Profile</h1>
@@ -327,7 +273,6 @@ function Profile() {
         </div>
       </div>
 
-      {/* Stats */}
       <div className={styles.stats}>
         <div className={`${styles.statItem} ${styles.statTrips}`}>
           <span className={styles.statNumber}>{stats.totalTrips}</span>
@@ -347,12 +292,9 @@ function Profile() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className={styles.mainContent}>
         <div className={styles.contentWrapper}>
-          {/* Left Column - Main Content */}
           <div className={styles.leftColumn}>
-            {/* Profile Card */}
             <div className={styles.profileCard}>
               <div className={styles.cardHeader}>
                 <h3 className={styles.cardTitle}>
@@ -444,14 +386,16 @@ function Profile() {
                         className={styles.fieldInput}
                       />
                     : <div className={styles.fieldValue}>
-                        {new Date(user.dateOfBirth).toLocaleDateString(
-                          "en-US",
-                          {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          },
-                        )}
+                        {user.dateOfBirth ?
+                          new Date(user.dateOfBirth).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            },
+                          )
+                        : "—"}
                       </div>
                     }
                   </div>
@@ -471,7 +415,7 @@ function Profile() {
                         placeholder="Enter nationality"
                       />
                     : <div className={styles.fieldValue}>
-                        {user.nationality}
+                        {user.nationality || "—"}
                       </div>
                     }
                   </div>
@@ -490,13 +434,15 @@ function Profile() {
                         placeholder="Enter your address"
                         rows="2"
                       />
-                    : <div className={styles.fieldValue}>{user.address}</div>}
+                    : <div className={styles.fieldValue}>
+                        {user.address || "—"}
+                      </div>
+                    }
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Tabs */}
             <div className={styles.tabs}>
               <button
                 className={`${styles.tab} ${
@@ -521,7 +467,6 @@ function Profile() {
               </button>
             </div>
 
-            {/* Tab Content */}
             <div className={styles.tabContent}>
               {activeTab === "security" && (
                 <div className={styles.card}>
@@ -595,7 +540,8 @@ function Profile() {
                               style={{
                                 width: passwordStrength.width,
                                 backgroundColor: passwordStrength.color,
-                              }}></div>
+                              }}
+                            />
                           </div>
                         </div>
                       )}
@@ -710,9 +656,7 @@ function Profile() {
             </div>
           </div>
 
-          {/* Right Column - Sidebar */}
           <div className={styles.rightColumn}>
-            {/* Quick Actions */}
             <div className={styles.sidebarCard}>
               <h3 className={styles.sidebarTitle}>Quick Actions</h3>
               <div className={styles.quickActions}>
@@ -735,23 +679,33 @@ function Profile() {
               </div>
             </div>
 
-            {/* Recent Activity */}
             <div className={styles.sidebarCard}>
               <h3 className={styles.sidebarTitle}>
                 <FiCalendar /> Recent Activity
               </h3>
               <div className={styles.activityList}>
-                {recentActivities.map((activity) => (
-                  <div key={activity.id} className={styles.activityItem}>
-                    <div className={styles.activityIcon}>{activity.icon}</div>
-                    <div className={styles.activityContent}>
-                      <div className={styles.activityText}>
-                        {activity.action}
+                {recentActivities.length === 0 ?
+                  <p style={{ color: "#64748b", fontSize: 14 }}>
+                    No recent activity.
+                  </p>
+                : recentActivities.map((activity) => (
+                    <div key={activity.id} className={styles.activityItem}>
+                      <div className={styles.activityIcon}>{activity.icon}</div>
+                      <div className={styles.activityContent}>
+                        <div className={styles.activityText}>
+                          {activity.action}
+                        </div>
+                        <div className={styles.activityTime}>
+                          {new Date(activity.date).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </div>
                       </div>
-                      <div className={styles.activityTime}>{activity.date}</div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                }
               </div>
             </div>
           </div>

@@ -1,29 +1,26 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import styles from "./UserNavbar.module.css";
+import { KEYS, get } from "../services/storage";
 import {
   FiHome,
   FiDollarSign,
   FiSend,
   FiGlobe,
   FiMap,
-  FiTrendingUp,
   FiUser,
   FiSettings,
   FiLogOut,
   FiBell,
   FiChevronDown,
   FiCheckCircle,
-  FiShield,
   FiCreditCard,
   FiCalendar,
   FiHelpCircle,
-  FiFileText,
-  FiClipboard,
   FiClock,
-  FiCheckSquare,
   FiBriefcase,
   FiPackage,
+  FiX,
 } from "react-icons/fi";
 
 function UserNavbar() {
@@ -31,6 +28,12 @@ function UserNavbar() {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [mobileUserDropdownOpen, setMobileUserDropdownOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+
+  const [user, setUser] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [bookings, setBookings] = useState([]);
+  const [visaApplications, setVisaApplications] = useState([]);
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -39,20 +42,85 @@ function UserNavbar() {
   const mobileMenuRef = useRef(null);
   const hamburgerRef = useRef(null);
 
-  // Get user from localStorage
-  const user = JSON.parse(localStorage.getItem("currentUser")) || {
-    fullName: "John Smith",
-    email: "john@example.com",
-  };
+  /* ============================================================
+     LOAD DATA FROM STORAGE
+     ============================================================ */
+  useEffect(() => {
+    let isMounted = true;
 
-  const bookingCount = 2;
-  const notificationCount = 3;
-  const pendingVisasCount = 1;
+    const loadData = () => {
+      if (!isMounted) return;
 
-  // Close dropdowns when clicking outside
+      const currentUser = get(KEYS.CURRENT_USER) || null;
+      setUser(currentUser);
+
+      if (!currentUser?.id) {
+        setNotifications([]);
+        setBookings([]);
+        setVisaApplications([]);
+        return;
+      }
+
+      const allNotifs = get(KEYS.NOTIFICATIONS) || [];
+      const allBookings = get(KEYS.BOOKINGS) || [];
+      const allVisas = get(KEYS.VISA_APPLICATIONS) || [];
+
+      setNotifications(
+        Array.isArray(allNotifs) ?
+          allNotifs.filter((n) => n.userId === currentUser.id)
+        : [],
+      );
+      setBookings(
+        Array.isArray(allBookings) ?
+          allBookings.filter((b) => b.userId === currentUser.id)
+        : [],
+      );
+      setVisaApplications(
+        Array.isArray(allVisas) ?
+          allVisas.filter((v) => v.userId === currentUser.id)
+        : [],
+      );
+    };
+
+    loadData();
+
+    // Re-load when localStorage changes (other tabs) or window refocuses
+    const handleStorage = (e) => {
+      if (
+        !e.key ||
+        e.key === KEYS.NOTIFICATIONS ||
+        e.key === KEYS.BOOKINGS ||
+        e.key === KEYS.VISA_APPLICATIONS ||
+        e.key === KEYS.CURRENT_USER
+      ) {
+        loadData();
+      }
+    };
+
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("focus", loadData);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("focus", loadData);
+    };
+  }, [location.pathname]);
+
+  /* ============================================================
+     DERIVED COUNTS
+     ============================================================ */
+  const unreadCount = notifications.filter((n) => !n.read).length;
+  const bookingCount = bookings.length;
+  const pendingVisasCount = visaApplications.filter(
+    (v) => v.status !== "approved" && v.status !== "rejected",
+  ).length;
+
+  /* ============================================================
+     CLICK OUTSIDE
+     ============================================================ */
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // Close desktop user dropdown
       if (
         userDropdownOpen &&
         userDropdownRef.current &&
@@ -61,7 +129,6 @@ function UserNavbar() {
         setUserDropdownOpen(false);
       }
 
-      // Close mobile user dropdown
       if (
         mobileUserDropdownOpen &&
         mobileUserDropdownRef.current &&
@@ -71,12 +138,11 @@ function UserNavbar() {
         setMobileUserDropdownOpen(false);
       }
 
-      // Close mobile menu
       if (
         mobileMenuOpen &&
         mobileMenuRef.current &&
         !mobileMenuRef.current.contains(event.target) &&
-        !hamburgerRef.current.contains(event.target)
+        !hamburgerRef.current?.contains(event.target)
       ) {
         setMobileMenuOpen(false);
       }
@@ -91,21 +157,25 @@ function UserNavbar() {
     };
   }, [userDropdownOpen, mobileUserDropdownOpen, mobileMenuOpen]);
 
-  // Handle scroll effect
+  /* ============================================================
+     SCROLL EFFECT
+     ============================================================ */
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-
+    const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu when route changes
+  /* ============================================================
+     CLOSE MOBILE MENU ON ROUTE CHANGE
+     ============================================================ */
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [location.pathname]);
 
+  /* ============================================================
+     HANDLERS
+     ============================================================ */
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
     setMobileUserDropdownOpen(false);
@@ -121,27 +191,37 @@ function UserNavbar() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("currentUser");
+    localStorage.removeItem(KEYS.CURRENT_USER);
     navigate("/login");
   };
 
-  const isActive = (path) => {
-    return (
-      location.pathname === path || location.pathname.startsWith(`${path}/`)
-    );
+  const handleNotificationClick = () => {
+    navigate("/dashboard/notifications");
   };
+
+  const isActive = (path) =>
+    location.pathname === path || location.pathname.startsWith(`${path}/`);
 
   const getInitials = (name) => {
-    return name ?
-        name
-          .split(" ")
-          .map((n) => n[0])
-          .join("")
-          .toUpperCase()
-          .slice(0, 2)
-      : "JS";
+    if (!name) return "GU";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
   };
 
+  const formatNotificationCount = (count) =>
+    count > 99 ? "99+" : String(count);
+
+  // Safe values if user hasn't loaded yet
+  const displayName = user?.fullName || "Guest";
+  const displayEmail = user?.email || "";
+
+  /* ============================================================
+     RENDER
+     ============================================================ */
   return (
     <>
       <header className={`${styles.navbar} ${scrolled ? styles.scrolled : ""}`}>
@@ -153,7 +233,7 @@ function UserNavbar() {
             <span className={styles.logoAccent}>Fin</span>
           </Link>
 
-          {/* Desktop Navigation - CLEAN HIGH-LEVEL NAV */}
+          {/* Desktop Navigation */}
           <nav className={styles.navLinks}>
             <Link
               to="/dashboard"
@@ -291,7 +371,7 @@ function UserNavbar() {
               </div>
             </div>
 
-            {/* Support Link */}
+            {/* Support */}
             <Link
               to="/dashboard/support"
               className={`${styles.navLink} ${
@@ -305,11 +385,18 @@ function UserNavbar() {
           {/* Desktop Right Side */}
           <div className={styles.navRight}>
             {/* Notification */}
-            <button className={styles.notificationBtn}>
+            <button
+              className={styles.notificationBtn}
+              onClick={handleNotificationClick}
+              aria-label={
+                unreadCount > 0 ?
+                  `${unreadCount} unread notifications`
+                : "Notifications"
+              }>
               <FiBell className={styles.notificationIcon} />
-              {notificationCount > 0 && (
+              {unreadCount > 0 && (
                 <span className={styles.notificationBadge}>
-                  {notificationCount}
+                  {formatNotificationCount(unreadCount)}
                 </span>
               )}
             </button>
@@ -324,30 +411,28 @@ function UserNavbar() {
                 className={styles.userButton}
                 onClick={toggleUserDropdown}>
                 <div className={styles.userAvatar}>
-                  {getInitials(user.fullName)}
+                  {getInitials(displayName)}
                 </div>
                 <span className={styles.userName}>
-                  {user.fullName?.split(" ")[0]}
+                  {displayName.split(" ")[0]}
                 </span>
                 <FiChevronDown className={styles.userDropdownIcon} />
               </button>
 
               <div className={styles.userDropdownMenu}>
-                {/* User Info */}
                 <div className={styles.userInfo}>
                   <div className={styles.dropdownAvatar}>
-                    {getInitials(user.fullName)}
+                    {getInitials(displayName)}
                   </div>
                   <div className={styles.userDetails}>
-                    <div className={styles.dropdownName}>{user.fullName}</div>
-                    <div className={styles.dropdownEmail}>{user.email}</div>
+                    <div className={styles.dropdownName}>{displayName}</div>
+                    <div className={styles.dropdownEmail}>{displayEmail}</div>
                     <span className={styles.verifiedBadge}>
                       <FiCheckCircle /> Verified
                     </span>
                   </div>
                 </div>
 
-                {/* User Account Menu Items */}
                 <div className={styles.dropdownMenuItems}>
                   <Link
                     to="/dashboard/profile"
@@ -388,19 +473,24 @@ function UserNavbar() {
             </div>
           </div>
 
-          {/* MOBILE NAVIGATION */}
+          {/* Mobile Navigation */}
           <div className={styles.mobileNav}>
-            {/* Mobile Notification */}
-            <button className={styles.mobileNotificationBtn}>
+            <button
+              className={styles.mobileNotificationBtn}
+              onClick={handleNotificationClick}
+              aria-label={
+                unreadCount > 0 ?
+                  `${unreadCount} unread notifications`
+                : "Notifications"
+              }>
               <FiBell className={styles.mobileNotificationIcon} />
-              {notificationCount > 0 && (
+              {unreadCount > 0 && (
                 <span className={styles.mobileNotificationBadge}>
-                  {notificationCount}
+                  {formatNotificationCount(unreadCount)}
                 </span>
               )}
             </button>
 
-            {/* Mobile User Dropdown */}
             <div
               ref={mobileUserDropdownRef}
               className={styles.mobileUserDropdown}>
@@ -408,25 +498,23 @@ function UserNavbar() {
                 className={styles.mobileUserButton}
                 onClick={toggleMobileUserDropdown}>
                 <div className={styles.mobileUserAvatar}>
-                  {getInitials(user.fullName)}
+                  {getInitials(displayName)}
                 </div>
               </button>
 
-              {/* Mobile User Dropdown Menu */}
               {mobileUserDropdownOpen && (
                 <div className={styles.mobileUserDropdownMenu}>
                   <div className={styles.mobileUserDropdownContent}>
-                    {/* User Info */}
                     <div className={styles.mobileUserInfo}>
                       <div className={styles.mobileDropdownAvatar}>
-                        {getInitials(user.fullName)}
+                        {getInitials(displayName)}
                       </div>
                       <div className={styles.mobileUserDetails}>
                         <div className={styles.mobileDropdownName}>
-                          {user.fullName}
+                          {displayName}
                         </div>
                         <div className={styles.mobileDropdownEmail}>
-                          {user.email}
+                          {displayEmail}
                         </div>
                         <span className={styles.verifiedBadge}>
                           <FiCheckCircle /> Verified
@@ -434,7 +522,6 @@ function UserNavbar() {
                       </div>
                     </div>
 
-                    {/* User Account Menu Items */}
                     <div className={styles.mobileDropdownMenuItems}>
                       <Link
                         to="/dashboard/profile"
@@ -476,7 +563,6 @@ function UserNavbar() {
               )}
             </div>
 
-            {/* Hamburger Menu */}
             <button
               ref={hamburgerRef}
               className={`${styles.hamburger} ${
@@ -492,7 +578,7 @@ function UserNavbar() {
         </div>
       </header>
 
-      {/* MOBILE MENU - Contains MAIN NAVIGATION CONTENT */}
+      {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div
           ref={mobileMenuRef}
@@ -501,21 +587,26 @@ function UserNavbar() {
           <div
             className={styles.mobileMenuContent}
             onClick={(e) => e.stopPropagation()}>
-            {/* Mobile Header */}
             <div className={styles.mobileHeader}>
+              <button
+                className={styles.mobileCloseBtn}
+                onClick={() => setMobileMenuOpen(false)}
+                aria-label="Close menu">
+                <FiX />
+              </button>
+
               <div className={styles.mobileHeaderAvatar}>
-                {getInitials(user.fullName)}
+                {getInitials(displayName)}
               </div>
               <div className={styles.mobileHeaderInfo}>
-                <h3>{user.fullName}</h3>
-                <p>{user.email}</p>
+                <h3>{displayName}</h3>
+                <p>{displayEmail}</p>
                 <span className={styles.verifiedBadge}>
                   <FiCheckCircle /> Verified
                 </span>
               </div>
             </div>
 
-            {/* Mobile Navigation Links */}
             <div className={styles.mobileNavLinks}>
               <Link
                 to="/dashboard"
@@ -527,7 +618,6 @@ function UserNavbar() {
                 <span>Dashboard</span>
               </Link>
 
-              {/* Services Section */}
               <div className={styles.mobileServicesSection}>
                 <h4>Services</h4>
                 <Link
@@ -576,7 +666,6 @@ function UserNavbar() {
                 </Link>
               </div>
 
-              {/* My Activities Section */}
               <div className={styles.mobileActivitiesSection}>
                 <h4>My Activities</h4>
                 <Link
@@ -629,7 +718,6 @@ function UserNavbar() {
                 </Link>
               </div>
 
-              {/* Support */}
               <Link
                 to="/dashboard/support"
                 className={`${styles.mobileLink} ${
@@ -641,7 +729,6 @@ function UserNavbar() {
               </Link>
             </div>
 
-            {/* Quick Access */}
             <div className={styles.mobileQuickActions}>
               <h4>Quick Access</h4>
               <div className={styles.mobileActionsGrid}>

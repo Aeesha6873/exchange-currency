@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   FiDollarSign,
   FiSearch,
@@ -16,96 +16,37 @@ import {
 } from "react-icons/fi";
 import styles from "./ExchangeTransaction.module.css";
 
+const read = (key, fallback = []) => {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const write = (key, value) => {
+  localStorage.setItem(key, JSON.stringify(value));
+};
+
+const formatDate = (iso) => {
+  if (!iso) return "—";
+  try {
+    return new Date(iso).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  } catch {
+    return iso;
+  }
+};
+
 const ExchangeTransactions = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [transactions, setTransactions] = useState([
-    {
-      id: "EXC-001",
-      user: "John Smith",
-      fromCurrency: "USD",
-      toCurrency: "EUR",
-      amount: 2500,
-      received: 2300,
-      fee: 25,
-      status: "completed",
-      date: "Jan 15, 2024",
-      userEmail: "john@example.com",
-      exchangeRate: 0.92,
-      paymentMethod: "Bank Transfer",
-    },
-    {
-      id: "EXC-002",
-      user: "Emma Wilson",
-      fromCurrency: "GBP",
-      toCurrency: "USD",
-      amount: 1800,
-      received: 2286,
-      fee: 18,
-      status: "processing",
-      date: "Jan 15, 2024",
-      userEmail: "emma@example.com",
-      exchangeRate: 1.27,
-      paymentMethod: "Credit Card",
-    },
-    {
-      id: "EXC-003",
-      user: "David Chen",
-      fromCurrency: "CAD",
-      toCurrency: "GBP",
-      amount: 3500,
-      received: 2030,
-      fee: 35,
-      status: "pending",
-      date: "Jan 14, 2024",
-      userEmail: "david@example.com",
-      exchangeRate: 0.58,
-      paymentMethod: "Bank Transfer",
-    },
-    {
-      id: "EXC-004",
-      user: "Sarah Johnson",
-      fromCurrency: "EUR",
-      toCurrency: "JPY",
-      amount: 1200,
-      received: 190200,
-      fee: 12,
-      status: "completed",
-      date: "Jan 14, 2024",
-      userEmail: "sarah@example.com",
-      exchangeRate: 158.5,
-      paymentMethod: "PayPal",
-    },
-    {
-      id: "EXC-005",
-      user: "Michael Brown",
-      fromCurrency: "AUD",
-      toCurrency: "USD",
-      amount: 800,
-      received: 536,
-      fee: 8,
-      status: "failed",
-      date: "Jan 13, 2024",
-      userEmail: "michael@example.com",
-      exchangeRate: 0.67,
-      paymentMethod: "Credit Card",
-      failureReason: "Bank account verification failed",
-    },
-    {
-      id: "EXC-006",
-      user: "Lisa Wang",
-      fromCurrency: "USD",
-      toCurrency: "CNY",
-      amount: 5000,
-      received: 35900,
-      fee: 50,
-      status: "completed",
-      date: "Jan 13, 2024",
-      userEmail: "lisa@example.com",
-      exchangeRate: 7.18,
-      paymentMethod: "Bank Transfer",
-    },
-  ]);
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Modal States
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -117,33 +58,124 @@ const ExchangeTransactions = () => {
   const [modalMessage, setModalMessage] = useState("");
   const [modalTitle, setModalTitle] = useState("");
 
-  // Calculate stats
-  const stats = {
-    totalVolume: transactions.reduce((sum, t) => sum + t.amount, 0),
-    totalTransactions: transactions.length,
-    completed: transactions.filter((t) => t.status === "completed").length,
-    totalFees: transactions.reduce((sum, t) => sum + t.fee, 0),
+  /* ---------------------------------------------------------------- */
+  /* Load + join with users                                            */
+  /* ---------------------------------------------------------------- */
+
+  const load = () => {
+    const users = read("users", []);
+    const raw = read("transactions", []);
+
+    const enriched = raw
+      .map((t) => {
+        const user = users.find((u) => String(u.id) === String(t.userId));
+        const userName =
+          user?.fullName || user?.email || t.userName || "Unknown User";
+        const userEmail = user?.email || t.userEmail || "—";
+
+        const fromAmount = Number(t.fromAmount ?? t.amount) || 0;
+        const toAmount = Number(t.toAmount) || 0;
+        const rate =
+          Number(t.exchangeRate ?? t.rate) ||
+          (fromAmount > 0 ? toAmount / fromAmount : 0);
+        const fee = Number(t.fee) || 0;
+
+        return {
+          id: t.id,
+          reference: t.reference || t.id,
+          userId: t.userId,
+          user: userName,
+          userEmail,
+          fromCurrency: t.fromCurrency || "—",
+          toCurrency: t.toCurrency || "—",
+          amount: fromAmount,
+          received: toAmount,
+          fee,
+          status: t.status || "pending",
+          date: t.createdAt || t.date || null,
+          dateDisplay: formatDate(t.createdAt || t.date),
+          exchangeRate: rate,
+          paymentMethod: t.bank || t.paymentMethod || "—",
+          direction: t.direction,
+          account: t.account,
+          failureReason: t.failureReason || "",
+        };
+      })
+      .sort(
+        (a, b) =>
+          new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime(),
+      );
+
+    setTransactions(enriched);
+    setLoading(false);
   };
 
-  // Filter transactions
-  const filteredTransactions = transactions.filter((transaction) => {
-    const matchesSearch =
-      transaction.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      transaction.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      transaction.userEmail.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || transaction.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  useEffect(() => {
+    load();
+    const onStorage = (e) => {
+      if (["transactions", "users"].includes(e.key)) load();
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
 
-  // Modal Functions
-  const openDetailsModal = (transaction) => {
-    setSelectedTransaction(transaction);
+  /* ---------------------------------------------------------------- */
+  /* Stats                                                             */
+  /* ---------------------------------------------------------------- */
+
+  const stats = useMemo(() => {
+    return {
+      totalVolume: transactions.reduce((s, t) => s + t.amount, 0),
+      totalTransactions: transactions.length,
+      completed: transactions.filter((t) => t.status === "completed").length,
+      totalFees: transactions.reduce((s, t) => s + t.fee, 0),
+    };
+  }, [transactions]);
+
+  /* ---------------------------------------------------------------- */
+  /* Filtering                                                         */
+  /* ---------------------------------------------------------------- */
+
+  const filteredTransactions = useMemo(() => {
+    const q = searchTerm.toLowerCase();
+    return transactions.filter((t) => {
+      const matchesSearch =
+        !q ||
+        t.user.toLowerCase().includes(q) ||
+        t.userEmail.toLowerCase().includes(q) ||
+        t.reference.toLowerCase().includes(q) ||
+        t.id.toLowerCase().includes(q);
+
+      const matchesStatus = statusFilter === "all" || t.status === statusFilter;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [transactions, searchTerm, statusFilter]);
+
+  /* ---------------------------------------------------------------- */
+  /* Persistence helpers                                               */
+  /* ---------------------------------------------------------------- */
+
+  const updateTransactionInStorage = (id, patch) => {
+    const all = read("transactions", []);
+    const updated = all.map((t) =>
+      String(t.id) === String(id) ? { ...t, ...patch } : t,
+    );
+    write("transactions", updated);
+    load();
+  };
+
+  /* ---------------------------------------------------------------- */
+  /* Modals                                                            */
+  /* ---------------------------------------------------------------- */
+
+  const openDetailsModal = (t) => {
+    setSelectedTransaction(t);
     setShowDetailsModal(true);
   };
 
-  const openRejectModal = (transaction) => {
-    setSelectedTransaction(transaction);
+  const openRejectModal = (t) => {
+    setSelectedTransaction(t);
     setRejectReason("");
     setShowRejectModal(true);
   };
@@ -154,11 +186,11 @@ const ExchangeTransactions = () => {
     setShowSuccessModal(true);
   };
 
-  const openConfirmModal = (transaction, action) => {
-    setSelectedTransaction(transaction);
+  const openConfirmModal = (t, action) => {
+    setSelectedTransaction(t);
     setModalTitle(`Confirm ${action}`);
     setModalMessage(
-      `Are you sure you want to ${action.toLowerCase()} transaction ${transaction.id}?`,
+      `Are you sure you want to ${action.toLowerCase()} transaction ${t.reference}?`,
     );
     setShowConfirmModal(true);
   };
@@ -172,9 +204,27 @@ const ExchangeTransactions = () => {
     setRejectReason("");
   };
 
-  // Action Functions
+  /* ---------------------------------------------------------------- */
+  /* Actions                                                           */
+  /* ---------------------------------------------------------------- */
+
   const handleExportData = () => {
-    const dataStr = JSON.stringify(filteredTransactions, null, 2);
+    const exportData = filteredTransactions.map((t) => ({
+      reference: t.reference,
+      user: t.user,
+      userEmail: t.userEmail,
+      fromCurrency: t.fromCurrency,
+      toCurrency: t.toCurrency,
+      amount: t.amount,
+      received: t.received,
+      fee: t.fee,
+      exchangeRate: t.exchangeRate,
+      status: t.status,
+      date: t.date,
+      paymentMethod: t.paymentMethod,
+    }));
+
+    const dataStr = JSON.stringify(exportData, null, 2);
     const dataUri =
       "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
     const link = document.createElement("a");
@@ -193,53 +243,43 @@ const ExchangeTransactions = () => {
 
   const handleApproveTransaction = () => {
     if (!selectedTransaction) return;
-
-    setTransactions((prev) =>
-      prev.map((t) =>
-        t.id === selectedTransaction.id ? { ...t, status: "completed" } : t,
-      ),
-    );
-
+    updateTransactionInStorage(selectedTransaction.id, {
+      status: "completed",
+      completedAt: new Date().toISOString(),
+    });
+    const ref = selectedTransaction.reference;
     closeAllModals();
     openSuccessModal(
       "Transaction Approved",
-      `Transaction ${selectedTransaction.id} has been approved successfully.`,
+      `Transaction ${ref} has been approved successfully.`,
     );
   };
 
   const handleRejectTransaction = () => {
-    if (!selectedTransaction || !rejectReason.trim()) {
-      alert("Please enter a rejection reason.");
-      return;
-    }
-
-    setTransactions((prev) =>
-      prev.map((t) =>
-        t.id === selectedTransaction.id ?
-          {
-            ...t,
-            status: "failed",
-            failureReason: rejectReason,
-          }
-        : t,
-      ),
-    );
-
+    if (!selectedTransaction || !rejectReason.trim()) return;
+    updateTransactionInStorage(selectedTransaction.id, {
+      status: "failed",
+      failureReason: rejectReason,
+      rejectedAt: new Date().toISOString(),
+    });
+    const ref = selectedTransaction.reference;
+    const reason = rejectReason;
     closeAllModals();
     openSuccessModal(
       "Transaction Rejected",
-      `Transaction ${selectedTransaction.id} has been rejected. Reason: ${rejectReason}`,
+      `Transaction ${ref} has been rejected. Reason: ${reason}`,
     );
   };
 
-  const handleResendNotification = (transaction) => {
+  const handleResendNotification = (t) => {
     openSuccessModal(
       "Notification Sent",
-      `Notification has been sent to ${transaction.userEmail} about transaction ${transaction.id}.`,
+      `Notification has been sent to ${t.userEmail} about transaction ${t.reference}.`,
     );
   };
 
   const handleRefreshData = () => {
+    load();
     openSuccessModal(
       "Data Refreshed",
       "Transaction data has been refreshed successfully.",
@@ -251,18 +291,40 @@ const ExchangeTransactions = () => {
     setStatusFilter("all");
   };
 
-  // Format currency
+  /* ---------------------------------------------------------------- */
+  /* Formatting                                                        */
+  /* ---------------------------------------------------------------- */
+
   const formatCurrency = (amount, currency) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: currency || "USD",
-    }).format(amount);
+    try {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: currency || "USD",
+        maximumFractionDigits: currency === "JPY" ? 0 : 2,
+      }).format(amount);
+    } catch {
+      return `${amount} ${currency || ""}`;
+    }
   };
 
-  // Calculate received amount
-  const calculateReceived = (transaction) => {
-    return transaction.amount * transaction.exchangeRate - transaction.fee;
-  };
+  /* ---------------------------------------------------------------- */
+  /* Render                                                            */
+  /* ---------------------------------------------------------------- */
+
+  if (loading) {
+    return (
+      <div className={styles.container}>
+        <div
+          style={{
+            padding: "4rem",
+            textAlign: "center",
+            color: "#64748b",
+          }}>
+          Loading transactions...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
@@ -292,7 +354,7 @@ const ExchangeTransactions = () => {
         </div>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats */}
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
           <div className={styles.statIcon}>
@@ -370,7 +432,6 @@ const ExchangeTransactions = () => {
             className={styles.statusSelect}>
             <option value="all">All Status</option>
             <option value="completed">Completed</option>
-            <option value="processing">Processing</option>
             <option value="pending">Pending</option>
             <option value="failed">Failed</option>
           </select>
@@ -381,7 +442,7 @@ const ExchangeTransactions = () => {
         </button>
       </div>
 
-      {/* Transactions Table */}
+      {/* Table */}
       <div className={styles.tableContainer}>
         <div className={styles.tableHeader}>
           <h3 className={styles.tableTitle}>
@@ -413,13 +474,15 @@ const ExchangeTransactions = () => {
                   <tr key={transaction.id} className={styles.tableRow}>
                     <td>
                       <div className={styles.idCell}>
-                        <span className={styles.id}>{transaction.id}</span>
+                        <span className={styles.id}>
+                          {transaction.reference}
+                        </span>
                       </div>
                     </td>
                     <td>
                       <div className={styles.userCell}>
                         <div className={styles.userAvatar}>
-                          {transaction.user.charAt(0)}
+                          {transaction.user.charAt(0).toUpperCase()}
                         </div>
                         <div className={styles.userInfo}>
                           <div className={styles.userName}>
@@ -444,7 +507,8 @@ const ExchangeTransactions = () => {
                         </div>
                         <div className={styles.exchangeRate}>
                           1 {transaction.fromCurrency} ={" "}
-                          {transaction.exchangeRate} {transaction.toCurrency}
+                          {transaction.exchangeRate.toFixed(4)}{" "}
+                          {transaction.toCurrency}
                         </div>
                       </div>
                     </td>
@@ -456,12 +520,14 @@ const ExchangeTransactions = () => {
                             transaction.fromCurrency,
                           )}
                         </div>
-                        <div className={styles.amountReceived}>
-                          {formatCurrency(
-                            transaction.received,
-                            transaction.toCurrency,
-                          )}
-                        </div>
+                        {transaction.received > 0 && (
+                          <div className={styles.amountReceived}>
+                            {formatCurrency(
+                              transaction.received,
+                              transaction.toCurrency,
+                            )}
+                          </div>
+                        )}
                       </div>
                     </td>
                     <td>
@@ -476,10 +542,12 @@ const ExchangeTransactions = () => {
                     </td>
                     <td>
                       <div
-                        className={`${styles.status} ${styles[transaction.status]}`}>
+                        className={`${styles.status} ${
+                          styles[transaction.status]
+                        }`}>
                         {transaction.status === "completed" && <FiCheck />}
-                        {transaction.status === "processing" && <FiClock />}
                         {transaction.status === "pending" && <FiClock />}
+                        {transaction.status === "processing" && <FiClock />}
                         {transaction.status === "failed" && <FiX />}
                         <span className={styles.statusText}>
                           {transaction.status}
@@ -487,7 +555,9 @@ const ExchangeTransactions = () => {
                       </div>
                     </td>
                     <td>
-                      <div className={styles.dateCell}>{transaction.date}</div>
+                      <div className={styles.dateCell}>
+                        {transaction.dateDisplay}
+                      </div>
                     </td>
                     <td>
                       <div className={styles.actionsCell}>
@@ -537,13 +607,23 @@ const ExchangeTransactions = () => {
                   <td colSpan="8" className={styles.emptyState}>
                     <div className={styles.emptyContent}>
                       <FiDollarSign className={styles.emptyIcon} />
-                      <h3>No transactions found</h3>
-                      <p>Try adjusting your search or filters</p>
-                      <button
-                        className={styles.clearBtn}
-                        onClick={handleClearFilters}>
-                        Clear All Filters
-                      </button>
+                      <h3>
+                        {transactions.length === 0 ?
+                          "No transactions yet"
+                        : "No transactions found"}
+                      </h3>
+                      <p>
+                        {transactions.length === 0 ?
+                          "No users have made any exchanges yet."
+                        : "Try adjusting your search or filters."}
+                      </p>
+                      {transactions.length > 0 && (
+                        <button
+                          className={styles.clearBtn}
+                          onClick={handleClearFilters}>
+                          Clear All Filters
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -553,7 +633,7 @@ const ExchangeTransactions = () => {
         </div>
       </div>
 
-      {/* Transaction Details Modal */}
+      {/* Details Modal */}
       {showDetailsModal && selectedTransaction && (
         <div className={styles.modalOverlay} onClick={closeAllModals}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -570,10 +650,10 @@ const ExchangeTransactions = () => {
               <div className={styles.detailsGrid}>
                 <div className={styles.detailItem}>
                   <span className={styles.detailLabel}>
-                    <FiCreditCard /> Transaction ID
+                    <FiCreditCard /> Reference
                   </span>
                   <span className={styles.detailValue}>
-                    {selectedTransaction.id}
+                    {selectedTransaction.reference}
                   </span>
                 </div>
 
@@ -609,7 +689,7 @@ const ExchangeTransactions = () => {
                   <span className={styles.detailLabel}>Exchange Rate</span>
                   <span className={styles.detailValue}>
                     1 {selectedTransaction.fromCurrency} ={" "}
-                    {selectedTransaction.exchangeRate}{" "}
+                    {selectedTransaction.exchangeRate.toFixed(4)}{" "}
                     {selectedTransaction.toCurrency}
                   </span>
                 </div>
@@ -624,15 +704,17 @@ const ExchangeTransactions = () => {
                   </span>
                 </div>
 
-                <div className={styles.detailItem}>
-                  <span className={styles.detailLabel}>Amount Received</span>
-                  <span className={styles.detailValue}>
-                    {formatCurrency(
-                      selectedTransaction.received,
-                      selectedTransaction.toCurrency,
-                    )}
-                  </span>
-                </div>
+                {selectedTransaction.received > 0 && (
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Amount Received</span>
+                    <span className={styles.detailValue}>
+                      {formatCurrency(
+                        selectedTransaction.received,
+                        selectedTransaction.toCurrency,
+                      )}
+                    </span>
+                  </div>
+                )}
 
                 <div className={styles.detailItem}>
                   <span className={styles.detailLabel}>Fee</span>
@@ -644,17 +726,30 @@ const ExchangeTransactions = () => {
                   </span>
                 </div>
 
-                <div className={styles.detailItem}>
-                  <span className={styles.detailLabel}>Payment Method</span>
-                  <span className={styles.detailValue}>
-                    {selectedTransaction.paymentMethod}
-                  </span>
-                </div>
+                {selectedTransaction.paymentMethod !== "—" && (
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Platform</span>
+                    <span className={styles.detailValue}>
+                      {selectedTransaction.paymentMethod}
+                    </span>
+                  </div>
+                )}
+
+                {selectedTransaction.account && (
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Account</span>
+                    <span className={styles.detailValue}>
+                      {selectedTransaction.account}
+                    </span>
+                  </div>
+                )}
 
                 <div className={styles.detailItem}>
                   <span className={styles.detailLabel}>Status</span>
                   <span
-                    className={`${styles.detailValue} ${styles[selectedTransaction.status]}`}>
+                    className={`${styles.detailValue} ${
+                      styles[selectedTransaction.status]
+                    }`}>
                     {selectedTransaction.status}
                   </span>
                 </div>
@@ -664,7 +759,7 @@ const ExchangeTransactions = () => {
                     <FiCalendar /> Date
                   </span>
                   <span className={styles.detailValue}>
-                    {selectedTransaction.date}
+                    {selectedTransaction.dateDisplay}
                   </span>
                 </div>
 
@@ -690,7 +785,7 @@ const ExchangeTransactions = () => {
         </div>
       )}
 
-      {/* Reject Transaction Modal */}
+      {/* Reject Modal */}
       {showRejectModal && selectedTransaction && (
         <div className={styles.modalOverlay} onClick={closeAllModals}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -706,7 +801,7 @@ const ExchangeTransactions = () => {
             <div className={styles.modalContent}>
               <p className={styles.modalText}>
                 Are you sure you want to reject transaction{" "}
-                <strong>{selectedTransaction.id}</strong>?
+                <strong>{selectedTransaction.reference}</strong>?
               </p>
 
               <div className={styles.formGroup}>
@@ -741,7 +836,7 @@ const ExchangeTransactions = () => {
         </div>
       )}
 
-      {/* Confirm Action Modal */}
+      {/* Confirm Modal */}
       {showConfirmModal && selectedTransaction && (
         <div className={styles.modalOverlay} onClick={closeAllModals}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -774,7 +869,9 @@ const ExchangeTransactions = () => {
                 <div className={styles.previewItem}>
                   <span>Current Status:</span>
                   <span
-                    className={`${styles.previewStatus} ${styles[selectedTransaction.status]}`}>
+                    className={`${styles.previewStatus} ${
+                      styles[selectedTransaction.status]
+                    }`}>
                     {selectedTransaction.status}
                   </span>
                 </div>

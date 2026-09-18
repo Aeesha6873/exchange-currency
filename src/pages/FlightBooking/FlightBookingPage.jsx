@@ -4,8 +4,7 @@ import FlightSearch from "../../components/flightbooking/FlightSearch";
 import FlightResults from "../../components/flightbooking/FlightResults";
 import BookingForm from "../../components/flightbooking/BookingForm";
 import Confirmation from "../../components/flightbooking/Confirmation";
-// import Nav from "../../components/Navbar";
-// import Footer from "../../components/Footer";
+import { authApi, bookingsApi } from "../../services/api";
 import styles from "./FlightBookingPage.module.css";
 
 function FlightBookingPage() {
@@ -55,15 +54,47 @@ function FlightBookingPage() {
     }, 400);
   };
 
-  const handleBookingComplete = (data) => {
+  const handleBookingComplete = async (data) => {
+    const currentUser = authApi.getCurrentUser();
+
+    if (!currentUser) {
+      alert("Please log in to complete your booking.");
+      return;
+    }
+
     setIsAnimating(true);
+
+    // Save to localStorage so it appears in Dashboard + Bookings page
+    const saved = await bookingsApi.create(currentUser.id, {
+      type: "flight",
+      reference: `FLT-${Date.now().toString().slice(-6)}`,
+      destination:
+        searchData?.arrivalCity ?
+          `${searchData.arrivalCity}, ${searchData.arrivalCountry || ""}`.trim()
+        : searchData?.to || "Flight Booking",
+      date: searchData?.departureDate || new Date().toISOString().slice(0, 10),
+      time: searchData?.departureTime || "00:00",
+      status: "confirmed",
+      airline: selectedFlight?.airline || "—",
+      flight: selectedFlight?.flightNumber || "—",
+      price: Number(selectedFlight?.price) || 0,
+      currency: selectedFlight?.currency || "USD",
+      passengers: data?.passengers || 1,
+      class: selectedFlight?.class || "Economy",
+      departure: searchData?.departure || searchData?.from || "—",
+      arrival: searchData?.arrival || searchData?.to || "—",
+      duration: selectedFlight?.duration || "—",
+      bookingDate: new Date().toISOString().slice(0, 10),
+      amenities: selectedFlight?.amenities || [],
+    });
+
+    setBookingData({ ...data, reference: saved.reference, id: saved.id });
+
     setTimeout(() => {
-      setBookingData(data);
       setCurrentStep("confirmation");
       setIsAnimating(false);
     }, 400);
   };
-
   const handleNewBooking = () => {
     setIsAnimating(true);
     setTimeout(() => {
@@ -253,7 +284,7 @@ function FlightBookingPage() {
                     animate="visible"
                     exit="exit"
                     className={styles.contentWrapper}>
-                    {isAnimating ? (
+                    {isAnimating ?
                       <div className={styles.loadingState}>
                         <div className={styles.neonSpinner}>
                           <div className={styles.spinnerCore}></div>
@@ -266,8 +297,7 @@ function FlightBookingPage() {
                           <span></span>
                         </div>
                       </div>
-                    ) : (
-                      <>
+                    : <>
                         {currentStep === "search" && (
                           <FlightSearch onSearch={handleSearch} />
                         )}
@@ -297,7 +327,7 @@ function FlightBookingPage() {
                           />
                         )}
                       </>
-                    )}
+                    }
                   </motion.div>
                 </AnimatePresence>
               </div>
@@ -314,9 +344,9 @@ function FlightBookingPage() {
                   <div className={styles.stat}>
                     <span className={styles.statLabel}>Status</span>
                     <span className={styles.statValue}>
-                      {currentStep === "confirmation"
-                        ? "Complete"
-                        : "In Progress"}
+                      {currentStep === "confirmation" ?
+                        "Complete"
+                      : "In Progress"}
                     </span>
                   </div>
                 </div>

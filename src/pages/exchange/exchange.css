@@ -74,8 +74,8 @@
 }
 
 .indicatorRing {
-  width: 64px;
-  height: 64px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.8);
   border: 2px solid rgba(16, 185, 129, 0.2);
@@ -103,7 +103,7 @@
 }
 
 .stepName {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--gray);
   text-transform: uppercase;
@@ -495,7 +495,7 @@
   color: var(--dark-green);
 }
 
-.assistButton {
+/* .assistButton {
   background: linear-gradient(135deg, var(--green), var(--dark-green));
   border: none;
   border-radius: 12px;
@@ -508,16 +508,16 @@
   gap: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
-}
+} */
 
-.assistButton:hover {
+/* .assistButton:hover {
   transform: translateY(-2px);
-}
+} */
 
-.assistIcon {
+/* .assistIcon {
   font-size: 18px;
   animation: pulse 2s infinite;
-}
+} */
 
 @keyframes pulse {
   0%,
@@ -936,15 +936,15 @@
     min-height: 300px;
   }
 
-  .footerStats {
+  /* .footerStats {
     flex-direction: column;
     gap: 15px;
-  }
+  } */
 
-  .assistButton {
+  /* .assistButton {
     padding: 12px 20px;
     font-size: 13px;
-  }
+  } */
 
   .successCard {
     padding: 32px 24px;
@@ -987,15 +987,15 @@
     grid-template-columns: 1fr;
   }
 
-  .stepIndicators {
+  /* .stepIndicators {
     gap: 10px;
     justify-content: center;
-  }
+  } */
 
-  .stepIndicator {
+  /* .stepIndicator {
     gap: 15px;
     width: 100%;
-  }
+  } */
 
   .stepName {
     font-size: 14px;
@@ -1117,4 +1117,126 @@
   color: var(--gray);
   font-size: 16px;
   line-height: 1.5;
+}
+@media (max-width: 768px) {
+  .stepProgress {
+    margin-bottom: 24px;
+  }
+
+  .stepIndicators {
+    gap: 6px;
+  }
+
+  .stepIndicator {
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .indicatorRing {
+    width: 38px;
+    height: 38px;
+    border-width: 1.5px;
+  }
+
+  .stepIcon {
+    font-size: 16px;
+  }
+
+  .stepName {
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .activePulse {
+    width: 48px;
+    height: 48px;
+    top: -5px;
+  }
+}
+
+@media (max-width: 640px) {
+  .stepIndicators {
+    gap: 4px;
+  }
+
+  .indicatorRing {
+    width: 32px;
+    height: 32px;
+  }
+
+  .stepIcon {
+    font-size: 14px;
+  }
+
+  .indicatorDot {
+    width: 5px;
+    height: 5px;
+  }
+
+  .stepName {
+    font-size: 9px;
+    letter-spacing: 0.3px;
+  }
+
+  .activePulse {
+    width: 40px;
+    height: 40px;
+    top: -4px;
+  }
+}
+
+@media (max-width: 400px) {
+  .indicatorRing {
+    width: 28px;
+    height: 28px;
+  }
+
+  .stepIcon {
+    font-size: 12px;
+  }
+
+  .stepName {
+    font-size: 8px;
+    letter-spacing: 0;
+  }
+}
+@media (max-width: 768px) {
+  .cardFooter {
+    padding: 20px 16px;
+    justify-content: center;
+  }
+
+  .footerStats {
+    flex-direction: row;
+    gap: 40px;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+
+  .stat {
+    align-items: center;
+    text-align: center;
+  }
+
+  .statLabel {
+    font-size: 10px;
+  }
+
+  .statValue {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 400px) {
+  .footerStats {
+    gap: 24px;
+  }
+
+  .statValue {
+    font-size: 14px;
+  }
 }

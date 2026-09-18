@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { authApi, visaApi } from "../../services/api";
 import {
   FaGlobe,
   FaPlaneDeparture,
@@ -10,7 +12,6 @@ import {
   FaCheckCircle,
   FaArrowLeft,
   FaArrowRight,
-  FaFlag,
   FaClock,
   FaCalendarDay,
   FaUserCircle,
@@ -21,8 +22,6 @@ import {
   FaUpload,
   FaTrash,
   FaPrint,
-  FaRobot,
-  FaEye,
   FaCheck,
   FaChevronDown,
   FaInfoCircle,
@@ -43,10 +42,31 @@ export default function VisaServicePage() {
     nationality: "",
     passportFile: null,
   });
+
+  // Payment state
+  const [paymentMethod, setPaymentMethod] = useState("card");
+  const [paymentData, setPaymentData] = useState({
+    cardNumber: "",
+    cardName: "",
+    expiry: "",
+    cvv: "",
+  });
+
   const [isAnimating, setIsAnimating] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+
+  // Country dropdown (portal)
+  const [countryDropdownOpen, setCountryDropdownOpen] = useState(false);
+  const [countrySearch, setCountrySearch] = useState("");
+  const [dropdownRect, setDropdownRect] = useState(null);
+  const triggerRef = useRef(null);
+
+  // Countries — loaded from localStorage (shared with admin)
+  const [countries, setCountries] = useState([]);
+
   const fileInputRef = useRef(null);
 
+  /* ============ CONFIG ============ */
   const steps = [
     { id: 1, label: "Country", icon: <FaGlobe />, color: "var(--green)" },
     {
@@ -72,56 +92,31 @@ export default function VisaServicePage() {
     },
   ];
 
-  const countries = [
-    {
-      id: "uk",
-      name: "United Kingdom",
-      flag: "🇬🇧",
-      price: 450,
-      currency: "£",
-      processing: "5-7 days",
-    },
-    {
-      id: "china",
-      name: "China",
-      flag: "🇨🇳",
-      price: 350,
-      currency: "¥",
-      processing: "7-10 days",
-    },
-    {
-      id: "umarah",
-      name: "Umarah",
-      flag: "🇸🇦",
-      price: 300,
-      currency: "SAR",
-      processing: "3-5 days",
-    },
-    {
-      id: "qatar",
-      name: "Qatar",
-      flag: "🇶🇦",
-      price: 400,
-      currency: "QAR",
-      processing: "4-6 days",
-    },
-    {
-      id: "dubai",
-      name: "Dubai",
-      flag: "🇦🇪",
-      price: 380,
-      currency: "AED",
-      processing: "2-4 days",
-    },
-    {
-      id: "algeria",
-      name: "Algeria",
-      flag: "🇩🇿",
-      price: 250,
-      currency: "DZD",
-      processing: "5-8 days",
-    },
-  ];
+  /* ============ LOAD COUNTRIES FROM STORAGE ============ */
+  useEffect(() => {
+    const loadCountries = () => {
+      try {
+        const raw = localStorage.getItem("visaCountries");
+        const stored = raw ? JSON.parse(raw) : [];
+        const active = stored
+          .filter((c) => c.isActive !== false)
+          .map((c) => ({ ...c, price: c.basePrice ?? c.price ?? 0 }));
+        setCountries(active);
+      } catch (err) {
+        console.error("Failed to load countries:", err);
+        setCountries([]);
+      }
+    };
+
+    loadCountries();
+
+    const onStorage = (e) => {
+      if (e.key === "visaCountries") loadCountries();
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
   const departureTimes = [
     {
       id: "urgent",
@@ -153,7 +148,6 @@ export default function VisaServicePage() {
     },
   ];
 
-  // Update your durations array:
   const durations = [
     {
       id: "30",
@@ -193,7 +187,7 @@ export default function VisaServicePage() {
   ];
 
   const stepDescriptions = {
-    1: "Select your destination country from the dropdown",
+    1: "Select your destination country",
     2: "Choose when you need your visa processed",
     3: "Select your visa duration",
     4: "Fill in your personal details",
@@ -202,101 +196,85 @@ export default function VisaServicePage() {
     7: "Application submitted successfully!",
   };
 
-  const handleNext = () => {
+  /* ============ HELPERS ============ */
+  const getCountry = (id) => countries.find((c) => c.id === id);
+  const getCountryName = () => getCountry(applicationData.country)?.name || "";
+  const getCountryFlag = () => getCountry(applicationData.country)?.flag || "";
+  const getCountryCurrency = () =>
+    getCountry(applicationData.country)?.currency || "$";
+  const getCountryProcessing = () =>
+    getCountry(applicationData.country)?.processing || "";
+  const getDepartureLabel = () =>
+    departureTimes.find((t) => t.id === applicationData.departureTime)?.time ||
+    "";
+  const getDurationLabel = () =>
+    durations.find((d) => d.id === applicationData.duration)?.time || "";
+  const calculateTotalPrice = () =>
+    getCountry(applicationData.country)?.price || 0;
+
+  /* ============ NAV ============ */
+  const goToStep = (n) => {
     setIsAnimating(true);
     setTimeout(() => {
-      setCurrentStep(currentStep + 1);
+      setCurrentStep(n);
       setIsAnimating(false);
-    }, 400);
+    }, 350);
   };
+  const handleNext = () => goToStep(currentStep + 1);
+  const handleStepBack = () => goToStep(currentStep - 1);
 
-  const handleStepBack = () => {
-    setIsAnimating(true);
-    setTimeout(() => {
-      setCurrentStep(currentStep - 1);
-      setIsAnimating(false);
-    }, 400);
+  /* ============ SELECTION ============ */
+  const handleCountrySelect = (countryId) => {
+    setApplicationData((prev) => ({ ...prev, country: countryId }));
+    setCountryDropdownOpen(false);
   };
-
-  const handleCountrySelect = (e) => {
-    const countryId = e.target.value;
-    setApplicationData({ ...applicationData, country: countryId });
-  };
-
-  const handleDepartureSelect = (timeId) => {
-    setApplicationData({ ...applicationData, departureTime: timeId });
-  };
-
-  const handleDurationSelect = (durationId) => {
-    setApplicationData({ ...applicationData, duration: durationId });
-  };
-
+  const handleDepartureSelect = (timeId) =>
+    setApplicationData((prev) => ({ ...prev, departureTime: timeId }));
+  const handleDurationSelect = (durationId) =>
+    setApplicationData((prev) => ({ ...prev, duration: durationId }));
   const handleDetailsSubmit = (e) => {
     e.preventDefault();
     handleNext();
   };
 
-  const handlePassportUpload = (e) => {
-    const file = e.target.files[0];
-    if (file && file.type.match("image.*|application/pdf")) {
-      if (file.size > 10 * 1024 * 1024) {
-        alert("File size must be less than 10MB");
-        return;
-      }
-      setApplicationData({
-        ...applicationData,
-        passportFile: {
-          name: file.name,
-          size: (file.size / 1024 / 1024).toFixed(2) + " MB",
-          type: file.type,
-          url: URL.createObjectURL(file),
-        },
-      });
-    } else {
+  /* ============ UPLOAD ============ */
+  const processUpload = (file) => {
+    if (!file) return;
+    if (!file.type.match("image.*|application/pdf")) {
       alert("Please upload a valid image or PDF file");
+      return;
     }
+    if (file.size > 10 * 1024 * 1024) {
+      alert("File size must be less than 10MB");
+      return;
+    }
+    setApplicationData((prev) => ({
+      ...prev,
+      passportFile: {
+        name: file.name,
+        size: (file.size / 1024 / 1024).toFixed(2) + " MB",
+        type: file.type,
+        url: URL.createObjectURL(file),
+      },
+    }));
   };
-
+  const handlePassportUpload = (e) => processUpload(e.target.files[0]);
   const handleDragOver = (e) => {
     e.preventDefault();
     setIsDragging(true);
   };
-
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
-
+  const handleDragLeave = () => setIsDragging(false);
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragging(false);
-
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.match("image.*|application/pdf")) {
-      if (file.size > 10 * 1024 * 1024) {
-        alert("File size must be less than 10MB");
-        return;
-      }
-      setApplicationData({
-        ...applicationData,
-        passportFile: {
-          name: file.name,
-          size: (file.size / 1024 / 1024).toFixed(2) + " MB",
-          type: file.type,
-          url: URL.createObjectURL(file),
-        },
-      });
-    } else {
-      alert("Please upload a valid image or PDF file");
-    }
+    processUpload(e.dataTransfer.files[0]);
   };
-
   const handleRemovePassport = () => {
     if (applicationData.passportFile?.url) {
       URL.revokeObjectURL(applicationData.passportFile.url);
     }
-    setApplicationData({ ...applicationData, passportFile: null });
+    setApplicationData((prev) => ({ ...prev, passportFile: null }));
   };
-
   const handleUploadSubmit = () => {
     if (!applicationData.passportFile) {
       alert("Please upload your passport data page");
@@ -305,8 +283,93 @@ export default function VisaServicePage() {
     handleNext();
   };
 
-  const handlePaymentSubmit = () => {
-    handleNext();
+  /* ============ PAYMENT ============ */
+  const formatCardNumber = (value) => {
+    const digits = value.replace(/\D/g, "").slice(0, 19);
+    return digits.replace(/(.{4})/g, "$1 ").trim();
+  };
+  const formatExpiry = (value) => {
+    const digits = value.replace(/\D/g, "").slice(0, 4);
+    if (digits.length <= 2) return digits;
+    return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  };
+  const handleCardNumberChange = (e) =>
+    setPaymentData((p) => ({
+      ...p,
+      cardNumber: formatCardNumber(e.target.value),
+    }));
+  const handleExpiryChange = (e) =>
+    setPaymentData((p) => ({ ...p, expiry: formatExpiry(e.target.value) }));
+  const handleCvvChange = (e) =>
+    setPaymentData((p) => ({
+      ...p,
+      cvv: e.target.value.replace(/\D/g, "").slice(0, 4),
+    }));
+
+  const handlePaymentSubmit = async () => {
+    const currentUser = authApi.getCurrentUser();
+    if (!currentUser) {
+      alert("Please log in to submit a visa application.");
+      return;
+    }
+
+    if (paymentMethod === "card") {
+      const digits = paymentData.cardNumber.replace(/\s/g, "");
+      if (digits.length < 13 || digits.length > 19) {
+        alert("Please enter a valid card number");
+        return;
+      }
+      if (!paymentData.cardName.trim()) {
+        alert("Please enter the cardholder name");
+        return;
+      }
+      if (!/^\d{2}\/\d{2}$/.test(paymentData.expiry)) {
+        alert("Please enter expiry as MM/YY");
+        return;
+      }
+      if (!/^\d{3,4}$/.test(paymentData.cvv)) {
+        alert("Please enter a valid CVV");
+        return;
+      }
+    }
+
+    setIsAnimating(true);
+
+    try {
+      await visaApi.create(currentUser.id, {
+        countryId: applicationData.country,
+        countryName: getCountryName(),
+        countryFlag: getCountryFlag(),
+        countryCurrency: getCountryCurrency(),
+        departureTimeId: applicationData.departureTime,
+        departureLabel: getDepartureLabel(),
+        durationId: applicationData.duration,
+        durationLabel: getDurationLabel(),
+        firstName: applicationData.firstName,
+        lastName: applicationData.lastName,
+        email: applicationData.email,
+        phone: applicationData.phone,
+        passportNumber: applicationData.passportNumber,
+        nationality: applicationData.nationality,
+        passportFile:
+          applicationData.passportFile ?
+            {
+              name: applicationData.passportFile.name,
+              size: applicationData.passportFile.size,
+              type: applicationData.passportFile.type,
+            }
+          : null,
+        amountPaid: calculateTotalPrice(),
+        paymentMethod,
+      });
+    } catch (err) {
+      console.error(err);
+    }
+
+    setTimeout(() => {
+      setCurrentStep(7);
+      setIsAnimating(false);
+    }, 400);
   };
 
   const resetApplication = () => {
@@ -325,180 +388,881 @@ export default function VisaServicePage() {
         nationality: "",
         passportFile: null,
       });
+      setPaymentMethod("card");
+      setPaymentData({ cardNumber: "", cardName: "", expiry: "", cvv: "" });
       setIsAnimating(false);
     }, 400);
   };
 
-  const calculateTotalPrice = () => {
-    const country = countries.find((c) => c.id === applicationData.country);
-    return country?.price || 0;
-  };
-
-  const getCountryName = () => {
-    return countries.find((c) => c.id === applicationData.country)?.name || "";
-  };
-
-  const getCountryFlag = () => {
-    return countries.find((c) => c.id === applicationData.country)?.flag || "";
-  };
-
-  const getCountryCurrency = () => {
-    return (
-      countries.find((c) => c.id === applicationData.country)?.currency || "$"
-    );
-  };
-
-  const getCountryProcessing = () => {
-    return (
-      countries.find((c) => c.id === applicationData.country)?.processing || ""
-    );
-  };
-
-  const getDepartureLabel = () => {
-    return (
-      departureTimes.find((t) => t.id === applicationData.departureTime)
-        ?.range || ""
-    );
-  };
-
-  const getDurationLabel = () => {
-    return (
-      durations.find((d) => d.id === applicationData.duration)?.months || ""
-    );
+  /* ============ STEP TITLE ============ */
+  const getCurrentStepTitle = () => {
+    switch (currentStep) {
+      case 1:
+        return "Select Country";
+      case 2:
+        return "Processing Speed";
+      case 3:
+        return "Visa Duration";
+      case 4:
+        return "Personal Details";
+      case 5:
+        return "Upload Document";
+      case 6:
+        return "Review & Payment";
+      case 7:
+        return "Application Complete";
+      default:
+        return "";
+    }
   };
 
   const currentStepIndex = currentStep - 1;
-  const currentStepConfig = steps[currentStepIndex];
-
   const stepVariants = {
-    hidden: { opacity: 0, scale: 0.95, rotateX: -10 },
+    hidden: { opacity: 0, x: 20 },
     visible: {
       opacity: 1,
-      scale: 1,
-      rotateX: 0,
-      transition: {
-        duration: 0.6,
-        ease: [0.22, 1, 0.36, 1],
-      },
+      x: 0,
+      transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] },
     },
-    exit: {
-      opacity: 0,
-      scale: 0.95,
-      rotateX: 10,
-      transition: {
-        duration: 0.4,
-      },
-    },
+    exit: { opacity: 0, x: -20, transition: { duration: 0.25 } },
   };
 
+  /* ============ EFFECTS ============ */
   useEffect(() => {
-    const handleKeyPress = (e) => {
-      if (e.key === "Escape" && currentStep > 1) {
-        handleStepBack();
+    const onKey = (e) => {
+      if (e.key === "Escape") {
+        if (countryDropdownOpen) setCountryDropdownOpen(false);
+        else if (currentStep > 1 && currentStep < 7) handleStepBack();
       }
     };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStep, countryDropdownOpen]);
 
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [currentStep]);
+  useEffect(() => {
+    if (!countryDropdownOpen) return;
+    const updateRect = () => {
+      if (triggerRef.current) {
+        setDropdownRect(triggerRef.current.getBoundingClientRect());
+      }
+    };
+    updateRect();
+    window.addEventListener("scroll", updateRect, true);
+    window.addEventListener("resize", updateRect);
+    return () => {
+      window.removeEventListener("scroll", updateRect, true);
+      window.removeEventListener("resize", updateRect);
+    };
+  }, [countryDropdownOpen]);
 
+  useEffect(() => {
+    const onClickOutside = (e) => {
+      const triggerEl = triggerRef.current;
+      const portalEl = document.querySelector(".countryDropdownPortal");
+      if (
+        triggerEl &&
+        !triggerEl.contains(e.target) &&
+        (!portalEl || !portalEl.contains(e.target))
+      ) {
+        setCountryDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, []);
+
+  /* ============ STEP 1 — COUNTRY ============ */
+  const renderCountryStep = () => {
+    const selected = getCountry(applicationData.country);
+    const filtered = countries.filter((c) =>
+      c.name.toLowerCase().includes(countrySearch.toLowerCase()),
+    );
+
+    return (
+      <div className="visaForm">
+        <div className="form-section">
+          <h3 className="section-title">
+            <FaGlobe /> Select Destination Country
+          </h3>
+          <p className="section-subtitle">
+            Choose your destination to see visa requirements and pricing
+          </p>
+
+          <div className="countryDropdownWrapper">
+            <div
+              ref={triggerRef}
+              className={`countryDropdownTrigger ${applicationData.country ? "has-value" : ""}`}
+              onClick={() => {
+                setCountrySearch("");
+                setCountryDropdownOpen((v) => !v);
+              }}>
+              <div className="countryDropdownLeft">
+                {selected ?
+                  <>
+                    <span className="countryDropdownFlag">{selected.flag}</span>
+                    <div className="countryDropdownText">
+                      <span className="countryDropdownName">
+                        {selected.name}
+                      </span>
+                      <span className="countryDropdownMeta">
+                        <FaClock /> {selected.processing}
+                      </span>
+                    </div>
+                  </>
+                : <>
+                    <span className="countryDropdownPlaceholderIcon">
+                      <FaGlobe />
+                    </span>
+                    <span className="countryDropdownPlaceholder">
+                      Select a country...
+                    </span>
+                  </>
+                }
+              </div>
+
+              <div className="countryDropdownRight">
+                {selected && (
+                  <span className="countryDropdownPrice">
+                    <span className="currency-symbols">
+                      {selected.currency}
+                    </span>
+                    <span className="price-amounts">{selected.price}</span>
+                  </span>
+                )}
+                <FaChevronDown
+                  className={`countryDropdownChevron ${
+                    countryDropdownOpen ? "open" : ""
+                  }`}
+                />
+              </div>
+            </div>
+
+            {countryDropdownOpen &&
+              dropdownRect &&
+              createPortal(
+                <div
+                  className="countryDropdownPortal"
+                  style={{
+                    position: "fixed",
+                    top: dropdownRect.bottom + 6,
+                    left: dropdownRect.left,
+                    width: dropdownRect.width,
+                  }}>
+                  <div className="countryDropdownSearch">
+                    <input
+                      type="text"
+                      autoFocus
+                      placeholder="Search country..."
+                      value={countrySearch}
+                      onChange={(e) => setCountrySearch(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="countryDropdownMenu">
+                    {filtered.length === 0 ?
+                      <div className="countryDropdownEmpty">
+                        {countries.length === 0 ?
+                          "No countries available"
+                        : "No countries found"}
+                      </div>
+                    : filtered.map((country) => {
+                        const isSelected =
+                          applicationData.country === country.id;
+                        return (
+                          <div
+                            key={country.id}
+                            className={`countryDropdownItem ${
+                              isSelected ? "selected" : ""
+                            }`}
+                            onClick={() => handleCountrySelect(country.id)}>
+                            <span className="countryDropdownItemFlag">
+                              {country.flag}
+                            </span>
+                            <div className="countryDropdownItemInfo">
+                              <span className="countryDropdownItemName">
+                                {country.name}
+                              </span>
+                              <span className="countryDropdownItemMeta">
+                                <FaClock /> {country.processing}
+                              </span>
+                            </div>
+                            <span className="countryDropdownItemPrice">
+                              {country.currency}
+                              {country.price}
+                            </span>
+                            {isSelected && (
+                              <FaCheck className="countryDropdownItemCheck" />
+                            )}
+                          </div>
+                        );
+                      })
+                    }
+                  </div>
+                </div>,
+                document.body,
+              )}
+          </div>
+        </div>
+
+        <div className="visaActions">
+          <button
+            className="visaBtn visaBtnPrimary"
+            onClick={handleNext}
+            disabled={!applicationData.country}>
+            Continue <FaArrowRight />
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  /* ============ STEP 2 — DEPARTURE ============ */
+  const renderDepartureStep = () => (
+    <div className="visaForm">
+      <div className="form-section">
+        <h3 className="section-title">
+          <FaPlaneDeparture /> Processing Speed
+        </h3>
+        <p className="section-subtitle">
+          How quickly do you need your visa processed?
+        </p>
+
+        <div className="optionList">
+          {departureTimes.map((time, index) => (
+            <motion.div
+              key={time.id}
+              className={`optionListItem ${
+                applicationData.departureTime === time.id ? "selected" : ""
+              }`}
+              onClick={() => handleDepartureSelect(time.id)}
+              initial={{ opacity: 0, x: -15 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.05 }}>
+              <div className="optionListIcon">{time.icon}</div>
+              <div className="optionListInfo">
+                <span className="optionListLabel">{time.label}</span>
+                <span className="optionListTime">{time.time}</span>
+              </div>
+              <span className="optionListBadge">{time.badge}</span>
+              <div className="optionListCheck">
+                {applicationData.departureTime === time.id && <FaCheck />}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      <div className="visaActions">
+        <button className="visaBtn visaBtnSecondary" onClick={handleStepBack}>
+          <FaArrowLeft /> Back
+        </button>
+        <button
+          className="visaBtn visaBtnPrimary"
+          onClick={handleNext}
+          disabled={!applicationData.departureTime}>
+          Continue <FaArrowRight />
+        </button>
+      </div>
+    </div>
+  );
+
+  /* ============ STEP 3 — DURATION ============ */
+  const renderDurationStep = () => (
+    <div className="visaForm">
+      <div className="form-section">
+        <h3 className="section-title">
+          <FaCalendarAlt /> Visa Duration
+        </h3>
+        <p className="section-subtitle">
+          Select how long you need your visa for
+        </p>
+
+        <div className="optionList">
+          {durations.map((duration, index) => (
+            <motion.div
+              key={duration.id}
+              className={`optionListItem ${
+                applicationData.duration === duration.id ? "selected" : ""
+              }`}
+              onClick={() => handleDurationSelect(duration.id)}
+              initial={{ opacity: 0, x: -15 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.05 }}>
+              <div className="optionListIcon">{duration.icon}</div>
+              <div className="optionListInfo">
+                <span className="optionListLabel">{duration.label}</span>
+                <span className="optionListTime">{duration.time}</span>
+              </div>
+              <span className="optionListBadge">{duration.badge}</span>
+              <div className="optionListCheck">
+                {applicationData.duration === duration.id && <FaCheck />}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      <div className="visaActions">
+        <button className="visaBtn visaBtnSecondary" onClick={handleStepBack}>
+          <FaArrowLeft /> Back
+        </button>
+        <button
+          className="visaBtn visaBtnPrimary"
+          onClick={handleNext}
+          disabled={!applicationData.duration}>
+          Continue <FaArrowRight />
+        </button>
+      </div>
+    </div>
+  );
+
+  /* ============ STEP 4 — DETAILS ============ */
+  const renderDetailsStep = () => (
+    <div className="visaForm">
+      <div className="form-section">
+        <h3 className="section-title">
+          <FaUser /> Personal Details
+        </h3>
+        <p className="section-subtitle">
+          Provide your information as it appears on your passport
+        </p>
+
+        <form onSubmit={handleDetailsSubmit}>
+          <div className="formGrid">
+            <div className="formField">
+              <label>
+                <FaUserCircle /> First Name
+              </label>
+              <input
+                type="text"
+                placeholder="Enter first name"
+                value={applicationData.firstName}
+                onChange={(e) =>
+                  setApplicationData({
+                    ...applicationData,
+                    firstName: e.target.value,
+                  })
+                }
+                required
+              />
+            </div>
+            <div className="formField">
+              <label>
+                <FaUserCircle /> Last Name
+              </label>
+              <input
+                type="text"
+                placeholder="Enter last name"
+                value={applicationData.lastName}
+                onChange={(e) =>
+                  setApplicationData({
+                    ...applicationData,
+                    lastName: e.target.value,
+                  })
+                }
+                required
+              />
+            </div>
+            <div className="formField">
+              <label>
+                <FaEnvelope /> Email Address
+              </label>
+              <input
+                type="email"
+                placeholder="you@example.com"
+                value={applicationData.email}
+                onChange={(e) =>
+                  setApplicationData({
+                    ...applicationData,
+                    email: e.target.value,
+                  })
+                }
+                required
+              />
+            </div>
+            <div className="formField">
+              <label>
+                <FaPhone /> Phone Number
+              </label>
+              <input
+                type="tel"
+                placeholder="+234 800 000 0000"
+                value={applicationData.phone}
+                onChange={(e) =>
+                  setApplicationData({
+                    ...applicationData,
+                    phone: e.target.value,
+                  })
+                }
+                required
+              />
+            </div>
+            <div className="formField">
+              <label>
+                <FaPassport /> Passport Number
+              </label>
+              <input
+                type="text"
+                placeholder="A12345678"
+                value={applicationData.passportNumber}
+                onChange={(e) =>
+                  setApplicationData({
+                    ...applicationData,
+                    passportNumber: e.target.value,
+                  })
+                }
+                required
+              />
+            </div>
+            <div className="formField">
+              <label>
+                <FaMapMarkerAlt /> Nationality
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Nigerian"
+                value={applicationData.nationality}
+                onChange={(e) =>
+                  setApplicationData({
+                    ...applicationData,
+                    nationality: e.target.value,
+                  })
+                }
+                required
+              />
+            </div>
+          </div>
+
+          <div className="visaActions">
+            <button
+              type="button"
+              className="visaBtn visaBtnSecondary"
+              onClick={handleStepBack}>
+              <FaArrowLeft /> Back
+            </button>
+            <button type="submit" className="visaBtn visaBtnPrimary">
+              Continue <FaArrowRight />
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+
+  /* ============ STEP 5 — UPLOAD ============ */
+  const renderUploadStep = () => (
+    <div className="visaForm">
+      <div className="form-section">
+        <h3 className="section-title">
+          <FaFileUpload /> Upload Passport
+        </h3>
+        <p className="section-subtitle">
+          Upload a clear image or PDF of your passport data page
+        </p>
+
+        {!applicationData.passportFile ?
+          <div
+            className={`visaUploadZone ${isDragging ? "dragging" : ""}`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}>
+            <div className="visaUploadIcon">
+              <FaUpload />
+            </div>
+            <p className="visaUploadText">
+              <strong>Click to upload</strong> or drag and drop
+            </p>
+            <p className="visaUploadHint">PNG, JPG or PDF (max 10MB)</p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,application/pdf"
+              onChange={handlePassportUpload}
+              hidden
+            />
+          </div>
+        : <div className="visaFilePreview">
+            <div className="visaFileIcon">
+              <FaFileUpload />
+            </div>
+            <div className="visaFileInfo">
+              <span className="visaFileName">
+                {applicationData.passportFile.name}
+              </span>
+              <span className="visaFileSize">
+                {applicationData.passportFile.size}
+              </span>
+            </div>
+            <button className="visaFileRemove" onClick={handleRemovePassport}>
+              <FaTrash />
+            </button>
+          </div>
+        }
+      </div>
+
+      <div className="visaActions">
+        <button className="visaBtn visaBtnSecondary" onClick={handleStepBack}>
+          <FaArrowLeft /> Back
+        </button>
+        <button className="visaBtn visaBtnPrimary" onClick={handleUploadSubmit}>
+          Continue to Payment <FaArrowRight />
+        </button>
+      </div>
+    </div>
+  );
+
+  /* ============ STEP 6 — PAYMENT ============ */
+  const renderPaymentStep = () => (
+    <div className="visaForm visaPaymentStep">
+      <div className="form-section">
+        <h3 className="section-title">
+          <FaCreditCard /> Review & Payment
+        </h3>
+        <p className="section-subtitle">
+          Confirm your details and enter payment information
+        </p>
+
+        <div className="reviewGrid">
+          <div className="reviewCard">
+            <span className="reviewCard__label">
+              <FaGlobe /> Country
+            </span>
+            <span className="reviewCard__value">
+              {getCountryFlag()} {getCountryName()}
+            </span>
+          </div>
+          <div className="reviewCard">
+            <span className="reviewCard__label">
+              <FaPlaneDeparture /> Processing
+            </span>
+            <span className="reviewCard__value">{getDepartureLabel()}</span>
+          </div>
+          <div className="reviewCard">
+            <span className="reviewCard__label">
+              <FaCalendarAlt /> Duration
+            </span>
+            <span className="reviewCard__value">{getDurationLabel()}</span>
+          </div>
+          <div className="reviewCard">
+            <span className="reviewCard__label">
+              <FaUser /> Full Name
+            </span>
+            <span className="reviewCard__value">
+              {applicationData.firstName} {applicationData.lastName}
+            </span>
+          </div>
+          <div className="reviewCard">
+            <span className="reviewCard__label">
+              <FaEnvelope /> Email
+            </span>
+            <span className="reviewCard__value">{applicationData.email}</span>
+          </div>
+          <div className="reviewCard">
+            <span className="reviewCard__label">
+              <FaPhone /> Phone
+            </span>
+            <span className="reviewCard__value">{applicationData.phone}</span>
+          </div>
+          <div className="reviewCard">
+            <span className="reviewCard__label">
+              <FaPassport /> Passport No.
+            </span>
+            <span className="reviewCard__value">
+              {applicationData.passportNumber}
+            </span>
+          </div>
+          <div className="reviewCard">
+            <span className="reviewCard__label">
+              <FaMapMarkerAlt /> Nationality
+            </span>
+            <span className="reviewCard__value">
+              {applicationData.nationality}
+            </span>
+          </div>
+          {applicationData.passportFile && (
+            <div className="reviewCard reviewCard--full">
+              <span className="reviewCard__label">
+                <FaFileUpload /> Passport File
+              </span>
+              <span className="reviewCard__value reviewCard__value--truncate">
+                {applicationData.passportFile.name}
+              </span>
+            </div>
+          )}
+        </div>
+
+        <div className="paymentMethods">
+          <h4 className="paymentMethodsTitle">Payment Method</h4>
+          <div className="paymentMethodList paymentMethodList--row">
+            <label
+              className={`paymentMethodItem ${
+                paymentMethod === "card" ? "selected" : ""
+              }`}
+              onClick={() => setPaymentMethod("card")}>
+              <input
+                type="radio"
+                name="payment"
+                checked={paymentMethod === "card"}
+                onChange={() => setPaymentMethod("card")}
+              />
+              <div className="paymentMethodIcon">
+                <FaCreditCard />
+              </div>
+              <div className="paymentMethodInfo">
+                <span className="paymentMethodName">Card</span>
+                <span className="paymentMethodDesc">Visa, MC, Verve</span>
+              </div>
+            </label>
+
+            <label
+              className={`paymentMethodItem ${
+                paymentMethod === "paypal" ? "selected" : ""
+              }`}
+              onClick={() => setPaymentMethod("paypal")}>
+              <input
+                type="radio"
+                name="payment"
+                checked={paymentMethod === "paypal"}
+                onChange={() => setPaymentMethod("paypal")}
+              />
+              <div className="paymentMethodIcon">
+                <FaGlobe />
+              </div>
+              <div className="paymentMethodInfo">
+                <span className="paymentMethodName">PayPal</span>
+                <span className="paymentMethodDesc">Secure checkout</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        {paymentMethod === "card" && (
+          <div className="cardForm">
+            <div className="formField">
+              <label>
+                <FaCreditCard /> Card Number
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                autoComplete="cc-number"
+                placeholder="1234 5678 9012 3456"
+                value={paymentData.cardNumber}
+                onChange={handleCardNumberChange}
+              />
+            </div>
+
+            <div className="formField">
+              <label>
+                <FaUserCircle /> Cardholder Name
+              </label>
+              <input
+                type="text"
+                autoComplete="cc-name"
+                placeholder="Name on card"
+                value={paymentData.cardName}
+                onChange={(e) =>
+                  setPaymentData((p) => ({ ...p, cardName: e.target.value }))
+                }
+              />
+            </div>
+
+            <div className="cardFormRow">
+              <div className="formField">
+                <label>
+                  <FaCalendarAlt /> Expiry
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="cc-exp"
+                  placeholder="MM/YY"
+                  maxLength={5}
+                  value={paymentData.expiry}
+                  onChange={handleExpiryChange}
+                />
+              </div>
+
+              <div className="formField">
+                <label>
+                  <FaInfoCircle /> CVV
+                </label>
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  autoComplete="cc-csc"
+                  placeholder="123"
+                  maxLength={4}
+                  value={paymentData.cvv}
+                  onChange={handleCvvChange}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="paymentTotal">
+          <span>Total Amount</span>
+          <div className="paymentAmount">
+            <span className="currency-symbols">{getCountryCurrency()}</span>
+            <span className="price-amounts">{calculateTotalPrice()}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="visaActions">
+        <button className="visaBtn visaBtnSecondary" onClick={handleStepBack}>
+          <FaArrowLeft /> Back
+        </button>
+        <button
+          className="visaBtn visaBtnPrimary"
+          onClick={handlePaymentSubmit}>
+          <FaCreditCard /> Pay {getCountryCurrency()}
+          {calculateTotalPrice()}
+        </button>
+      </div>
+    </div>
+  );
+
+  /* ============ STEP 7 — COMPLETE ============ */
+  const renderCompleteStep = () => (
+    <div className="visaComplete">
+      <motion.div
+        className="visaCompleteIcon"
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ type: "spring", stiffness: 200, damping: 15 }}>
+        <FaCheckCircle />
+      </motion.div>
+      <h2 className="visaCompleteTitle">Application Submitted!</h2>
+      <p className="visaCompleteText">
+        Your visa application for <strong>{getCountryName()}</strong> has been
+        submitted successfully. We'll contact you at{" "}
+        <strong>{applicationData.email}</strong> with updates.
+      </p>
+
+      <div className="visaCompleteDetails">
+        <div className="visaCompleteItem">
+          <span>Application ID</span>
+          <strong>#VISA-{Date.now().toString().slice(-6)}</strong>
+        </div>
+        <div className="visaCompleteItem">
+          <span>Processing Time</span>
+          <strong>{getCountryProcessing()}</strong>
+        </div>
+        <div className="visaCompleteItem">
+          <span>Amount Paid</span>
+          <strong>
+            {getCountryCurrency()}
+            {calculateTotalPrice()}
+          </strong>
+        </div>
+      </div>
+
+      <div className="visaActions visaActionsCenter">
+        <button
+          className="visaBtn visaBtnSecondary"
+          onClick={() => window.print()}>
+          <FaPrint /> Print Receipt
+        </button>
+        <button className="visaBtn visaBtnPrimary" onClick={resetApplication}>
+          Start New Application
+        </button>
+      </div>
+    </div>
+  );
+
+  /* ============ SWITCH ============ */
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 1:
+        return renderCountryStep();
+      case 2:
+        return renderDepartureStep();
+      case 3:
+        return renderDurationStep();
+      case 4:
+        return renderDetailsStep();
+      case 5:
+        return renderUploadStep();
+      case 6:
+        return renderPaymentStep();
+      case 7:
+        return renderCompleteStep();
+      default:
+        return null;
+    }
+  };
+
+  /* ============ MAIN ============ */
   return (
     <div className="visaServicePage">
       <main className="visaMain">
         <div className="visaContainer">
-          {/* Step Navigation */}
           <div className="visaStepNavigation">
             <div className="visaStepProgress">
               <div
                 className="visaProgressLine"
                 style={{
                   width: `${(currentStepIndex / (steps.length - 1)) * 100}%`,
-                  background: `linear-gradient(90deg, var(--green), var(--dark-green))`,
-                }}></div>
+                }}
+              />
             </div>
 
             <div className="visaStepIndicators">
               {steps.map((step, index) => {
                 const isActive = index === currentStepIndex;
                 const isCompleted = index < currentStepIndex;
-
                 return (
                   <div
                     key={step.id}
-                    className={`visaStepIndicator ${isActive ? "active" : ""} ${
-                      isCompleted ? "completed" : ""
-                    }`}
-                    style={{
-                      "--step-color": step.color,
-                      animationDelay: `${index * 100}ms`,
-                    }}
+                    className={`visaStepIndicator ${
+                      isActive ? "active" : ""
+                    } ${isCompleted ? "completed" : ""}`}
+                    style={{ "--step-color": step.color }}
                     onClick={() => {
-                      if (index < currentStep) {
-                        setIsAnimating(true);
-                        setTimeout(() => {
-                          setCurrentStep(index + 1);
-                          setIsAnimating(false);
-                        }, 400);
-                      }
+                      if (index < currentStep && currentStep < 7)
+                        goToStep(index + 1);
                     }}>
                     <div className="visaIndicatorRing">
-                      <div className="visaIndicatorDot"></div>
                       <span className="visaStepIcon">{step.icon}</span>
                     </div>
                     <span className="visaStepName">{step.label}</span>
-                    {isActive && (
-                      <motion.div
-                        className="visaActivePulse"
-                        animate={{ scale: [1, 1.2, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      />
-                    )}
                   </div>
                 );
               })}
             </div>
           </div>
 
-          {/* Content Area */}
           <div className="visaContentArea">
-            {/* Side Panel */}
-            <div className="visaSidePanel">
+            <aside className="visaSidePanel">
               <div className="visaSidePanelSticky">
-                {/* This is hidden on mobile */}
                 <div className="visaCurrentStepInfo">
-                  <motion.div
-                    className="visaStepNumber"
-                    animate={{ rotate: [0, 360] }}
-                    transition={{
-                      duration: 20,
-                      repeat: Infinity,
-                      ease: "linear",
-                    }}>
-                    <span>0{currentStep}</span>
-                  </motion.div>
+                  <div className="visaStepNumber">{currentStep}</div>
                   <div className="visaStepInfo">
-                    <h3 className="visaStepTitle">{currentStepConfig.label}</h3>
+                    <h3 className="visaStepTitle">{getCurrentStepTitle()}</h3>
                     <p className="visaStepDescription">
                       {stepDescriptions[currentStep]}
                     </p>
                   </div>
                   <div className="visaProgressDots">
-                    {steps.map((_, index) => (
+                    {steps.map((_, i) => (
                       <div
-                        key={index}
+                        key={i}
                         className={`visaProgressDot ${
-                          index === currentStepIndex ? "active" : ""
-                        } ${index < currentStepIndex ? "completed" : ""}`}
+                          i === currentStepIndex ? "active" : ""
+                        } ${i < currentStepIndex ? "completed" : ""}`}
                       />
                     ))}
                   </div>
                 </div>
 
-                {/* Pricing Summary - Shown first */}
                 {applicationData.country && (
                   <div className="pricing-summary">
                     <div className="pricing-header">
-                      <div className="pricing-title">Estimated Total</div>
+                      <span className="pricing-title">Summary</span>
                       <div className="pricing-total">
                         <span className="currency-symbols">
                           {getCountryCurrency()}
@@ -510,19 +1274,14 @@ export default function VisaServicePage() {
                     </div>
                     <div className="pricing-details">
                       <div className="pricing-item">
-                        <span className="pricing-label">Visa Fee</span>
+                        <span className="pricing-label">Country</span>
                         <span className="pricing-value">
-                          <span className="currency-symbols">
-                            {getCountryCurrency()}
-                          </span>
-                          <span className="price-amounts">
-                            {calculateTotalPrice()}
-                          </span>
+                          {getCountryFlag()} {getCountryName()}
                         </span>
                       </div>
                       {applicationData.departureTime && (
                         <div className="pricing-item">
-                          <span className="pricing-label">Processing Time</span>
+                          <span className="pricing-label">Processing</span>
                           <span className="pricing-value">
                             {getDepartureLabel()}
                           </span>
@@ -540,933 +1299,61 @@ export default function VisaServicePage() {
                   </div>
                 )}
 
-                {/* Quick Help - Moved to last position */}
-                {currentStep !== 7 && (
-                  <div className="visaQuickHelp">
-                    <div className="visaHelpHeader">
-                      <span className="visaHelpIcon">
-                        <FaRobot />
-                      </span>
-                      <span>Visa Tips</span>
-                    </div>
-                    <ul className="visaTipsList">
-                      <li>Ensure passport is valid for 6+ months</li>
-                      <li>Clear scan of passport data page required</li>
-                      <li>Processing time depends on selected duration</li>
-                      <li>Keep reference number for tracking</li>
-                    </ul>
+                <div className="visaQuickHelp">
+                  <div className="visaHelpHeader">
+                    <FaInfoCircle className="visaHelpIcon" />
+                    <span>Quick Tips</span>
                   </div>
-                )}
+                  <ul className="visaTipsList">
+                    <li>Ensure passport is valid for 6+ months</li>
+                    <li>Upload clear, well-lit documents</li>
+                    <li>Double-check spelling of names</li>
+                    <li>Keep your contact info updated</li>
+                  </ul>
+                </div>
               </div>
-            </div>
+            </aside>
 
-            {/* Main Content Card - NO SCROLL */}
-            <div className="visaMainCard">
+            <section className="visaMainCard">
               <div className="visaCardHeader">
-                <div className="visaCardGlow"></div>
-                <h2 className="visaCardTitle">
-                  {currentStep === 1 && "Select Destination"}
-                  {currentStep === 2 && "Expected Departure Time"}
-                  {currentStep === 3 && "Visa Duration"}
-                  {currentStep === 4 && "Personal Details"}
-                  {currentStep === 5 && "Upload Passport"}
-                  {currentStep === 6 && "Payment"}
-                  {currentStep === 7 && "Application Complete"}
-                </h2>
+                <div className="visaCardGlow" />
+                <h2 className="visaCardTitle">{getCurrentStepTitle()}</h2>
                 <div className="visaCardSubtitle">
-                  <span className="visaSubtitleLine"></span>
+                  <div className="visaSubtitleLine" />
                   <span className="visaSubtitleText">
-                    {currentStep === 1 && "Choose your destination country"}
-                    {currentStep === 2 &&
-                      "When do you need your visa processed?"}
-                    {currentStep === 3 && "How long do you need the visa for?"}
-                    {currentStep === 4 && "Enter your personal information"}
-                    {currentStep === 5 && "Upload passport data page"}
-                    {currentStep === 6 && "Complete your payment"}
-                    {currentStep === 7 && "Submission successful"}
+                    Step {currentStep} of {steps.length}
                   </span>
                 </div>
               </div>
 
               <div className="visaCardContent">
                 <AnimatePresence mode="wait">
-                  <motion.div
-                    key={currentStep}
-                    variants={stepVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                    className="visaContentWrapper">
-                    {isAnimating ?
-                      <div className="visaLoadingState">
-                        <div className="visaNeonSpinner">
-                          <div className="visaSpinnerCore"></div>
-                          <div className="visaSpinnerRing"></div>
-                        </div>
-                        <p className="visaLoadingText">Processing...</p>
-                        <div className="visaLoadingDots">
-                          <span></span>
-                          <span></span>
-                          <span></span>
-                        </div>
+                  {isAnimating ?
+                    <motion.div
+                      key="loading"
+                      className="visaLoadingState"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}>
+                      <div className="visaNeonSpinner">
+                        <div className="visaSpinnerCore" />
+                        <div className="visaSpinnerRing" />
                       </div>
-                    : <>
-                        {/* Step 1: Country Selection */}
-                        {currentStep === 1 && (
-                          <div className="visaForm">
-                            <div className="form-section">
-                              <h3 className="section-title">
-                                <FaMapMarkerAlt />
-                                Select Your Destination
-                              </h3>
-                              <p className="section-subtitle">
-                                Choose your destination country from the
-                                dropdown below. The visa fee will be displayed
-                                after selection.
-                              </p>
-
-                              <div className="country-dropdown-container">
-                                <div className="country-select-wrapper">
-                                  <select
-                                    value={applicationData.country}
-                                    onChange={handleCountrySelect}
-                                    className="country-select"
-                                    required>
-                                    <option value="">
-                                      -- Select a country --
-                                    </option>
-                                    {countries.map((country) => (
-                                      <option
-                                        key={country.id}
-                                        value={country.id}>
-                                        {country.flag} {country.name}
-                                      </option>
-                                    ))}
-                                  </select>
-                                  <span className="country-select-icon">
-                                    <FaChevronDown />
-                                  </span>
-                                </div>
-                              </div>
-
-                              {applicationData.country && (
-                                <motion.div
-                                  className="selected-country-info"
-                                  initial={{ opacity: 0, y: 20 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  transition={{ duration: 0.5 }}>
-                                  <div className="selected-country-flag">
-                                    {getCountryFlag()}
-                                  </div>
-                                  <div className="selected-country-details">
-                                    <h3 className="selected-country-name">
-                                      {getCountryName()}
-                                      <FaCheck
-                                        style={{ color: "var(--green)" }}
-                                      />
-                                    </h3>
-                                    <div className="selected-country-price">
-                                      <div className="price-tag">
-                                        <span className="currency-symbols">
-                                          {getCountryCurrency()}
-                                        </span>
-                                        <span className="price-amounts">
-                                          {calculateTotalPrice()}
-                                        </span>
-                                      </div>
-                                      <div className="processing-info">
-                                        <FaInfoCircle />
-                                        Standard processing:{" "}
-                                        {getCountryProcessing()}
-                                      </div>
-                                    </div>
-                                  </div>
-                                </motion.div>
-                              )}
-                            </div>
-
-                            <div className="visaActionButtons">
-                              <div style={{ flex: 1 }}></div>
-                              <button
-                                className="visaPrimaryButton"
-                                onClick={handleNext}
-                                disabled={!applicationData.country}>
-                                Next: Departure Time
-                                <FaArrowRight />
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                        {currentStep === 2 && (
-                          <div className="visaForm">
-                            <div className="form-section">
-                              <h3 className="section-title">
-                                <FaPlaneDeparture />
-                                Processing Time
-                              </h3>
-                              <p className="section-subtitle">
-                                Select how quickly you need your visa processed
-                              </p>
-
-                              <div className="quick-info-section">
-                                <FaInfoCircle />
-                                <p className="quick-info-text">
-                                  <strong>Tip:</strong> Choose based on your
-                                  travel date. Express and Urgent options have
-                                  additional fees.
-                                </p>
-                              </div>
-
-                              <div className="departure-time-grid-compact">
-                                {departureTimes.map((time) => (
-                                  <div
-                                    key={time.id}
-                                    className={`departure-option-compact ${
-                                      (
-                                        applicationData.departureTime ===
-                                        time.id
-                                      ) ?
-                                        "selected"
-                                      : ""
-                                    }`}
-                                    onClick={() =>
-                                      handleDepartureSelect(time.id)
-                                    }>
-                                    <div className="selection-indicator orange-indicator"></div>
-                                    <div className="departure-icon-compact">
-                                      {time.icon}
-                                    </div>
-                                    <div className="departure-title-compact">
-                                      {time.label}
-                                    </div>
-                                    <div className="departure-time-compact">
-                                      {time.time}
-                                    </div>
-                                    <div className="departure-badge">
-                                      {time.badge}
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-
-                            <div className="visaActionButtons">
-                              <button
-                                className="visaSecondaryButton"
-                                onClick={handleStepBack}>
-                                <FaArrowLeft />
-                                Back
-                              </button>
-                              <button
-                                className="visaPrimaryButton"
-                                onClick={handleNext}
-                                disabled={!applicationData.departureTime}>
-                                Next: Duration
-                                <FaArrowRight />
-                              </button>
-                            </div>
-                          </div>
-                        )}
-
-                        {currentStep === 3 && (
-                          <div className="visaForm">
-                            <div className="form-section">
-                              <h3 className="section-title">
-                                <FaCalendarAlt />
-                                Visa Duration
-                              </h3>
-                              <p className="section-subtitle">
-                                Select how long you need the visa for
-                              </p>
-
-                              <div className="quick-info-section">
-                                <FaInfoCircle />
-                                <p className="quick-info-text">
-                                  <strong>Note:</strong> Longer durations may
-                                  require additional documentation. All visas
-                                  allow multiple entries unless specified.
-                                </p>
-                              </div>
-
-                              <div className="duration-grid-compact">
-                                {durations.map((duration) => (
-                                  <div
-                                    key={duration.id}
-                                    className={`duration-option-compact ${
-                                      applicationData.duration === duration.id ?
-                                        "selected"
-                                      : ""
-                                    }`}
-                                    onClick={() =>
-                                      handleDurationSelect(duration.id)
-                                    }>
-                                    <div className="selection-indicator"></div>
-                                    <div className="duration-icon-compact">
-                                      {duration.icon}
-                                    </div>
-                                    <div className="duration-title-compact">
-                                      {duration.label}
-                                    </div>
-                                    <div className="duration-time-compact">
-                                      {duration.time}
-                                    </div>
-                                    <div className="duration-badge">
-                                      {duration.badge}
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-
-                            <div className="visaActionButtons">
-                              <button
-                                className="visaSecondaryButton"
-                                onClick={handleStepBack}>
-                                <FaArrowLeft />
-                                Back
-                              </button>
-                              <button
-                                className="visaPrimaryButton"
-                                onClick={handleNext}
-                                disabled={!applicationData.duration}>
-                                Next: Details
-                                <FaArrowRight />
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                        {/* Step 4: Personal Details */}
-                        {currentStep === 4 && (
-                          <form
-                            className="visaForm"
-                            onSubmit={handleDetailsSubmit}>
-                            <div className="form-section">
-                              <h3 className="section-title">
-                                <FaUserCircle />
-                                Personal Information
-                              </h3>
-                              <p className="section-subtitle">
-                                Please provide your personal details as they
-                                appear in your passport.
-                              </p>
-
-                              <div className="formGrid">
-                                <div className="formField">
-                                  <label>
-                                    <FaUser />
-                                    First Name *
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={applicationData.firstName}
-                                    onChange={(e) =>
-                                      setApplicationData({
-                                        ...applicationData,
-                                        firstName: e.target.value,
-                                      })
-                                    }
-                                    required
-                                    placeholder="Enter your first name"
-                                  />
-                                </div>
-                                <div className="formField">
-                                  <label>
-                                    <FaUser />
-                                    Last Name *
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={applicationData.lastName}
-                                    onChange={(e) =>
-                                      setApplicationData({
-                                        ...applicationData,
-                                        lastName: e.target.value,
-                                      })
-                                    }
-                                    required
-                                    placeholder="Enter your last name"
-                                  />
-                                </div>
-                              </div>
-
-                              <div className="formGrid">
-                                <div className="formField">
-                                  <label>
-                                    <FaEnvelope />
-                                    Email Address *
-                                  </label>
-                                  <input
-                                    type="email"
-                                    value={applicationData.email}
-                                    onChange={(e) =>
-                                      setApplicationData({
-                                        ...applicationData,
-                                        email: e.target.value,
-                                      })
-                                    }
-                                    required
-                                    placeholder="Enter your email address"
-                                  />
-                                </div>
-                                <div className="formField">
-                                  <label>
-                                    <FaPhone />
-                                    Phone Number *
-                                  </label>
-                                  <input
-                                    type="tel"
-                                    value={applicationData.phone}
-                                    onChange={(e) =>
-                                      setApplicationData({
-                                        ...applicationData,
-                                        phone: e.target.value,
-                                      })
-                                    }
-                                    required
-                                    placeholder="Enter your phone number"
-                                  />
-                                </div>
-                              </div>
-
-                              <div className="formGrid">
-                                <div className="formField">
-                                  <label>
-                                    <FaPassport />
-                                    Passport Number *
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={applicationData.passportNumber}
-                                    onChange={(e) =>
-                                      setApplicationData({
-                                        ...applicationData,
-                                        passportNumber: e.target.value,
-                                      })
-                                    }
-                                    required
-                                    placeholder="Enter your passport number"
-                                  />
-                                </div>
-                                <div className="formField">
-                                  <label>
-                                    <FaGlobe />
-                                    Nationality *
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={applicationData.nationality}
-                                    onChange={(e) =>
-                                      setApplicationData({
-                                        ...applicationData,
-                                        nationality: e.target.value,
-                                      })
-                                    }
-                                    placeholder="e.g., Nigerian"
-                                    required
-                                  />
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="visaActionButtons">
-                              <button
-                                type="button"
-                                className="visaSecondaryButton"
-                                onClick={handleStepBack}>
-                                <FaArrowLeft />
-                                Back
-                              </button>
-                              <button
-                                type="submit"
-                                className="visaPrimaryButton"
-                                disabled={
-                                  !applicationData.firstName ||
-                                  !applicationData.lastName ||
-                                  !applicationData.email ||
-                                  !applicationData.phone ||
-                                  !applicationData.passportNumber ||
-                                  !applicationData.nationality
-                                }>
-                                Next: Upload Passport
-                                <FaArrowRight />
-                              </button>
-                            </div>
-                          </form>
-                        )}
-                        {/* Step 5: Passport Upload */}
-                        {currentStep === 5 && (
-                          <div className="visaForm">
-                            <div className="upload-data-section">
-                              <div className="upload-data-header">
-                                <h4>
-                                  <FaPassport />
-                                  Passport Data Page Upload
-                                </h4>
-                                <p>
-                                  Upload a clear scan of your passport data page
-                                </p>
-                              </div>
-
-                              <div
-                                className={`passport-upload-zone ${
-                                  isDragging ? "dragging" : ""
-                                }`}
-                                onClick={() => fileInputRef.current.click()}
-                                onDragOver={handleDragOver}
-                                onDragLeave={handleDragLeave}
-                                onDrop={handleDrop}>
-                                <div className="upload-zone-icon">
-                                  <FaUpload />
-                                </div>
-                                <div className="upload-zone-title">
-                                  {applicationData.passportFile ?
-                                    "Upload Complete"
-                                  : "Upload Passport"}
-                                </div>
-                                <div className="upload-zone-subtitle">
-                                  {applicationData.passportFile ?
-                                    "Passport data page uploaded successfully"
-                                  : "Click to browse or drag & drop"}
-                                </div>
-                                <div className="upload-zone-instructions">
-                                  PDF, JPG, or PNG • Max 10MB
-                                </div>
-                                <input
-                                  ref={fileInputRef}
-                                  type="file"
-                                  accept=".pdf,.jpg,.jpeg,.png"
-                                  onChange={handlePassportUpload}
-                                  style={{ display: "none" }}
-                                />
-                              </div>
-
-                              {applicationData.passportFile && (
-                                <motion.div
-                                  className="passport-preview"
-                                  initial={{ opacity: 0, y: 20 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  transition={{ duration: 0.5 }}>
-                                  <div className="passport-preview-icon">
-                                    <FaPassport />
-                                  </div>
-                                  <div className="passport-preview-info">
-                                    <div className="passport-preview-name">
-                                      {applicationData.passportFile.name}
-                                    </div>
-                                    <div className="passport-preview-meta">
-                                      <span>
-                                        {applicationData.passportFile.size}
-                                      </span>
-                                      <span>
-                                        {applicationData.passportFile.type
-                                          .split("/")[1]
-                                          .toUpperCase()}
-                                      </span>
-                                      <span style={{ color: "var(--green)" }}>
-                                        <FaCheck />
-                                        Ready for submission
-                                      </span>
-                                    </div>
-                                  </div>
-                                  <div className="passport-preview-actions">
-                                    <button
-                                      className="visaSecondaryButton"
-                                      onClick={() =>
-                                        window.open(
-                                          applicationData.passportFile.url,
-                                          "_blank",
-                                        )
-                                      }
-                                      style={{ padding: "10px 20px" }}>
-                                      <FaEye />
-                                      View
-                                    </button>
-                                    <button
-                                      className="visaSecondaryButton"
-                                      onClick={handleRemovePassport}
-                                      style={{ padding: "10px 20px" }}>
-                                      <FaTrash />
-                                      Remove
-                                    </button>
-                                  </div>
-                                </motion.div>
-                              )}
-
-                              <div className="upload-requirements">
-                                <div className="requirements-title">
-                                  <FaInfoCircle />
-                                  Passport Requirements
-                                </div>
-                                <ul className="requirements-list">
-                                  <li>Clear scan of the passport data page</li>
-                                  <li>
-                                    All information must be clearly visible
-                                  </li>
-                                  <li>
-                                    Passport must be valid for at least 6 months
-                                  </li>
-                                  <li>File size must not exceed 10MB</li>
-                                </ul>
-                              </div>
-                            </div>
-
-                            <div className="visaActionButtons">
-                              <button
-                                className="visaSecondaryButton"
-                                onClick={handleStepBack}>
-                                <FaArrowLeft />
-                                Back
-                              </button>
-                              <button
-                                className="visaPrimaryButton"
-                                onClick={handleUploadSubmit}
-                                disabled={!applicationData.passportFile}>
-                                Next: Payment
-                                <FaArrowRight />
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                        {/* Step 6: Payment */}
-                        {currentStep === 6 && (
-                          <div className="visaForm">
-                            <div className="form-section">
-                              <h3 className="section-title">
-                                <FaCreditCard />
-                                Payment Details
-                              </h3>
-
-                              <div className="pricing-summary">
-                                <div className="pricing-header">
-                                  <div className="pricing-title">
-                                    Payment Summary
-                                  </div>
-                                  <div className="pricing-total">
-                                    <span className="currency-symbols">
-                                      {getCountryCurrency()}
-                                    </span>
-                                    <span className="price-amounts">
-                                      {calculateTotalPrice()}
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="pricing-details">
-                                  <div className="pricing-item">
-                                    <span className="pricing-label">
-                                      Destination
-                                    </span>
-                                    <span className="pricing-value">
-                                      {getCountryFlag()} {getCountryName()}
-                                    </span>
-                                  </div>
-                                  <div className="pricing-item">
-                                    <span className="pricing-label">
-                                      Processing Time
-                                    </span>
-                                    <span className="pricing-value">
-                                      {getDepartureLabel()}
-                                    </span>
-                                  </div>
-                                  <div className="pricing-item">
-                                    <span className="pricing-label">
-                                      Visa Duration
-                                    </span>
-                                    <span className="pricing-value">
-                                      {getDurationLabel()}
-                                    </span>
-                                  </div>
-                                  <div className="pricing-item total">
-                                    <span className="pricing-label">
-                                      Total Amount
-                                    </span>
-                                    <span className="pricing-value">
-                                      <span className="currency-symbols">
-                                        {getCountryCurrency()}
-                                      </span>
-                                      <span className="price-amounts">
-                                        {calculateTotalPrice()}
-                                      </span>
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="formField fullWidth">
-                                <label>Payment Method *</label>
-                                <select defaultValue="card" required>
-                                  <option value="card">
-                                    Credit/Debit Card
-                                  </option>
-                                  <option value="bank">Bank Transfer</option>
-                                  <option value="wallet">Digital Wallet</option>
-                                </select>
-                              </div>
-
-                              <div className="formField">
-                                <label>Card Number *</label>
-                                <input
-                                  type="text"
-                                  placeholder="1234 5678 9012 3456"
-                                  required
-                                />
-                              </div>
-
-                              <div className="formGrid">
-                                <div className="formField">
-                                  <label>Expiry Date *</label>
-                                  <input
-                                    type="text"
-                                    placeholder="MM/YY"
-                                    required
-                                  />
-                                </div>
-                                <div className="formField">
-                                  <label>CVV *</label>
-                                  <input
-                                    type="text"
-                                    placeholder="123"
-                                    required
-                                  />
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="visaActionButtons">
-                              <button
-                                className="visaSecondaryButton"
-                                onClick={handleStepBack}>
-                                <FaArrowLeft />
-                                Back
-                              </button>
-                              <button
-                                className="visaPrimaryButton"
-                                onClick={handlePaymentSubmit}>
-                                Pay{" "}
-                                <span className="currency-symbols">
-                                  {getCountryCurrency()}
-                                </span>
-                                <span className="price-amounts">
-                                  {calculateTotalPrice()}
-                                </span>
-                                <FaArrowRight />
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                        {/* Step 7: Success */}
-                        {currentStep === 7 && (
-                          <div className="visaSuccessContainer">
-                            <div className="visaSuccessCard">
-                              <div className="visaSuccessCardGlow"></div>
-
-                              <motion.div
-                                className="visaSuccessIcon"
-                                animate={{
-                                  rotate: 360,
-                                  scale: [1, 1.1, 1],
-                                }}
-                                transition={{
-                                  rotate: {
-                                    duration: 20,
-                                    repeat: Infinity,
-                                    ease: "linear",
-                                  },
-                                  scale: {
-                                    duration: 2,
-                                    repeat: Infinity,
-                                    repeatType: "reverse",
-                                  },
-                                }}>
-                                <div className="visaSuccessIconInner">
-                                  <div className="visaSuccessIconRing"></div>
-                                  <span className="visaSuccessCheck">
-                                    <FaCheckCircle />
-                                  </span>
-                                </div>
-                              </motion.div>
-
-                              <motion.h2
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.2 }}
-                                className="visaSuccessTitle">
-                                Application Submitted!
-                              </motion.h2>
-
-                              <motion.p
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.3 }}
-                                className="visaSuccessSubtitle">
-                                Your visa application has been received and
-                                payment confirmed. You will receive an email
-                                with your application ID and tracking details
-                                within 24 hours.
-                              </motion.p>
-
-                              <motion.div
-                                className="applicationSummary"
-                                initial={{ opacity: 0, y: 30 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.4 }}>
-                                <div className="applicationSummaryGlow"></div>
-
-                                <div className="applicationHeader">
-                                  <div className="applicationIdSection">
-                                    <div className="applicationLabel">
-                                      APPLICATION ID
-                                    </div>
-                                    <div className="applicationId">
-                                      VISA-
-                                      {Date.now()
-                                        .toString()
-                                        .slice(-8)
-                                        .toUpperCase()}
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <div className="applicationDetailsGrid">
-                                  <div className="applicationDetailItem">
-                                    <div className="detailTitle">
-                                      Destination
-                                    </div>
-                                    <div className="detailContent">
-                                      {getCountryFlag()} {getCountryName()}
-                                    </div>
-                                  </div>
-                                  <div className="applicationDetailItem">
-                                    <div className="detailTitle">Applicant</div>
-                                    <div className="detailContent">
-                                      {applicationData.firstName}{" "}
-                                      {applicationData.lastName}
-                                    </div>
-                                  </div>
-                                  <div className="applicationDetailItem">
-                                    <div className="detailTitle">
-                                      Visa Duration
-                                    </div>
-                                    <div className="detailContent">
-                                      {getDurationLabel()}
-                                    </div>
-                                  </div>
-                                  <div className="applicationDetailItem">
-                                    <div className="detailTitle">
-                                      Processing Time
-                                    </div>
-                                    <div className="detailContent">
-                                      {getDepartureLabel()}
-                                    </div>
-                                  </div>
-                                  <div className="applicationDetailItem">
-                                    <div className="detailTitle">Status</div>
-                                    <div className="detailContent">
-                                      <span
-                                        style={{
-                                          color: "var(--green)",
-                                          fontWeight: "700",
-                                        }}>
-                                        Payment Confirmed
-                                      </span>
-                                    </div>
-                                  </div>
-                                  <div className="applicationDetailItem">
-                                    <div className="detailTitle">
-                                      Amount Paid
-                                    </div>
-                                    <div className="detailContent">
-                                      <span
-                                        style={{
-                                          color: "var(--green)",
-                                          fontWeight: "800",
-                                        }}>
-                                        <span className="currency-symbols">
-                                          {getCountryCurrency()}
-                                        </span>
-                                        {calculateTotalPrice()}
-                                      </span>
-                                    </div>
-                                  </div>
-                                  <div className="applicationDetailItem">
-                                    <div className="detailTitle">Submitted</div>
-                                    <div className="detailContent">
-                                      {new Date().toLocaleDateString()}
-                                    </div>
-                                  </div>
-                                  <div className="applicationDetailItem">
-                                    <div className="detailTitle">
-                                      Estimated Processing
-                                    </div>
-                                    <div className="detailContent">
-                                      {getDepartureLabel()}
-                                    </div>
-                                  </div>
-                                </div>
-                              </motion.div>
-
-                              <motion.div
-                                className="visaActionButtons"
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.6 }}>
-                                <button
-                                  className="visaSecondaryButton"
-                                  onClick={() => window.print()}>
-                                  <FaPrint />
-                                  Print Receipt
-                                </button>
-                                <button
-                                  className="visaPrimaryButton"
-                                  onClick={resetApplication}>
-                                  Start New Application
-                                </button>
-                              </motion.div>
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    }
-                  </motion.div>
+                      <p className="visaLoadingText">Loading...</p>
+                    </motion.div>
+                  : <motion.div
+                      key={currentStep}
+                      className="visaContentWrapper"
+                      variants={stepVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit">
+                      {renderStepContent()}
+                    </motion.div>
+                  }
                 </AnimatePresence>
               </div>
-
-              {/* Card Footer */}
-              <div className="visaCardFooter">
-                <div className="visaFooterStats">
-                  <div className="visaStat">
-                    <span className="visaStatLabel">Step</span>
-                    <span className="visaStatValue">0{currentStep}/07</span>
-                  </div>
-                  <div className="visaStat">
-                    <span className="visaStatLabel">Status</span>
-                    <span className="visaStatValue">
-                      {currentStep === 7 ? "Complete" : "In Progress"}
-                    </span>
-                  </div>
-                  {applicationData.country && (
-                    <div className="visaStat">
-                      <span className="visaStatLabel">Price</span>
-                      <span
-                        className="visaStatValue"
-                        style={{ color: "var(--green)" }}>
-                        <span className="currency-symbols">
-                          {getCountryCurrency()}
-                        </span>
-                        {calculateTotalPrice()}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                {currentStep !== 7 && (
-                  <button className="visaAssistButton">
-                    <span className="visaAssistIcon">
-                      <FaRobot />
-                    </span>
-                    Visa Assistant
-                  </button>
-                )}
-              </div>
-            </div>
+            </section>
           </div>
         </div>
       </main>

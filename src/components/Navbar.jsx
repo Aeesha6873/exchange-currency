@@ -207,7 +207,7 @@ function Navbar() {
 
         {/* Mobile Services Dropdown */}
         <div className={styles.mobileServicesSection}>
-          <button
+          <div
             className={styles.mobileServicesTrigger}
             onClick={toggleServices}
             aria-expanded={servicesOpen}>
@@ -218,7 +218,7 @@ function Navbar() {
                 transition: "transform 0.3s ease",
               }}
             />
-          </button>
+          </div>
 
           {servicesOpen && (
             <div className={styles.mobileServicesDropdown}>

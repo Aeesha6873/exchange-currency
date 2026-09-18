@@ -3,15 +3,11 @@ import { useNavigate } from "react-router-dom";
 import styles from "./Transactions.module.css";
 import {
   FiTrendingUp,
-  FiFilter,
   FiDownload,
   FiEye,
   FiSearch,
   FiCalendar,
   FiDollarSign,
-  FiCreditCard,
-  FiArrowUpRight,
-  FiArrowDownRight,
   FiCheckCircle,
   FiClock,
   FiChevronRight,
@@ -19,15 +15,17 @@ import {
   FiMail,
   FiShare2,
   FiX,
+  FiArrowDownRight,
 } from "react-icons/fi";
 import { MdCompareArrows, MdAccountBalance } from "react-icons/md";
+import { authApi, transactionsApi } from "../../services/api";
 
 function Transactions() {
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState("all");
   const [dateRange, setDateRange] = useState({
     start: "2024-01-01",
-    end: "2024-12-31",
+    end: "2026-12-31",
   });
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTransaction, setSelectedTransaction] = useState(null);
@@ -35,133 +33,17 @@ function Transactions() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setTimeout(() => {
-      const mockTransactions = [
-        {
-          id: 1,
-          type: "exchange",
-          direction: "in",
-          amount: 1500.0,
-          date: "2024-12-01",
-          time: "14:30",
-          status: "completed",
-          reference: "EX-789012",
-          rate: "0.92",
-          fee: 15.0,
-          description: "USD to EUR Exchange",
-          bank: "Wise",
-          account: "****4523",
-          exchangeRate: 0.92,
-          fromAmount: 1500,
-          fromCurrency: "USD",
-          toAmount: 1380,
-          toCurrency: "EUR",
-        },
-        {
-          id: 2,
-          type: "exchange",
-          direction: "out",
-          amount: 500.0,
-          date: "2024-11-15",
-          time: "11:30",
-          status: "pending",
-          reference: "EX-456123",
-          rate: "0.79",
-          fee: 10.0,
-          description: "USD to GBP Exchange",
-          bank: "Revolut",
-          account: "****1234",
-          exchangeRate: 0.79,
-          fromAmount: 500,
-          fromCurrency: "USD",
-          toAmount: 395,
-          toCurrency: "GBP",
-        },
-        {
-          id: 3,
-          type: "exchange",
-          direction: "in",
-          amount: 1200.0,
-          date: "2024-11-10",
-          time: "09:45",
-          status: "completed",
-          reference: "EX-789456",
-          rate: "1.35",
-          fee: 12.0,
-          description: "EUR to USD Exchange",
-          bank: "TransferWise",
-          account: "****7890",
-          exchangeRate: 1.35,
-          fromAmount: 1200,
-          fromCurrency: "EUR",
-          toAmount: 1620,
-          toCurrency: "USD",
-        },
-        {
-          id: 4,
-          type: "exchange",
-          direction: "out",
-          amount: 800.0,
-          date: "2024-11-05",
-          time: "16:20",
-          status: "completed",
-          reference: "EX-123789",
-          rate: "110.5",
-          fee: 8.0,
-          description: "USD to JPY Exchange",
-          bank: "Revolut",
-          account: "****4567",
-          exchangeRate: 110.5,
-          fromAmount: 800,
-          fromCurrency: "USD",
-          toAmount: 88400,
-          toCurrency: "JPY",
-        },
-        {
-          id: 5,
-          type: "exchange",
-          direction: "in",
-          amount: 2500.0,
-          date: "2024-10-28",
-          time: "13:15",
-          status: "completed",
-          reference: "EX-987654",
-          rate: "1.12",
-          fee: 25.0,
-          description: "GBP to EUR Exchange",
-          bank: "Wise",
-          account: "****8910",
-          exchangeRate: 1.12,
-          fromAmount: 2500,
-          fromCurrency: "GBP",
-          toAmount: 2800,
-          toCurrency: "EUR",
-        },
-        {
-          id: 6,
-          type: "exchange",
-          direction: "out",
-          amount: 300.0,
-          date: "2024-10-20",
-          time: "10:45",
-          status: "failed",
-          reference: "EX-654321",
-          rate: "0.85",
-          fee: 0.0,
-          description: "EUR to CHF Exchange",
-          bank: "Revolut",
-          account: "****2345",
-          exchangeRate: 0.85,
-          fromAmount: 300,
-          fromCurrency: "EUR",
-          toAmount: 255,
-          toCurrency: "CHF",
-        },
-      ];
-      setTransactions(mockTransactions);
+    const currentUser = authApi.getCurrentUser();
+    if (!currentUser) {
+      navigate("/login");
+      return;
+    }
+    (async () => {
+      const rows = await transactionsApi.list(currentUser.id);
+      setTransactions(rows);
       setLoading(false);
-    }, 1000);
-  }, []);
+    })();
+  }, [navigate]);
 
   const transactionTypes = [
     { id: "all", label: "All Exchanges" },
@@ -194,38 +76,28 @@ function Transactions() {
     },
   ];
 
-  const filteredTransactions = transactions.filter((transaction) => {
-    const matchesFilter =
-      activeFilter === "all" || transaction.status === activeFilter;
+  const filteredTransactions = transactions.filter((t) => {
+    const matchesFilter = activeFilter === "all" || t.status === activeFilter;
+
+    const q = searchQuery.toLowerCase();
     const matchesSearch =
       searchQuery === "" ||
-      transaction.description
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase()) ||
-      transaction.reference.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      transaction.fromCurrency
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase()) ||
-      transaction.toCurrency.toLowerCase().includes(searchQuery.toLowerCase());
+      t.description?.toLowerCase().includes(q) ||
+      t.reference?.toLowerCase().includes(q) ||
+      t.fromCurrency?.toLowerCase().includes(q) ||
+      t.toCurrency?.toLowerCase().includes(q);
 
-    const transactionDate = new Date(transaction.date);
+    const tDate = new Date(t.date);
     const startDate = new Date(dateRange.start);
     const endDate = new Date(dateRange.end);
     endDate.setHours(23, 59, 59, 999);
-
-    const matchesDateRange =
-      transactionDate >= startDate && transactionDate <= endDate;
+    const matchesDateRange = tDate >= startDate && tDate <= endDate;
 
     return matchesFilter && matchesSearch && matchesDateRange;
   });
 
-  const getTypeIcon = () => {
-    return <MdCompareArrows />;
-  };
-
-  const getTypeColor = () => {
-    return "#10b981";
-  };
+  const getTypeIcon = () => <MdCompareArrows />;
+  const getTypeColor = () => "#10b981";
 
   const getStatusBadge = (status) => {
     const badges = {
@@ -255,35 +127,21 @@ function Transactions() {
       profit: 0,
       transactionCount: transactions.length,
     };
-
     transactions.forEach((t) => {
       totals.volume += t.amount;
       totals.fees += t.fee || 0;
-      if (t.status === "completed") {
-        totals.profit += t.amount * 0.005;
-      }
+      if (t.status === "completed") totals.profit += t.amount * 0.005;
     });
-
     return totals;
   };
 
   const totals = calculateTotals();
 
-  const handleViewDetails = (transaction) => {
-    setSelectedTransaction(transaction);
-  };
-
-  const handleCloseDetails = () => {
-    setSelectedTransaction(null);
-  };
-
-  const handleExportCSV = () => {
-    alert("Exporting exchange history as CSV...");
-  };
-
-  const handleDownloadReceipt = (transaction) => {
-    alert(`Downloading receipt for ${transaction.reference}...`);
-  };
+  const handleViewDetails = (t) => setSelectedTransaction(t);
+  const handleCloseDetails = () => setSelectedTransaction(null);
+  const handleExportCSV = () => alert("Exporting exchange history as CSV...");
+  const handleDownloadReceipt = (t) =>
+    alert(`Downloading receipt for ${t.reference}...`);
 
   const formatCurrency = (amount, currency = "USD") => {
     if (currency === "JPY") {
@@ -293,37 +151,33 @@ function Transactions() {
         minimumFractionDigits: 0,
       }).format(amount);
     }
-
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: currency,
+      currency,
       minimumFractionDigits: 2,
     }).format(amount);
   };
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+  const formatDate = (dateString) =>
+    new Date(dateString).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
     });
-  };
 
-  const formatDateTime = (dateString, timeString) => {
-    return `${formatDate(dateString)} • ${timeString}`;
-  };
+  const formatDateTime = (dateString, timeString) =>
+    `${formatDate(dateString)} • ${timeString}`;
 
   const getTopCurrencies = () => {
-    const currencyCount = {};
+    const counts = {};
     transactions.forEach((t) => {
-      currencyCount[t.fromCurrency] = (currencyCount[t.fromCurrency] || 0) + 1;
-      currencyCount[t.toCurrency] = (currencyCount[t.toCurrency] || 0) + 1;
+      counts[t.fromCurrency] = (counts[t.fromCurrency] || 0) + 1;
+      counts[t.toCurrency] = (counts[t.toCurrency] || 0) + 1;
     });
-
-    return Object.entries(currencyCount)
+    return Object.entries(counts)
       .sort(([, a], [, b]) => b - a)
       .slice(0, 3)
-      .map(([currency]) => currency);
+      .map(([c]) => c);
   };
 
   const topCurrencies = getTopCurrencies();
@@ -339,7 +193,6 @@ function Transactions() {
 
   return (
     <div className={styles.transactionsContainer}>
-      {/* Header */}
       <div className={styles.header}>
         <div className={styles.headerContent}>
           <h1 className={styles.title}>Exchange History</h1>
@@ -354,7 +207,6 @@ function Transactions() {
         </div>
       </div>
 
-      {/* Stats */}
       <div className={styles.stats}>
         <div className={`${styles.statItem} ${styles.statVolume}`}>
           <span className={styles.statNumber}>
@@ -380,7 +232,6 @@ function Transactions() {
         </div>
       </div>
 
-      {/* Controls */}
       <div className={styles.controls}>
         <div className={styles.searchContainer}>
           <div className={styles.searchBox}>
@@ -416,12 +267,13 @@ function Transactions() {
           </div>
         </div>
 
-        {/* Filters */}
         <div className={styles.filters}>
           {transactionTypes.map((type) => (
             <button
               key={type.id}
-              className={`${styles.filterBtn} ${activeFilter === type.id ? styles.active : ""}`}
+              className={`${styles.filterBtn} ${
+                activeFilter === type.id ? styles.active : ""
+              }`}
               onClick={() => setActiveFilter(type.id)}>
               {type.label}
             </button>
@@ -429,16 +281,13 @@ function Transactions() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className={styles.mainContent}>
         <div className={styles.contentWrapper}>
-          {/* Left Column - Transactions List */}
           <div className={styles.leftColumn}>
             <div className={styles.transactionsList}>
               {filteredTransactions.length > 0 ?
                 filteredTransactions.map((transaction) => (
                   <div key={transaction.id} className={styles.transactionCard}>
-                    {/* Card Header */}
                     <div className={styles.cardHeader}>
                       <div className={styles.transactionType}>
                         <div
@@ -460,7 +309,6 @@ function Transactions() {
                       </div>
                     </div>
 
-                    {/* Card Content */}
                     <div className={styles.cardContent}>
                       <div className={styles.exchangeRow}>
                         <div className={styles.exchangeFrom}>
@@ -525,7 +373,6 @@ function Transactions() {
                       </div>
                     </div>
 
-                    {/* Card Footer */}
                     <div className={styles.cardFooter}>
                       <div className={styles.amountSection}>
                         <div
@@ -580,9 +427,7 @@ function Transactions() {
             </div>
           </div>
 
-          {/* Right Column - Sidebar */}
           <div className={styles.rightColumn}>
-            {/* Quick Actions */}
             <div className={styles.sidebarCard}>
               <h3 className={styles.sidebarTitle}>Quick Actions</h3>
               <div className={styles.quickActions}>
@@ -606,77 +451,62 @@ function Transactions() {
               </div>
             </div>
 
-            {/* Top Currencies */}
             <div className={styles.sidebarCard}>
               <h3 className={styles.sidebarTitle}>Top Currencies</h3>
               <div className={styles.currencyChart}>
-                {topCurrencies.map((currency, index) => {
-                  const percentage = [40, 65, 85][index] || 30;
-                  return (
-                    <div key={currency} className={styles.chartItem}>
-                      <div className={styles.chartIcon}>
-                        <FiDollarSign />
-                      </div>
-                      <div className={styles.chartContent}>
-                        <div className={styles.chartLabel}>{currency}</div>
-                        <div className={styles.chartBar}>
-                          <div
-                            className={styles.chartFill}
-                            style={{ width: `${percentage}%` }}></div>
+                {topCurrencies.length === 0 ?
+                  <p style={{ color: "#64748b", fontSize: 14 }}>
+                    No exchanges yet.
+                  </p>
+                : topCurrencies.map((currency, index) => {
+                    const percentage = [40, 65, 85][index] || 30;
+                    return (
+                      <div key={currency} className={styles.chartItem}>
+                        <div className={styles.chartIcon}>
+                          <FiDollarSign />
+                        </div>
+                        <div className={styles.chartContent}>
+                          <div className={styles.chartLabel}>{currency}</div>
+                          <div className={styles.chartBar}>
+                            <div
+                              className={styles.chartFill}
+                              style={{ width: `${percentage}%` }}
+                            />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                }
               </div>
             </div>
 
-            {/* Recent Activity */}
             <div className={styles.sidebarCard}>
               <h3 className={styles.sidebarTitle}>
                 <FiClock /> Recent Activity
               </h3>
               <div className={styles.activityList}>
-                <div className={styles.activityItem}>
-                  <div className={styles.activityIcon}>
-                    <MdCompareArrows />
-                  </div>
-                  <div className={styles.activityContent}>
-                    <div className={styles.activityText}>
-                      USD to EUR exchange completed
+                {transactions.slice(0, 3).map((t) => (
+                  <div key={t.id} className={styles.activityItem}>
+                    <div className={styles.activityIcon}>
+                      <FiArrowDownRight />
                     </div>
-                    <div className={styles.activityTime}>Today, 14:30</div>
-                  </div>
-                </div>
-                <div className={styles.activityItem}>
-                  <div className={styles.activityIcon}>
-                    <FiArrowDownRight />
-                  </div>
-                  <div className={styles.activityContent}>
-                    <div className={styles.activityText}>
-                      Exchange fee updated
+                    <div className={styles.activityContent}>
+                      <div className={styles.activityText}>
+                        {t.fromCurrency} to {t.toCurrency} exchange {t.status}
+                      </div>
+                      <div className={styles.activityTime}>
+                        {formatDate(t.date)}
+                      </div>
                     </div>
-                    <div className={styles.activityTime}>Yesterday, 10:15</div>
                   </div>
-                </div>
-                <div className={styles.activityItem}>
-                  <div className={styles.activityIcon}>
-                    <FiTrendingUp />
-                  </div>
-                  <div className={styles.activityContent}>
-                    <div className={styles.activityText}>
-                      EUR rates improved
-                    </div>
-                    <div className={styles.activityTime}>2 days ago</div>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Transaction Details Modal */}
       {selectedTransaction && (
         <div className={styles.modalOverlay} onClick={handleCloseDetails}>
           <div

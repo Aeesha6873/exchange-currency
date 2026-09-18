@@ -9,13 +9,10 @@ import {
   FiX,
   FiDownload,
   FiEye,
-  FiFilter,
   FiSearch,
-  FiUser,
   FiUsers,
   FiCheckCircle,
   FiAlertCircle,
-  FiCreditCard,
   FiEdit2,
   FiPrinter,
   FiMail,
@@ -27,6 +24,7 @@ import {
   MdDirectionsCar,
   MdLocalActivity,
 } from "react-icons/md";
+import { authApi, bookingsApi } from "../../services/api";
 
 function Bookings() {
   const navigate = useNavigate();
@@ -38,123 +36,55 @@ function Bookings() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      const mockBookings = [
-        {
-          id: 1,
-          type: "flight",
-          reference: "FLT-789012",
-          destination: "Paris, France",
-          date: "2024-12-15",
-          time: "14:30",
-          status: "confirmed",
-          airline: "Air France",
-          flight: "AF123",
-          price: 650,
-          currency: "USD",
-          passengers: 2,
-          class: "Economy",
-          departure: "JFK",
-          arrival: "CDG",
-          duration: "7h 30m",
-          bookingDate: "2024-11-10",
-          amenities: ["Meal", "Entertainment", "Wi-Fi"],
-        },
-        {
-          id: 2,
-          type: "hotel",
-          reference: "HTL-345678",
-          destination: "Bali, Indonesia",
-          date: "2024-12-20",
-          checkIn: "2024-12-20",
-          checkOut: "2024-12-25",
-          duration: "5 nights",
-          status: "confirmed",
-          hotel: "Grand Bali Resort",
-          price: 1200,
-          currency: "USD",
-          rooms: 1,
-          roomType: "Deluxe Suite",
-          guests: 2,
-          bookingDate: "2024-11-05",
-          amenities: ["Pool", "Spa", "Breakfast", "Beach Access"],
-        },
-        {
-          id: 3,
-          type: "tour",
-          reference: "TR-456789",
-          destination: "Tokyo, Japan",
-          date: "2024-12-05",
-          time: "09:00",
-          status: "completed",
-          tourName: "Tokyo City Tour",
-          price: 350,
-          currency: "USD",
-          duration: "8 hours",
-          participants: 4,
-          bookingDate: "2024-10-15",
-          amenities: ["Guide", "Transport", "Lunch"],
-        },
-        {
-          id: 4,
-          type: "car",
-          reference: "CAR-123456",
-          destination: "Los Angeles, USA",
-          date: "2024-12-01",
-          status: "pending",
-          carModel: "Tesla Model 3",
-          price: 450,
-          currency: "USD",
-          duration: "7 days",
-          pickup: "LAX Airport",
-          dropoff: "LAX Airport",
-          bookingDate: "2024-11-20",
-          amenities: ["GPS", "Insurance", "Unlimited Miles"],
-        },
-        {
-          id: 5,
-          type: "flight",
-          reference: "FLT-987654",
-          destination: "Dubai, UAE",
-          date: "2024-11-28",
-          time: "22:15",
-          status: "cancelled",
-          airline: "Emirates",
-          flight: "EK202",
-          price: 950,
-          currency: "USD",
-          passengers: 1,
-          class: "Business",
-          departure: "DXB",
-          arrival: "JFK",
-          duration: "14h",
-          bookingDate: "2024-10-01",
-          cancellationDate: "2024-10-15",
-          refundAmount: 855,
-        },
-      ];
-      setBookings(mockBookings);
+    const currentUser = authApi.getCurrentUser();
+    if (!currentUser) {
+      navigate("/login");
+      return;
+    }
+    (async () => {
+      const rows = await bookingsApi.list(currentUser.id);
+      setBookings(rows);
       setLoading(false);
-    }, 1000);
-  }, []);
+    })();
+  }, [navigate]);
+
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
 
   const stats = {
-    totalBookings: 5,
-    flights: 2,
-    hotels: 1,
-    tours: 1,
-    cars: 1,
-    totalSpent: "$3,600",
-    upcomingTrips: 2,
-    savings: "$150",
+    totalBookings: bookings.length,
+    flights: bookings.filter((b) => b.type === "flight").length,
+    hotels: bookings.filter((b) => b.type === "hotel").length,
+    totalSpent:
+      "$" +
+      bookings
+        .reduce((sum, b) => sum + (b.currency === "USD" ? b.price : 0), 0)
+        .toLocaleString(),
   };
 
   const bookingTabs = [
-    { id: "upcoming", label: "Upcoming", count: 2 },
-    { id: "completed", label: "Completed", count: 1 },
-    { id: "cancelled", label: "Cancelled", count: 1 },
-    { id: "pending", label: "Pending", count: 1 },
+    {
+      id: "upcoming",
+      label: "Upcoming",
+      count: bookings.filter(
+        (b) => b.status === "confirmed" && new Date(b.date) > now,
+      ).length,
+    },
+    {
+      id: "completed",
+      label: "Completed",
+      count: bookings.filter((b) => b.status === "completed").length,
+    },
+    {
+      id: "cancelled",
+      label: "Cancelled",
+      count: bookings.filter((b) => b.status === "cancelled").length,
+    },
+    {
+      id: "pending",
+      label: "Pending",
+      count: bookings.filter((b) => b.status === "pending").length,
+    },
   ];
 
   const statusFilters = [
@@ -238,20 +168,19 @@ function Bookings() {
   const filteredBookings = bookings.filter((booking) => {
     const matchesTab =
       activeTab === "upcoming" ?
-        booking.status === "confirmed" && new Date(booking.date) > new Date()
+        booking.status === "confirmed" && new Date(booking.date) >= now
       : activeTab === "completed" ? booking.status === "completed"
       : activeTab === "cancelled" ? booking.status === "cancelled"
       : activeTab === "pending" ? booking.status === "pending"
       : true;
 
+    const q = searchQuery.toLowerCase();
     const matchesSearch =
       searchQuery === "" ||
-      booking.destination.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      booking.reference.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (booking.airline &&
-        booking.airline.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (booking.hotel &&
-        booking.hotel.toLowerCase().includes(searchQuery.toLowerCase()));
+      booking.destination?.toLowerCase().includes(q) ||
+      booking.reference?.toLowerCase().includes(q) ||
+      booking.airline?.toLowerCase().includes(q) ||
+      booking.hotel?.toLowerCase().includes(q);
 
     const matchesStatus =
       filterStatus === "all" || booking.status === filterStatus;
@@ -259,43 +188,31 @@ function Bookings() {
     return matchesTab && matchesSearch && matchesStatus;
   });
 
-  const handleViewDetails = (booking) => {
-    setSelectedBooking(booking);
-  };
+  const handleViewDetails = (booking) => setSelectedBooking(booking);
+  const handleCloseDetails = () => setSelectedBooking(null);
 
-  const handleCloseDetails = () => {
-    setSelectedBooking(null);
-  };
-
-  const handleDownloadInvoice = (booking) => {
+  const handleDownloadInvoice = (booking) =>
     alert(`Downloading invoice for ${booking.reference}`);
-  };
 
-  const handleCancelBooking = (booking) => {
+  const handleCancelBooking = async (booking) => {
     if (
-      window.confirm(
-        `Are you sure you want to cancel booking ${booking.reference}?`,
-      )
-    ) {
-      alert(`Booking ${booking.reference} cancelled successfully.`);
-    }
+      !window.confirm(`Are you sure you want to cancel ${booking.reference}?`)
+    )
+      return;
+    const updated = await bookingsApi.cancel(booking.id);
+    setBookings((prev) => prev.map((b) => (b.id === booking.id ? updated : b)));
+    alert(`Booking ${booking.reference} cancelled successfully.`);
   };
 
-  const handleModifyBooking = (booking) => {
+  const handleModifyBooking = (booking) =>
     alert(`Modify booking ${booking.reference}`);
-  };
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+  const formatDate = (dateString) =>
+    new Date(dateString).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
     });
-  };
-
-  const formatTime = (timeString) => {
-    return timeString;
-  };
 
   if (loading) {
     return (
@@ -308,7 +225,6 @@ function Bookings() {
 
   return (
     <div className={styles.bookingsContainer}>
-      {/* Header */}
       <div className={styles.header}>
         <div className={styles.headerContent}>
           <h1 className={styles.title}>My Bookings</h1>
@@ -326,7 +242,6 @@ function Bookings() {
         </div>
       </div>
 
-      {/* Stats */}
       <div className={styles.stats}>
         <div className={styles.statItem}>
           <span className={styles.statNumber}>{stats.totalBookings}</span>
@@ -346,7 +261,6 @@ function Bookings() {
         </div>
       </div>
 
-      {/* Controls */}
       <div className={styles.controls}>
         <div className={styles.searchContainer}>
           <FiSearch className={styles.searchIcon} />
@@ -363,7 +277,9 @@ function Bookings() {
           {statusFilters.map((filter) => (
             <button
               key={filter.id}
-              className={`${styles.filterBtn} ${filterStatus === filter.id ? styles.active : ""}`}
+              className={`${styles.filterBtn} ${
+                filterStatus === filter.id ? styles.active : ""
+              }`}
               onClick={() => setFilterStatus(filter.id)}>
               {filter.label}
             </button>
@@ -371,14 +287,14 @@ function Bookings() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className={styles.mainContent}>
-        {/* Booking Tabs */}
         <div className={styles.bookingTabs}>
           {bookingTabs.map((tab) => (
             <button
               key={tab.id}
-              className={`${styles.tabButton} ${activeTab === tab.id ? styles.active : ""}`}
+              className={`${styles.tabButton} ${
+                activeTab === tab.id ? styles.active : ""
+              }`}
               onClick={() => setActiveTab(tab.id)}>
               <div className={styles.tabContent}>
                 <div className={styles.tabLabel}>{tab.label}</div>
@@ -389,14 +305,11 @@ function Bookings() {
         </div>
 
         <div className={styles.contentWrapper}>
-          {/* Left Column - Bookings List */}
           <div className={styles.leftColumn}>
-            {/* Bookings List */}
             <div className={styles.bookingsList}>
               {filteredBookings.length > 0 ?
                 filteredBookings.map((booking) => (
                   <div key={booking.id} className={styles.bookingCard}>
-                    {/* Card Header */}
                     <div className={styles.cardHeader}>
                       <div className={styles.bookingType}>
                         <div
@@ -415,12 +328,13 @@ function Bookings() {
                         </div>
                       </div>
                       <div
-                        className={`${styles.status} ${styles[`status${booking.status}`]}`}>
+                        className={`${styles.status} ${
+                          styles[`status${booking.status}`]
+                        }`}>
                         {getStatusBadge(booking.status)}
                       </div>
                     </div>
 
-                    {/* Card Content */}
                     <div className={styles.cardContent}>
                       <div className={styles.destinationRow}>
                         <FiMapPin className={styles.destinationIcon} />
@@ -445,7 +359,7 @@ function Bookings() {
                             <div>
                               <div className={styles.detailLabel}>Time</div>
                               <div className={styles.detailValue}>
-                                {formatTime(booking.time)}
+                                {booking.time}
                               </div>
                             </div>
                           </div>
@@ -469,7 +383,9 @@ function Bookings() {
                                 Passengers
                               </div>
                               <div className={styles.detailValue}>
-                                {booking.passengers}
+                                {Array.isArray(booking.passengers) ?
+                                  booking.passengers.length
+                                : booking.passengers}
                               </div>
                             </div>
                           </div>
@@ -478,13 +394,11 @@ function Bookings() {
 
                       {booking.amenities && booking.amenities.length > 0 && (
                         <div className={styles.amenities}>
-                          {booking.amenities
-                            .slice(0, 3)
-                            .map((amenity, index) => (
-                              <span key={index} className={styles.amenity}>
-                                <FiCheck /> {amenity}
-                              </span>
-                            ))}
+                          {booking.amenities.slice(0, 3).map((amenity, i) => (
+                            <span key={i} className={styles.amenity}>
+                              <FiCheck /> {amenity}
+                            </span>
+                          ))}
                           {booking.amenities.length > 3 && (
                             <span className={styles.amenityMore}>
                               +{booking.amenities.length - 3} more
@@ -494,7 +408,6 @@ function Bookings() {
                       )}
                     </div>
 
-                    {/* Card Footer */}
                     <div className={styles.cardFooter}>
                       <div className={styles.priceSection}>
                         <div className={styles.bookingPrice}>
@@ -558,9 +471,7 @@ function Bookings() {
             </div>
           </div>
 
-          {/* Right Column - Sidebar */}
           <div className={styles.rightColumn}>
-            {/* Quick Actions */}
             <div className={styles.sidebarCard}>
               <h3 className={styles.sidebarTitle}>Quick Actions</h3>
               <div className={styles.quickActions}>
@@ -584,41 +495,26 @@ function Bookings() {
               </div>
             </div>
 
-            {/* Booking Tips */}
             <div className={styles.sidebarCard}>
               <h3 className={styles.sidebarTitle}>Booking Tips</h3>
               <div className={styles.tipsList}>
-                <div className={styles.tipItem}>
-                  <FiCheckCircle className={styles.tipIcon} />
-                  <div className={styles.tipContent}>
-                    Check-in online 24h before flight
+                {[
+                  "Check-in online 24h before flight",
+                  "Download boarding passes",
+                  "Review cancellation policies",
+                  "Keep travel documents handy",
+                ].map((tip, i) => (
+                  <div key={i} className={styles.tipItem}>
+                    <FiCheckCircle className={styles.tipIcon} />
+                    <div className={styles.tipContent}>{tip}</div>
                   </div>
-                </div>
-                <div className={styles.tipItem}>
-                  <FiCheckCircle className={styles.tipIcon} />
-                  <div className={styles.tipContent}>
-                    Download boarding passes
-                  </div>
-                </div>
-                <div className={styles.tipItem}>
-                  <FiCheckCircle className={styles.tipIcon} />
-                  <div className={styles.tipContent}>
-                    Review cancellation policies
-                  </div>
-                </div>
-                <div className={styles.tipItem}>
-                  <FiCheckCircle className={styles.tipIcon} />
-                  <div className={styles.tipContent}>
-                    Keep travel documents handy
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Booking Details Modal */}
       {selectedBooking && (
         <div className={styles.modalOverlay} onClick={handleCloseDetails}>
           <div
@@ -726,23 +622,6 @@ function Bookings() {
                         {selectedBooking.currency} {selectedBooking.price}
                       </span>
                     </div>
-                    {selectedBooking.cancellationDate && (
-                      <div className={styles.paymentRow}>
-                        <span>Cancelled:</span>
-                        <span>
-                          {formatDate(selectedBooking.cancellationDate)}
-                        </span>
-                      </div>
-                    )}
-                    {selectedBooking.refundAmount && (
-                      <div className={styles.paymentRow}>
-                        <span>Refund:</span>
-                        <span className={styles.refundAmount}>
-                          {selectedBooking.currency}{" "}
-                          {selectedBooking.refundAmount}
-                        </span>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
@@ -752,8 +631,8 @@ function Bookings() {
                   <div className={styles.modalSection}>
                     <h3>Amenities & Services</h3>
                     <div className={styles.modalAmenities}>
-                      {selectedBooking.amenities.map((amenity, index) => (
-                        <div key={index} className={styles.modalAmenity}>
+                      {selectedBooking.amenities.map((amenity, i) => (
+                        <div key={i} className={styles.modalAmenity}>
                           <FiCheck />
                           {amenity}
                         </div>

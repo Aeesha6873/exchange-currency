@@ -7,34 +7,23 @@ import {
   FiDollarSign,
   FiAirplay,
   FiPackage,
-  FiMenu,
-  FiChevronRight,
   FiGlobe,
-  FiHome,
   FiSettings,
   FiMessageSquare,
+  FiLogOut,
+  FiMenu,
+  FiX,
 } from "react-icons/fi";
 import styles from "./AdminNavbar.module.css";
 
-function AdminNavbar({ user, isSidebarCollapsed, onToggleSidebar }) {
+function AdminNavbar({ user, isMobile, isSidebarOpen, onToggleSidebar }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showQuickMenu, setShowQuickMenu] = useState(false);
   const [unreadCount, setUnreadCount] = useState(3);
-  const [isMobile, setIsMobile] = useState(false);
 
   const notificationRef = useRef(null);
   const userMenuRef = useRef(null);
-  const quickMenuRef = useRef(null);
-
-  // Check if mobile
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 1025);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
 
   const notifications = [
     {
@@ -96,24 +85,9 @@ function AdminNavbar({ user, isSidebarCollapsed, onToggleSidebar }) {
       icon: <FiMessageSquare />,
       path: "/admin/support",
     },
-    {
-      label: "Logout",
-      icon: <FiUser />,
-      path: "/logout",
-      color: "#ef4444",
-    },
+    { label: "Logout", icon: <FiLogOut />, path: "/logout", color: "#ef4444" },
   ];
 
-  const quickActions = [
-    { label: "New Exchange", icon: <FiDollarSign />, color: "#10b981" },
-    { label: "Book Flight", icon: <FiAirplay />, color: "#3b82f6" },
-    { label: "Create Package", icon: <FiPackage />, color: "#f59e0b" },
-    { label: "Add User", icon: <FiUser />, color: "#8b5cf6" },
-    { label: "View Reports", icon: <FiHome />, color: "#ec4899" },
-    { label: "System Settings", icon: <FiSettings />, color: "#6b7280" },
-  ];
-
-  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -125,31 +99,32 @@ function AdminNavbar({ user, isSidebarCollapsed, onToggleSidebar }) {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
         setShowUserMenu(false);
       }
-      if (
-        quickMenuRef.current &&
-        !quickMenuRef.current.contains(event.target)
-      ) {
-        setShowQuickMenu(false);
-      }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
   }, []);
 
-  const markAllAsRead = () => {
-    setUnreadCount(0);
-  };
-
-  const handleQuickAction = (action) => {
-    console.log("Quick action:", action);
-    setShowQuickMenu(false);
-  };
+  const markAllAsRead = () => setUnreadCount(0);
 
   return (
     <header className={styles.adminNavbar}>
-      {/* Left Section - Toggle & Brand */}
       <div className={styles.leftSection}>
+        {isMobile && (
+          <button
+            className={`${styles.hamburgerBtn} ${isSidebarOpen ? styles.active : ""}`}
+            onClick={onToggleSidebar}
+            aria-label={isSidebarOpen ? "Close menu" : "Open menu"}
+            aria-expanded={isSidebarOpen}>
+            {isSidebarOpen ?
+              <FiX />
+            : <FiMenu />}
+          </button>
+        )}
+
         <div className={styles.brandSection}>
           <div className={styles.brandLogo}>
             <h1 className={styles.brandName}>TravelFin</h1>
@@ -158,7 +133,6 @@ function AdminNavbar({ user, isSidebarCollapsed, onToggleSidebar }) {
         </div>
       </div>
 
-      {/* Center Section - Search */}
       <div className={styles.centerSection}>
         <div className={styles.searchWrapper}>
           <FiSearch className={styles.searchIcon} />
@@ -180,57 +154,13 @@ function AdminNavbar({ user, isSidebarCollapsed, onToggleSidebar }) {
         </div>
       </div>
 
-      {/* Right Section - Actions */}
       <div className={styles.rightSection}>
-        {/* Quick Actions */}
-        <div className={styles.quickActionsContainer} ref={quickMenuRef}>
-          <button
-            className={`${styles.actionBtn} ${styles.quickActionsBtn} ${
-              showQuickMenu ? styles.active : ""
-            }`}
-            onClick={() => {
-              setShowQuickMenu(!showQuickMenu);
-              setShowNotifications(false);
-              setShowUserMenu(false);
-            }}
-            aria-label="Quick actions">
-            <span className={styles.quickActionsIcon}>⚡</span>
-            <span className={styles.quickActionsText}>Quick Actions</span>
-          </button>
-
-          {showQuickMenu && (
-            <div className={styles.quickActionsDropdown}>
-              <div className={styles.dropdownHeader}>
-                <h3>Quick Actions</h3>
-              </div>
-              <div className={styles.quickActionsGrid}>
-                {quickActions.map((action, index) => (
-                  <button
-                    key={index}
-                    className={styles.quickActionItem}
-                    onClick={() => handleQuickAction(action.label)}
-                    style={{ "--action-color": action.color }}>
-                    <div className={styles.quickActionIcon}>{action.icon}</div>
-                    <span className={styles.quickActionLabel}>
-                      {action.label}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Notifications */}
         <div className={styles.notificationContainer} ref={notificationRef}>
           <button
-            className={`${styles.actionBtn} ${styles.notificationBtn} ${
-              showNotifications ? styles.active : ""
-            }`}
+            className={`${styles.actionBtn} ${styles.notificationBtn} ${showNotifications ? styles.active : ""}`}
             onClick={() => {
               setShowNotifications(!showNotifications);
               setShowUserMenu(false);
-              setShowQuickMenu(false);
             }}
             aria-label="Notifications">
             <FiBell className={styles.notificationIcon} />
@@ -251,44 +181,39 @@ function AdminNavbar({ user, isSidebarCollapsed, onToggleSidebar }) {
                   </button>
                 )}
               </div>
-
               <div className={styles.notificationList}>
-                {notifications.map((notification) => (
+                {notifications.map((n) => (
                   <div
-                    key={notification.id}
-                    className={`${styles.notificationItem} ${
-                      notification.unread ? styles.unread : ""
-                    }`}
+                    key={n.id}
+                    className={`${styles.notificationItem} ${n.unread ? styles.unread : ""}`}
                     onClick={() => setShowNotifications(false)}>
                     <div
                       className={styles.notificationTypeIcon}
-                      style={{ background: `${notification.color}20` }}>
-                      {notification.icon}
+                      style={{ background: `${n.color}20` }}>
+                      {n.icon}
                     </div>
                     <div className={styles.notificationContent}>
-                      <p className={styles.notificationTitle}>
-                        {notification.title}
-                      </p>
+                      <p className={styles.notificationTitle}>{n.title}</p>
                       <div className={styles.notificationMeta}>
                         <span
                           className={styles.notificationType}
-                          style={{ color: notification.color }}>
-                          {notification.type}
+                          style={{ color: n.color }}>
+                          {n.type}
                         </span>
                         <span className={styles.notificationTime}>
-                          {notification.time}
+                          {n.time}
                         </span>
                       </div>
                     </div>
-                    {notification.unread && (
+                    {n.unread && (
                       <div
                         className={styles.unreadDot}
-                        style={{ background: notification.color }}></div>
+                        style={{ background: n.color }}
+                      />
                     )}
                   </div>
                 ))}
               </div>
-
               <div className={styles.dropdownFooter}>
                 <button className={styles.viewAllBtn}>
                   View All Notifications
@@ -298,16 +223,12 @@ function AdminNavbar({ user, isSidebarCollapsed, onToggleSidebar }) {
           )}
         </div>
 
-        {/* User Profile */}
         <div className={styles.userProfileContainer} ref={userMenuRef}>
           <button
-            className={`${styles.userProfileBtn} ${
-              showUserMenu ? styles.active : ""
-            }`}
+            className={`${styles.userProfileBtn} ${showUserMenu ? styles.active : ""}`}
             onClick={() => {
               setShowUserMenu(!showUserMenu);
               setShowNotifications(false);
-              setShowQuickMenu(false);
             }}
             aria-label="User menu">
             <div className={styles.avatar}>
@@ -324,9 +245,7 @@ function AdminNavbar({ user, isSidebarCollapsed, onToggleSidebar }) {
               </span>
             </div>
             <FiChevronDown
-              className={`${styles.chevron} ${
-                showUserMenu ? styles.rotated : ""
-              }`}
+              className={`${styles.chevron} ${showUserMenu ? styles.rotated : ""}`}
             />
           </button>
 
@@ -343,7 +262,6 @@ function AdminNavbar({ user, isSidebarCollapsed, onToggleSidebar }) {
                   <p>{user?.email || "admin@travelfin.com"}</p>
                 </div>
               </div>
-
               <div className={styles.userDropdownMenu}>
                 {userMenuItems.map((item, index) => (
                   <a
@@ -352,10 +270,7 @@ function AdminNavbar({ user, isSidebarCollapsed, onToggleSidebar }) {
                     className={styles.dropdownItem}
                     style={item.color ? { color: item.color } : {}}
                     onClick={(e) => {
-                      if (item.label === "Logout") {
-                        e.preventDefault();
-                        console.log("Logout clicked");
-                      }
+                      if (item.label === "Logout") e.preventDefault();
                       setShowUserMenu(false);
                     }}>
                     <span className={styles.dropdownIcon}>{item.icon}</span>

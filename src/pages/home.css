@@ -215,7 +215,7 @@ body {
 /* Four Services Grid */
 .services-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 2rem;
 }
 
@@ -248,7 +248,7 @@ body {
 }
 
 .service-card h3 {
-  font-size: 1.3rem;
+  font-size: 16;
   color: var(--dark-green);
   margin-bottom: 0.8rem;
   font-weight: 600;
@@ -468,7 +468,7 @@ body {
   }
 
   .section-title {
-    font-size: 1.8rem;
+    font-size: 4rem;
   }
 
   .section-subtitle {

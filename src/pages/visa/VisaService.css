@@ -1,3 +1,4 @@
+/* ===== ROOT ===== */
 :root {
   --dark-green: #064e3b;
   --green: #10b981;
@@ -5,10 +6,7 @@
   --white: #ffffff;
   --light-gray: #f8fafc;
   --gray: #64748b;
-  --transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  --gradient-primary: linear-gradient(135deg, var(--orange) 0%, #fd8c27 100%);
-  --gradient-success: linear-gradient(135deg, var(--green) 0%, #0ea5e9 100%);
-  --gradient-dark: linear-gradient(135deg, var(--dark-green) 0%, #065f46 100%);
+  --transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   --border-color: rgba(16, 185, 129, 0.15);
   --input-focus-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
   --shadow-sm: 0 2px 8px rgba(6, 78, 59, 0.08);
@@ -16,6 +14,7 @@
   --shadow-lg: 0 8px 40px rgba(6, 78, 59, 0.15);
 }
 
+/* ===== BASE ===== */
 .visaServicePage {
   min-height: 100vh;
   font-family:
@@ -24,361 +23,290 @@
     BlinkMacSystemFont,
     sans-serif;
   color: var(--gray);
-  position: relative;
   overflow-x: hidden;
   background: linear-gradient(135deg, #f8fafc 0%, #f0fdf4 100%);
 }
 
 .visaContainer {
-  max-width: 1400px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 0 clamp(16px, 4vw, 32px);
-  position: relative;
-  z-index: 1;
+  padding: 0 clamp(12px, 3vw, 32px);
 }
 
 .visaMain {
-  padding: clamp(80px, 8vw, 100px) 0 clamp(40px, 5vw, 60px);
+  padding: clamp(70px, 8vw, 100px) 0 clamp(30px, 4vw, 60px);
 }
 
+/* ===== STEP NAV ===== */
 .visaStepNavigation {
-  margin-bottom: clamp(20px, 3vw, 40px);
+  margin-bottom: clamp(16px, 2.5vw, 32px);
   width: 100%;
 }
-
 .visaStepProgress {
   height: 2px;
   background: rgba(0, 0, 0, 0.08);
   border-radius: 1px;
-  margin-bottom: clamp(30px, 4vw, 40px);
+  margin-bottom: clamp(20px, 3vw, 32px);
   position: relative;
   overflow: hidden;
-  width: 100%;
 }
-
 .visaProgressLine {
   height: 100%;
   position: absolute;
   left: 0;
   top: 0;
   transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-  border-radius: 1px;
   background: linear-gradient(90deg, var(--green), var(--dark-green));
 }
-
-/* ===== STEP INDICATORS ===== */
 .visaStepIndicators {
   display: flex;
-  flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  position: relative;
-  width: 100%;
-  margin: 0 auto;
-  padding: 0;
-  gap: 0;
+  gap: 4px;
 }
-
 .visaStepIndicator {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  position: relative;
+  gap: 6px;
   flex: 1;
   min-width: 0;
   cursor: pointer;
-  padding: 8px 0;
-  border-radius: 12px;
+  padding: 6px 0;
+  border-radius: 10px;
   transition: var(--transition);
 }
-
 .visaStepIndicator:hover {
   background: rgba(16, 185, 129, 0.05);
 }
-
 .visaIndicatorRing {
-  width: clamp(32px, 4vw, 48px);
-  height: clamp(32px, 4vw, 48px);
+  width: clamp(30px, 3.5vw, 42px);
+  height: clamp(30px, 3.5vw, 42px);
   border-radius: 50%;
   background: var(--white);
   border: 2px solid rgba(16, 185, 129, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
   transition: var(--transition);
   box-shadow: var(--shadow-sm);
-  flex-shrink: 0;
 }
-
-.visaIndicatorDot {
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  background: var(--step-color);
-  border-radius: 50%;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
 .visaStepIcon {
-  font-size: clamp(12px, 1.5vw, 16px);
+  font-size: clamp(11px, 1.3vw, 15px);
   color: var(--gray);
   transition: var(--transition);
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
-
 .visaStepName {
-  font-size: clamp(9px, 1.1vw, 11px);
+  font-size: clamp(9px, 1vw, 11px);
   font-weight: 500;
   color: var(--gray);
   text-transform: uppercase;
   letter-spacing: 0.3px;
-  transition: var(--transition);
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%;
 }
-
-/* Active State */
 .visaStepIndicator.active .visaIndicatorRing {
-  background: var(--white);
   border-color: var(--step-color);
   transform: scale(1.05);
   box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
 }
-
-.visaStepIndicator.active .visaIndicatorDot {
-  opacity: 1;
-}
-
-.visaStepIndicator.active .visaStepIcon {
+.visaStepIndicator.active .visaStepIcon,
+.visaStepIndicator.completed .visaStepIcon {
   color: var(--step-color);
-  transform: scale(1.1);
 }
-
 .visaStepIndicator.active .visaStepName {
   color: var(--step-color);
   font-weight: 600;
 }
-
-/* Completed State */
 .visaStepIndicator.completed .visaIndicatorRing {
   background: rgba(16, 185, 129, 0.1);
   border-color: var(--step-color);
 }
-
-.visaStepIndicator.completed .visaStepIcon {
-  color: var(--step-color);
-}
-
 .visaStepIndicator.completed .visaStepName {
   color: var(--dark-green);
-}
-
-.visaActivePulse {
-  position: absolute;
-  width: clamp(40px, 5vw, 56px);
-  height: clamp(40px, 5vw, 56px);
-  border: 2px solid var(--step-color);
-  border-radius: 50%;
-  top: -4px;
-  opacity: 0.3;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 0.3;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 0.2;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 0.3;
-  }
 }
 
 /* ===== CONTENT AREA ===== */
 .visaContentArea {
   display: grid;
-  grid-template-columns: minmax(280px, 320px) 1fr;
-  gap: clamp(24px, 3vw, 40px);
+  grid-template-columns: minmax(260px, 300px) 1fr;
+  gap: clamp(20px, 2.5vw, 32px);
   align-items: start;
 }
 
 /* ===== SIDE PANEL ===== */
-.visaSidePanel {
-  position: relative;
-}
-
 .visaSidePanelSticky {
   position: sticky;
-  top: clamp(100px, 10vw, 120px);
+  top: 100px;
   display: flex;
   flex-direction: column;
-  gap: clamp(20px, 3vw, 30px);
+  gap: 16px;
 }
-
 .visaCurrentStepInfo {
   background: var(--white);
   border: 1px solid var(--border-color);
-  border-radius: clamp(16px, 2vw, 20px);
-  padding: clamp(24px, 3vw, 30px);
-  animation: visaSlideInLeft 0.6s ease;
+  border-radius: 16px;
+  padding: 20px;
   box-shadow: var(--shadow-md);
 }
-
-@keyframes visaSlideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
 .visaStepNumber {
-  width: clamp(64px, 8vw, 80px);
-  height: clamp(64px, 8vw, 80px);
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  color: var(--dark-green);
-  background: linear-gradient(135deg, var(--step-color), var(--dark-green));
+  color: var(--white);
+  background: linear-gradient(135deg, var(--green), var(--dark-green));
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: clamp(20px, 3vw, 24px);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  box-shadow: var(--shadow-md);
+  margin-bottom: 14px;
   font-weight: 700;
-  font-size: clamp(26px, 3vw, 32px);
+  font-size: 22px;
 }
-
 .visaStepInfo {
-  margin-bottom: clamp(24px, 3vw, 30px);
+  margin-bottom: 16px;
 }
-
 .visaStepTitle {
-  font-size: clamp(18px, 2vw, 20px);
+  font-size: 17px;
   font-weight: 600;
-  margin-bottom: clamp(8px, 1vw, 12px);
+  margin: 0 0 6px;
   color: var(--dark-green);
-  line-height: 1.3;
 }
-
 .visaStepDescription {
-  font-size: clamp(13px, 1.5vw, 14px);
+  font-size: 13px;
   color: var(--gray);
-  line-height: 1.6;
+  line-height: 1.5;
+  margin: 0;
 }
-
 .visaProgressDots {
   display: flex;
-  gap: clamp(6px, 0.8vw, 8px);
+  gap: 6px;
   justify-content: center;
   flex-wrap: wrap;
 }
-
 .visaProgressDot {
-  width: clamp(6px, 0.8vw, 8px);
-  height: clamp(6px, 0.8vw, 8px);
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.1);
   transition: var(--transition);
 }
-
 .visaProgressDot.active {
-  background: var(--step-color);
-  transform: scale(1.2);
-  box-shadow: 0 0 8px var(--step-color);
+  background: var(--green);
+  transform: scale(1.3);
+  box-shadow: 0 0 8px var(--green);
 }
-
 .visaProgressDot.completed {
   background: var(--green);
 }
 
-/* ===== FIXED CURRENCY DISPLAY ===== */
-.price-tag {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 2px;
-  padding: clamp(10px, 1.5vw, 12px) clamp(20px, 3vw, 24px);
-  background: linear-gradient(135deg, var(--green), var(--dark-green));
-  color: var(--white);
-  border-radius: 12px;
-  font-weight: 700;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-  line-height: 1;
+/* ===== PRICING ===== */
+.pricing-summary {
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.08),
+    rgba(249, 115, 22, 0.08)
+  );
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 14px;
+  padding: 16px;
 }
-
-.currency-symbols {
-  font-size: clamp(14px, 2vw, 16px);
-  font-weight: 600;
-  opacity: 0.95;
-  align-self: center;
-}
-
-.price-amounts {
-  font-size: clamp(20px, 3vw, 24px);
-  font-weight: 800;
-  color: #ffffff;
-}
-
-.visaQuickHelp {
-  background: var(--white);
-  border: 1px solid var(--border-color);
-  border-radius: clamp(16px, 2vw, 20px);
-  padding: clamp(20px, 3vw, 25px);
-  animation: visaSlideInLeft 0.6s ease 0.2s both;
-  box-shadow: var(--shadow-md);
-  order: 3;
-}
-
-.visaHelpHeader {
+.pricing-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: clamp(8px, 1vw, 10px);
-  margin-bottom: clamp(16px, 2vw, 20px);
-  font-size: clamp(14px, 1.8vw, 16px);
+  margin-bottom: 14px;
+}
+.pricing-title {
+  font-size: 15px;
   font-weight: 600;
   color: var(--dark-green);
 }
-
-.visaHelpIcon {
-  font-size: clamp(18px, 2vw, 20px);
+.pricing-total {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
   color: var(--green);
 }
+.pricing-total .currency-symbols {
+  font-size: 14px;
+  font-weight: 600;
+}
+.pricing-total .price-amounts {
+  font-size: 20px;
+  font-weight: 800;
+}
+.pricing-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pricing-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.1);
+  gap: 8px;
+}
+.pricing-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.pricing-label {
+  font-size: 12px;
+  color: var(--gray);
+  flex-shrink: 0;
+}
+.pricing-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dark-green);
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
+/* ===== QUICK HELP ===== */
+.visaQuickHelp {
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+}
+.visaHelpHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dark-green);
+}
+.visaHelpIcon {
+  font-size: 16px;
+  color: var(--green);
+}
 .visaTipsList {
   list-style: none;
   padding: 0;
   margin: 0;
 }
-
 .visaTipsList li {
-  padding: clamp(8px, 1vw, 10px) 0;
+  padding: 6px 0 6px 16px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  font-size: clamp(13px, 1.5vw, 14px);
+  font-size: 12px;
   color: var(--gray);
   position: relative;
-  padding-left: clamp(16px, 2vw, 20px);
-  line-height: 1.5;
+  line-height: 1.4;
 }
-
 .visaTipsList li:last-child {
   border-bottom: none;
 }
-
 .visaTipsList li:before {
   content: "→";
   position: absolute;
@@ -387,137 +315,22 @@
   font-weight: bold;
 }
 
-/* ===== IMPROVED PRICING SUMMARY ===== */
-.pricing-summary {
-  background: linear-gradient(
-    135deg,
-    rgba(16, 185, 129, 0.08),
-    rgba(249, 115, 22, 0.08)
-  );
-  border: 1px solid rgba(16, 185, 129, 0.2);
-  border-radius: 20px;
-  padding: 24px;
-  margin-bottom: 0;
-  position: relative;
-  overflow: hidden;
-  order: 2;
-}
-
-.pricing-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.pricing-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--dark-green);
-}
-
-.pricing-total {
-  display: flex;
-  align-items: baseline;
-  gap: 2px;
-  font-weight: 800;
-  color: var(--green);
-}
-
-.pricing-total .currency-symbols {
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.pricing-total .price-amounts {
-  font-size: 24px;
-  font-weight: 800;
-}
-
-.pricing-details {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.pricing-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(16, 185, 129, 0.1);
-}
-
-.pricing-label {
-  font-size: 14px;
-  color: var(--gray);
-}
-
-.pricing-value {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--dark-green);
-  display: flex;
-  align-items: baseline;
-  gap: 2px;
-}
-
-.pricing-item.total {
-  padding-top: 12px;
-  border-top: 2px solid rgba(16, 185, 129, 0.2);
-  border-bottom: none;
-}
-
-.pricing-item.total .pricing-label {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--dark-green);
-}
-
-.pricing-item.total .pricing-value {
-  font-size: 20px;
-  font-weight: 800;
-  color: var(--green);
-}
-
-.pricing-item.total .pricing-value .currency-symbols {
-  font-size: 16px;
-  font-weight: 600;
-}
-
 /* ===== MAIN CARD ===== */
 .visaMainCard {
   background: var(--white);
   border: 1px solid var(--border-color);
-  border-radius: clamp(20px, 3vw, 24px);
-  overflow: hidden;
-  position: relative;
-  animation: visaSlideInRight 0.6s ease;
-  display: flex;
-  flex-direction: column;
+  border-radius: 20px;
   box-shadow: var(--shadow-lg);
-  margin-top: 0;
+  position: relative;
 }
-
-@keyframes visaSlideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
 .visaCardHeader {
-  padding: clamp(24px, 3vw, 30px) clamp(24px, 3vw, 30px) clamp(16px, 2vw, 20px);
+  padding: 20px 20px 14px;
   border-bottom: 1px solid var(--border-color);
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   position: relative;
   background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), transparent);
+  border-radius: 20px 20px 0 0;
 }
-
 .visaCardGlow {
   position: absolute;
   top: 0;
@@ -532,66 +345,54 @@
   );
   filter: blur(10px);
 }
-
 .visaCardTitle {
-  font-size: clamp(24px, 3vw, 32px);
+  font-size: clamp(18px, 2.5vw, 24px);
   font-weight: 700;
-  margin-bottom: clamp(8px, 1vw, 12px);
+  margin: 0 0 8px;
   background: linear-gradient(135deg, var(--dark-green) 0%, var(--green) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  line-height: 1.2;
 }
-
 .visaCardSubtitle {
   display: flex;
   align-items: center;
-  gap: clamp(12px, 2vw, 15px);
-  flex-wrap: wrap;
+  gap: 10px;
 }
-
 .visaSubtitleLine {
-  width: clamp(30px, 4vw, 40px);
+  width: 28px;
   height: 2px;
   background: var(--green);
-  border-radius: 1px;
 }
-
 .visaSubtitleText {
-  font-size: clamp(14px, 1.8vw, 16px);
+  font-size: 13px;
   color: var(--gray);
-  line-height: 1.4;
 }
-
 .visaCardContent {
-  flex: 1;
-  padding: 0 clamp(20px, 3vw, 40px) 20px;
-  overflow: visible;
+  padding: 0 20px 20px;
+  position: relative;
 }
-
 .visaContentWrapper {
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
-/* ===== LOADING STATE ===== */
+/* ===== LOADING ===== */
 .visaLoadingState {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 300px;
-  padding: 40px 20px;
+  min-height: 200px;
+  padding: 30px 20px;
 }
-
 .visaNeonSpinner {
-  width: clamp(60px, 8vw, 80px);
-  height: clamp(60px, 8vw, 80px);
+  width: 60px;
+  height: 60px;
   position: relative;
-  margin-bottom: clamp(20px, 3vw, 30px);
+  margin-bottom: 20px;
 }
-
 .visaSpinnerCore {
   width: 100%;
   height: 100%;
@@ -599,16 +400,13 @@
   border-radius: 50%;
   animation: spin 1.5s linear infinite;
 }
-
 .visaSpinnerRing {
   position: absolute;
-  inset: 8px;
+  inset: 6px;
   background: var(--white);
   border-radius: 50%;
   border: 2px solid rgba(16, 185, 129, 0.1);
-  box-shadow: var(--shadow-sm);
 }
-
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -617,120 +415,400 @@
     transform: rotate(360deg);
   }
 }
-
 .visaLoadingText {
-  font-size: clamp(16px, 2vw, 18px);
+  font-size: 15px;
   font-weight: 500;
-  margin-bottom: 20px;
   color: var(--dark-green);
-  text-align: center;
 }
 
-.visaLoadingDots {
-  display: flex;
-  gap: 8px;
-}
-
-.visaLoadingDots span {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--green);
-  animation: bounce 1.4s infinite ease-in-out;
-}
-
-.visaLoadingDots span:nth-child(1) {
-  animation-delay: -0.32s;
-}
-.visaLoadingDots span:nth-child(2) {
-  animation-delay: -0.16s;
-}
-
-@keyframes bounce {
-  0%,
-  80%,
-  100% {
-    transform: scale(0);
-  }
-  40% {
-    transform: scale(1);
-  }
-}
-
-/* ===== FORM STYLES ===== */
+/* ===== FORM ===== */
 .visaForm {
   max-width: 600px;
   margin: 0 auto;
   width: 100%;
+  position: relative;
 }
-
 .form-section {
-  margin-bottom: 40px;
+  margin-bottom: 24px;
 }
-
 .section-title {
-  font-size: clamp(18px, 2vw, 20px);
+  font-size: 16px;
   font-weight: 600;
   color: var(--dark-green);
-  margin-bottom: clamp(16px, 2vw, 20px);
-  padding-bottom: 12px;
+  margin: 0 0 10px;
+  padding-bottom: 10px;
   border-bottom: 2px solid rgba(16, 185, 129, 0.1);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
-
 .section-subtitle {
   color: var(--gray);
-  margin-bottom: clamp(20px, 3vw, 30px);
-  font-size: clamp(14px, 1.5vw, 15px);
-  line-height: 1.6;
-  max-width: 600px;
+  margin: 0 0 18px;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
-.formGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: clamp(16px, 2vw, 20px);
-  margin-bottom: 30px;
+/* ============================================================
+   COUNTRY DROPDOWN — Portal + search + scroll
+   ============================================================ */
+.countryDropdownWrapper {
+  position: relative;
+  width: 100%;
 }
 
-.formField {
-  margin-bottom: clamp(16px, 2vw, 20px);
+.countryDropdownTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--white);
+  border: 2px solid rgba(16, 185, 129, 0.15);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  user-select: none;
+}
+.countryDropdownTrigger:hover {
+  border-color: var(--green);
+  background: rgba(16, 185, 129, 0.02);
+}
+.countryDropdownTrigger.has-value {
+  border-color: var(--green);
+  background: rgba(16, 185, 129, 0.05);
 }
 
-.fullWidth {
-  grid-column: 1 / -1;
+.countryDropdownLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+.countryDropdownFlag {
+  font-size: 26px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.countryDropdownText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.countryDropdownName {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--dark-green);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.countryDropdownMeta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--gray);
+}
+.countryDropdownPlaceholderIcon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--green);
+  border-radius: 8px;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.countryDropdownPlaceholder {
+  font-size: 14px;
+  color: var(--gray);
 }
 
-.formField label {
+.countryDropdownRight {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: clamp(13px, 1.5vw, 14px);
+  flex-shrink: 0;
+}
+.countryDropdownPrice {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, var(--green), var(--dark-green));
+  color: var(--white);
+  border-radius: 8px;
+  font-weight: 700;
+}
+.countryDropdownPrice .currency-symbols {
+  font-size: 11px;
   font-weight: 600;
-  color: var(--dark-green);
-  margin-bottom: 10px;
+  opacity: 0.9;
+}
+.countryDropdownPrice .price-amounts {
+  font-size: 14px;
+  font-weight: 700;
 }
 
+.countryDropdownChevron {
+  font-size: 12px;
+  color: var(--gray);
+  transition: transform 0.3s ease;
+}
+.countryDropdownChevron.open {
+  transform: rotate(180deg);
+  color: var(--green);
+}
+
+/* Portal container */
+.countryDropdownPortal {
+  background: var(--white);
+  border: 1.5px solid rgba(16, 185, 129, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 20px 50px rgba(6, 78, 59, 0.18);
+  overflow: hidden;
+  z-index: 9999;
+  animation: countryDropdownFadeIn 0.18s ease;
+}
+@keyframes countryDropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.countryDropdownSearch {
+  padding: 10px;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.1);
+  background: rgba(16, 185, 129, 0.03);
+}
+.countryDropdownSearch input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1.5px solid rgba(16, 185, 129, 0.15);
+  border-radius: 8px;
+  background: var(--white);
+  color: var(--dark-green);
+  font-family: inherit;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.countryDropdownSearch input:focus {
+  outline: none;
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+}
+.countryDropdownSearch input::placeholder {
+  color: #94a3b8;
+}
+
+.countryDropdownMenu {
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(16, 185, 129, 0.4) transparent;
+}
+.countryDropdownMenu::-webkit-scrollbar {
+  width: 6px;
+}
+.countryDropdownMenu::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 6px 0;
+}
+.countryDropdownMenu::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.35);
+  border-radius: 10px;
+}
+.countryDropdownMenu::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.55);
+}
+
+.countryDropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.countryDropdownItem:hover {
+  background: rgba(16, 185, 129, 0.06);
+}
+.countryDropdownItem.selected {
+  background: rgba(16, 185, 129, 0.1);
+}
+.countryDropdownItemFlag {
+  font-size: 22px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.countryDropdownItemInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.countryDropdownItemName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dark-green);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.countryDropdownItemMeta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--gray);
+}
+.countryDropdownItemPrice {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--green);
+  flex-shrink: 0;
+}
+.countryDropdownItemCheck {
+  color: var(--green);
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.countryDropdownEmpty {
+  padding: 20px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--gray);
+}
+
+/* ===== OPTION LIST ===== */
+.optionList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.optionListItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--white);
+  border: 1.5px solid rgba(16, 185, 129, 0.12);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.optionListItem:hover {
+  border-color: var(--green);
+  background: rgba(16, 185, 129, 0.03);
+  transform: translateX(3px);
+}
+.optionListItem.selected {
+  border-color: var(--green);
+  background: rgba(16, 185, 129, 0.06);
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.12);
+}
+.optionListIcon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 10px;
+  color: var(--green);
+  font-size: 14px;
+  flex-shrink: 0;
+  transition: all 0.25s ease;
+}
+.optionListItem.selected .optionListIcon {
+  background: var(--green);
+  color: var(--white);
+}
+.optionListInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.optionListLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dark-green);
+}
+.optionListTime {
+  font-size: 11px;
+  color: var(--gray);
+}
+.optionListBadge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 8px;
+  background: rgba(249, 115, 22, 0.1);
+  color: var(--orange);
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+}
+.optionListCheck {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--green);
+  font-size: 12px;
+}
+
+/* ===== FORM FIELDS ===== */
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.formField {
+  display: flex;
+  flex-direction: column;
+}
+.formField label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dark-green);
+  margin-bottom: 6px;
+}
 .formField input,
 .formField select,
 .formField textarea {
   width: 100%;
-  padding: clamp(14px, 2vw, 16px) clamp(16px, 2vw, 20px);
-  font-size: clamp(14px, 1.8vw, 16px);
+  padding: 12px 14px;
+  font-size: 14px;
   border: 2px solid rgba(16, 185, 129, 0.1);
-  border-radius: 12px;
+  border-radius: 10px;
   background: var(--white);
   color: var(--dark-green);
   transition: var(--transition);
-  font-family:
-    "Inter",
-    -apple-system,
-    sans-serif;
-  box-shadow: var(--shadow-sm);
+  font-family: inherit;
 }
-
 .formField input:focus,
 .formField select:focus,
 .formField textarea:focus {
@@ -738,1488 +816,715 @@
   border-color: var(--green);
   box-shadow: var(--input-focus-shadow);
 }
-
 .formField input::placeholder {
-  color: rgba(100, 116, 139, 0.5);
+  color: #cbd5e1;
 }
 
-/* ===== COUNTRY DROPDOWN ===== */
-.country-dropdown-container {
-  position: relative;
-  margin-bottom: 30px;
-}
-
-.country-select-wrapper {
-  position: relative;
-}
-
-.country-select {
-  width: 100%;
-  padding: clamp(16px, 2vw, 18px) clamp(52px, 3vw, 52px) clamp(16px, 2vw, 18px)
-    20px;
-  font-size: clamp(15px, 1.8vw, 16px);
-  border: 2px solid rgba(16, 185, 129, 0.2);
-  border-radius: 16px;
-  background: var(--white);
-  color: var(--dark-green);
-  transition: var(--transition);
-  appearance: none;
-  cursor: pointer;
-  font-family:
-    "Inter",
-    -apple-system,
-    sans-serif;
-  font-weight: 500;
-  box-shadow: 0 4px 12px rgba(6, 78, 59, 0.08);
-}
-
-.country-select:focus {
-  outline: none;
-  border-color: var(--green);
-  box-shadow:
-    0 0 0 4px rgba(16, 185, 129, 0.15),
-    0 4px 12px rgba(6, 78, 59, 0.1);
-}
-
-.country-select-icon {
-  position: absolute;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--green);
-  font-size: clamp(14px, 2vw, 16px);
-  pointer-events: none;
-  transition: transform 0.3s ease;
-}
-
-.country-select:focus + .country-select-icon {
-  transform: translateY(-50%) rotate(180deg);
-}
-
-.selected-country-info {
-  background: linear-gradient(
-    135deg,
-    rgba(16, 185, 129, 0.05),
-    rgba(249, 115, 22, 0.05)
-  );
-  border: 2px solid rgba(16, 185, 129, 0.1);
-  border-radius: 20px;
-  padding: clamp(24px, 3vw, 30px);
-  margin-top: 30px;
-  display: flex;
-  align-items: center;
-  gap: clamp(20px, 3vw, 25px);
-  animation: fadeIn 0.6s ease;
-}
-
-.selected-country-flag {
-  font-size: clamp(48px, 6vw, 64px);
-  width: clamp(80px, 10vw, 100px);
-  height: clamp(80px, 10vw, 100px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--white);
-  border-radius: 20px;
-  box-shadow: var(--shadow-md);
-  flex-shrink: 0;
-}
-
-.selected-country-details {
-  flex: 1;
-}
-
-.selected-country-name {
-  margin: 0 0 12px 0;
-  font-size: clamp(24px, 3vw, 28px);
-  font-weight: 700;
-  color: var(--dark-green);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.selected-country-price {
-  display: flex;
-  align-items: center;
-  gap: clamp(15px, 2vw, 20px);
-  flex-wrap: wrap;
-}
-
-.processing-info {
-  font-size: clamp(13px, 1.5vw, 14px);
-  color: var(--gray);
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-/* ===== IMPROVED EXPECTED DEPARTURE TIME UI ===== */
-.departure-time-options {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-bottom: 30px;
-}
-
-.departure-option {
-  display: flex;
-  align-items: center;
-  padding: 20px;
-  border: 2px solid rgba(16, 185, 129, 0.1);
-  border-radius: 16px;
-  background: var(--white);
-  cursor: pointer;
-  transition: var(--transition);
-  box-shadow: var(--shadow-sm);
-  position: relative;
-}
-
-.departure-option:hover {
-  transform: translateY(-2px);
-  border-color: var(--orange);
-  box-shadow: 0 8px 20px rgba(249, 115, 22, 0.1);
-}
-
-.departure-option.selected {
-  border-color: var(--orange);
-  background: linear-gradient(135deg, rgba(249, 115, 22, 0.05), transparent);
-}
-
-.departure-option-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 50px;
-  height: 50px;
-  background: rgba(249, 115, 22, 0.1);
-  border-radius: 12px;
-  margin-right: 20px;
-  flex-shrink: 0;
-}
-
-.departure-option-icon svg {
-  font-size: 24px;
-  color: var(--orange);
-}
-
-.departure-option-content {
-  flex: 1;
-}
-
-.departure-option-label {
-  display: block;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--dark-green);
-  margin-bottom: 4px;
-}
-
-.departure-option-range {
-  display: block;
-  font-size: 14px;
-  color: var(--gray);
-  margin-bottom: 8px;
-}
-
-.departure-option-description {
-  display: block;
-  font-size: 13px;
-  color: var(--gray);
-  line-height: 1.4;
-}
-
-.departure-option-check {
-  margin-left: 20px;
-  color: var(--orange);
-  font-size: 20px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.departure-option.selected .departure-option-check {
-  opacity: 1;
-}
-
-/* ===== IMPROVED VISA DURATION UI ===== */
-.duration-options {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-bottom: 30px;
-}
-
-.duration-option {
-  display: flex;
-  align-items: center;
-  padding: 20px;
-  border: 2px solid rgba(16, 185, 129, 0.1);
-  border-radius: 16px;
-  background: var(--white);
-  cursor: pointer;
-  transition: var(--transition);
-  box-shadow: var(--shadow-sm);
-  position: relative;
-}
-
-.duration-option:hover {
-  transform: translateY(-2px);
-  border-color: var(--green);
-  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.1);
-}
-
-.duration-option.selected {
-  border-color: var(--green);
-  background: rgba(16, 185, 129, 0.05);
-}
-
-.duration-option-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 50px;
-  height: 50px;
-  background: rgba(16, 185, 129, 0.1);
-  border-radius: 12px;
-  margin-right: 20px;
-  flex-shrink: 0;
-}
-
-.duration-option-icon svg {
-  font-size: 24px;
-  color: var(--green);
-}
-
-.duration-option-content {
-  flex: 1;
-}
-
-.duration-option-label {
-  display: block;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--dark-green);
-  margin-bottom: 4px;
-}
-
-.duration-option-months {
-  display: block;
-  font-size: 14px;
-  color: var(--green);
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.duration-option-description {
-  display: block;
-  font-size: 13px;
-  color: var(--gray);
-  line-height: 1.4;
-}
-
-.duration-option-check {
-  margin-left: 20px;
-  color: var(--green);
-  font-size: 20px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.duration-option.selected .duration-option-check {
-  opacity: 1;
-}
-
-.duration-note {
-  background: rgba(16, 185, 129, 0.05);
-  border: 1px solid rgba(16, 185, 129, 0.1);
-  border-radius: 12px;
-  padding: clamp(12px, 2vw, 16px);
-  margin-bottom: 30px;
-  text-align: center;
-}
-
-.duration-note-text {
-  font-size: clamp(13px, 1.5vw, 14px);
-  color: var(--gray);
-  margin: 0;
-}
-
-.duration-note-text strong {
-  color: var(--orange);
-}
-
-/* ===== PASSPORT UPLOAD ===== */
-.upload-data-section {
-  background: rgba(16, 185, 129, 0.03);
-  border: 2px solid rgba(16, 185, 129, 0.1);
-  border-radius: 20px;
-  padding: clamp(30px, 4vw, 40px);
-  margin-bottom: 30px;
-}
-
-.upload-data-header {
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-.upload-data-header h4 {
-  font-size: clamp(18px, 2.5vw, 20px);
-  font-weight: 600;
-  color: var(--dark-green);
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-
-.upload-data-header p {
-  color: var(--gray);
-  font-size: clamp(13px, 1.5vw, 14px);
-}
-
-.passport-upload-zone {
-  border: 3px dashed rgba(16, 185, 129, 0.3);
-  border-radius: 20px;
-  padding: clamp(40px, 6vw, 60px) clamp(20px, 4vw, 40px);
+/* ===== UPLOAD ===== */
+.visaUploadZone {
+  border: 2px dashed rgba(16, 185, 129, 0.3);
+  border-radius: 14px;
+  padding: 32px 20px;
   text-align: center;
   cursor: pointer;
-  transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.5);
-  position: relative;
-  overflow: hidden;
+  transition: var(--transition);
+  background: rgba(16, 185, 129, 0.02);
 }
-
-.passport-upload-zone:hover {
+.visaUploadZone:hover,
+.visaUploadZone.dragging {
   border-color: var(--green);
-  background: rgba(16, 185, 129, 0.05);
-  transform: translateY(-2px);
+  background: rgba(16, 185, 129, 0.06);
 }
-
-.passport-upload-zone.dragging {
-  border-color: var(--green);
-  background: rgba(16, 185, 129, 0.1);
-  border-style: solid;
-}
-
-.upload-zone-icon {
-  font-size: clamp(48px, 8vw, 64px);
+.visaUploadIcon {
+  font-size: 32px;
   color: var(--green);
-  margin-bottom: 20px;
-  transition: transform 0.3s ease;
-  display: flex;
-  justify-content: center;
-}
-
-.passport-upload-zone:hover .upload-zone-icon {
-  transform: scale(1.1);
-}
-
-.upload-zone-title {
-  font-size: clamp(18px, 3vw, 22px);
-  font-weight: 600;
-  color: var(--dark-green);
   margin-bottom: 12px;
 }
-
-.upload-zone-subtitle {
+.visaUploadText {
+  font-size: 14px;
+  color: var(--dark-green);
+  margin: 0 0 4px;
+}
+.visaUploadHint {
+  font-size: 12px;
   color: var(--gray);
-  font-size: clamp(13px, 1.8vw, 14px);
-  margin-bottom: 8px;
+  margin: 0;
 }
-
-.upload-zone-instructions {
-  color: var(--orange);
-  font-size: clamp(12px, 1.5vw, 13px);
-  font-weight: 500;
-}
-
-.passport-preview {
-  background: var(--white);
-  border: 2px solid rgba(16, 185, 129, 0.1);
-  border-radius: 16px;
-  padding: clamp(20px, 3vw, 30px);
-  margin-top: 30px;
+.visaFilePreview {
   display: flex;
   align-items: center;
-  gap: clamp(20px, 3vw, 25px);
-  animation: slideInUp 0.5s ease;
+  gap: 12px;
+  padding: 14px;
+  background: rgba(16, 185, 129, 0.06);
+  border: 1.5px solid rgba(16, 185, 129, 0.2);
+  border-radius: 12px;
 }
-
-.passport-preview-icon {
-  font-size: clamp(40px, 5vw, 48px);
-  color: var(--green);
-  background: rgba(16, 185, 129, 0.1);
-  width: clamp(60px, 8vw, 80px);
-  height: clamp(60px, 8vw, 80px);
-  border-radius: 50%;
+.visaFileIcon {
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: var(--green);
+  color: var(--white);
+  border-radius: 10px;
+  font-size: 16px;
   flex-shrink: 0;
 }
-
-.passport-preview-info {
+.visaFileInfo {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
-
-.passport-preview-name {
-  font-size: clamp(16px, 2vw, 18px);
+.visaFileName {
+  font-size: 13px;
   font-weight: 600;
   color: var(--dark-green);
-  margin-bottom: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-
-.passport-preview-meta {
-  display: flex;
-  gap: clamp(12px, 2vw, 20px);
-  font-size: clamp(12px, 1.5vw, 14px);
+.visaFileSize {
+  font-size: 11px;
   color: var(--gray);
-  flex-wrap: wrap;
 }
-
-.passport-preview-actions {
-  display: flex;
-  gap: 12px;
-}
-
-.upload-requirements {
-  background: rgba(6, 78, 59, 0.03);
-  border: 1px solid rgba(6, 78, 59, 0.1);
-  border-radius: 16px;
-  padding: clamp(20px, 3vw, 25px);
-  margin-top: 30px;
-}
-
-.requirements-title {
-  font-size: clamp(14px, 2vw, 16px);
-  font-weight: 600;
-  color: var(--dark-green);
-  margin-bottom: 15px;
+.visaFileRemove {
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
-  gap: 10px;
-}
-
-.requirements-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.requirements-list li {
-  padding: clamp(8px, 1.5vw, 10px) 0;
-  border-bottom: 1px solid rgba(6, 78, 59, 0.05);
-  font-size: clamp(13px, 1.5vw, 14px);
-  color: var(--dark-green);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.requirements-list li:before {
-  content: "✓";
-  color: var(--green);
-  font-weight: bold;
-  font-size: clamp(14px, 2vw, 16px);
-}
-
-.requirements-list li:last-child {
-  border-bottom: none;
-}
-
-.visaActionButtons {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 32px;
-  padding-top: 24px;
-  border-top: 1px solid rgba(16, 185, 129, 0.1);
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.visaPrimaryButton,
-.visaSecondaryButton {
-  padding: clamp(14px, 2vw, 16px) clamp(24px, 3vw, 32px);
-  border-radius: clamp(10px, 2vw, 12px);
-  font-weight: 600;
-  font-size: clamp(14px, 2vw, 16px);
-  cursor: pointer;
-  transition: var(--transition);
+  justify-content: center;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
   border: none;
-  outline: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  min-width: min(180px, 100%);
-  box-shadow: var(--shadow-md);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 13px;
 }
-
-.visaPrimaryButton {
-  background: linear-gradient(135deg, var(--green), var(--dark-green));
+.visaFileRemove:hover {
+  background: #ef4444;
   color: var(--white);
 }
 
-.visaPrimaryButton:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+/* ===== PAYMENT STEP ===== */
+.visaPaymentStep .section-subtitle {
+  margin-bottom: 16px;
 }
 
-.visaSecondaryButton {
-  background: transparent;
-  color: var(--dark-green);
-  border: 2px solid rgba(6, 78, 59, 0.1);
+/* ===== REVIEW GRID ===== */
+.reviewGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
 }
-
-.visaSecondaryButton:hover:not(:disabled) {
-  background: rgba(6, 78, 59, 0.05);
-  border-color: var(--dark-green);
-  transform: translateY(-2px);
+.reviewCard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  background: rgba(16, 185, 129, 0.04);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  border-radius: 10px;
+  min-width: 0;
 }
-
-.visaPrimaryButton:disabled,
-.visaSecondaryButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none !important;
+.reviewCard--full {
+  grid-column: 1 / -1;
 }
-
-.visaSuccessContainer {
-  position: relative;
-  width: 100%;
-}
-
-.visaSuccessCard {
-  background: var(--white);
-  border: 1px solid rgba(16, 185, 129, 0.1);
-  border-radius: clamp(20px, 3vw, 24px);
-  padding: clamp(32px, 4vw, 48px);
-  position: relative;
-  overflow: hidden;
-  box-shadow: var(--shadow-lg);
-}
-
-.visaSuccessCardGlow {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--green) 50%,
-    transparent 100%
-  );
-  filter: blur(10px);
-}
-
-.visaSuccessIcon {
-  position: relative;
-  width: clamp(64px, 8vw, 80px);
-  height: clamp(64px, 8vw, 80px);
-  margin: 0 auto clamp(24px, 3vw, 32px);
-}
-
-.visaSuccessIconInner {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, var(--green), var(--dark-green));
-  border-radius: 50%;
+.reviewCard__label {
   display: flex;
   align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow-lg);
-}
-
-.visaSuccessIconRing {
-  position: absolute;
-  inset: -4px;
-  border: 2px solid var(--green);
-  border-radius: 50%;
-  filter: blur(4px);
-  opacity: 0.6;
-}
-
-.visaSuccessCheck {
-  font-size: clamp(28px, 4vw, 32px);
-  font-weight: 700;
-  color: var(--white);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.visaSuccessTitle {
-  font-size: clamp(24px, 3vw, 28px);
-  font-weight: 800;
-  color: var(--dark-green);
-  text-align: center;
-  margin-bottom: 12px;
-  background: linear-gradient(135deg, var(--dark-green) 0%, var(--green) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  line-height: 1.2;
-}
-
-.visaSuccessSubtitle {
-  font-size: clamp(14px, 2vw, 16px);
-  color: var(--gray);
-  text-align: center;
-  max-width: 500px;
-  margin: 0 auto clamp(32px, 4vw, 40px);
-  line-height: 1.5;
-}
-
-.applicationSummary {
-  background: rgba(16, 185, 129, 0.03);
-  border-radius: clamp(16px, 3vw, 20px);
-  padding: clamp(24px, 3vw, 32px);
-  border: 1px solid rgba(16, 185, 129, 0.1);
-  margin-bottom: clamp(24px, 3vw, 40px);
-  position: relative;
-  box-shadow: var(--shadow-md);
-}
-
-.applicationSummaryGlow {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--green) 50%,
-    transparent 100%
-  );
-  filter: blur(10px);
-  opacity: 0.5;
-}
-
-.applicationHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: clamp(24px, 3vw, 40px);
-  padding-bottom: clamp(16px, 2vw, 24px);
-  border-bottom: 1px solid rgba(16, 185, 129, 0.1);
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.applicationIdSection {
-  flex: 1;
-  min-width: 200px;
-}
-
-.applicationLabel {
-  font-size: clamp(11px, 1.5vw, 12px);
+  gap: 5px;
+  font-size: 11px;
   color: var(--gray);
   text-transform: uppercase;
-  letter-spacing: 0.8px;
-  margin-bottom: 8px;
+  letter-spacing: 0.3px;
+  font-weight: 500;
+}
+.reviewCard__value {
+  font-size: 13px;
   font-weight: 600;
-}
-
-.applicationId {
-  font-family: "Courier New", monospace;
-  font-weight: 700;
   color: var(--dark-green);
-  font-size: clamp(16px, 2.5vw, 20px);
-  letter-spacing: 0.5px;
-  word-break: break-all;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.reviewCard__value--truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.applicationDetailsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: clamp(16px, 2vw, 24px);
-  padding-top: clamp(24px, 3vw, 32px);
-  border-top: 1px solid rgba(16, 185, 129, 0.1);
+/* ===== PAYMENT METHODS ===== */
+.paymentMethods {
+  margin-bottom: 20px;
 }
-
-.applicationDetailItem {
+.paymentMethodsTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dark-green);
+  margin: 0 0 10px;
+}
+.paymentMethodList {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
-
-.detailTitle {
-  font-size: clamp(11px, 1.5vw, 12px);
-  color: var(--gray);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 600;
+.paymentMethodList--row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
-
-.detailContent {
-  font-size: clamp(14px, 2vw, 16px);
-  font-weight: 600;
-  color: var(--dark-green);
-  line-height: 1.4;
-  display: flex;
-  align-items: baseline;
-  gap: 2px;
-}
-
-.detailContent .currency-symbols {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.visaCardFooter {
-  padding: clamp(20px, 3vw, 30px) clamp(24px, 3vw, 30px);
-  border-top: 1px solid var(--border-color);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(16, 185, 129, 0.02);
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.visaFooterStats {
-  display: flex;
-  gap: clamp(20px, 3vw, 30px);
-  flex-wrap: wrap;
-}
-
-.visaStat {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.visaStatLabel {
-  font-size: clamp(10px, 1.2vw, 12px);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: var(--gray);
-  font-weight: 600;
-}
-
-.visaStatValue {
-  font-size: clamp(16px, 2vw, 18px);
-  font-weight: 700;
-  color: var(--dark-green);
-  display: flex;
-  align-items: baseline;
-  gap: 2px;
-}
-
-.visaStatValue .currency-symbols {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.visaAssistButton {
-  background: linear-gradient(135deg, var(--green), var(--dark-green));
-  border: none;
-  border-radius: 12px;
-  padding: clamp(12px, 2vw, 14px) clamp(20px, 3vw, 24px);
-  color: white;
-  font-size: clamp(13px, 1.5vw, 14px);
-  font-weight: 600;
+.paymentMethodItem {
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 10px 12px;
+  background: var(--white);
+  border: 1.5px solid rgba(16, 185, 129, 0.15);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.paymentMethodItem:hover {
+  border-color: var(--green);
+  background: rgba(16, 185, 129, 0.03);
+}
+.paymentMethodItem.selected {
+  border-color: var(--green);
+  background: rgba(16, 185, 129, 0.06);
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.12);
+}
+.paymentMethodItem input[type="radio"] {
+  display: none;
+}
+.paymentMethodIcon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--green);
+  border-radius: 10px;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.paymentMethodItem.selected .paymentMethodIcon {
+  background: var(--green);
+  color: var(--white);
+}
+.paymentMethodInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.paymentMethodName {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dark-green);
+}
+.paymentMethodDesc {
+  font-size: 10.5px;
+  color: var(--gray);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== CARD FORM ===== */
+.cardForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.cardFormRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.cardForm .formField input {
+  letter-spacing: 0.5px;
+}
+.cardForm .formField input[type="password"] {
+  letter-spacing: 2px;
+}
+
+/* ===== PAYMENT TOTAL ===== */
+.paymentTotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.08),
+    rgba(249, 115, 22, 0.08)
+  );
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dark-green);
+}
+.paymentAmount {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  color: var(--green);
+}
+.paymentAmount .currency-symbols {
+  font-size: 14px;
+  font-weight: 600;
+}
+.paymentAmount .price-amounts {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+/* ===== COMPLETE ===== */
+.visaComplete {
+  text-align: center;
+  padding: 20px 0;
+}
+.visaCompleteIcon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--green), var(--dark-green));
+  color: var(--white);
+  border-radius: 50%;
+  font-size: 34px;
+  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.35);
+}
+.visaCompleteTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--dark-green);
+  margin: 0 0 10px;
+}
+.visaCompleteText {
+  font-size: 13px;
+  color: var(--gray);
+  line-height: 1.6;
+  margin: 0 0 24px;
+  max-width: 460px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.visaCompleteDetails {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.visaCompleteItem {
+  padding: 12px;
+  background: rgba(16, 185, 129, 0.05);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.visaCompleteItem span {
+  font-size: 11px;
+  color: var(--gray);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.visaCompleteItem strong {
+  font-size: 13px;
+  color: var(--dark-green);
+  font-weight: 700;
+  word-break: break-word;
+}
+
+/* ===== BUTTONS ===== */
+.visaActions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(16, 185, 129, 0.1);
+}
+.visaActionsCenter {
+  justify-content: center;
+}
+.visaBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 10px;
+  border: none;
   cursor: pointer;
   transition: var(--transition);
-  box-shadow: var(--shadow-md);
+  font-family: inherit;
   white-space: nowrap;
 }
-
-.visaAssistButton:hover {
+.visaBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.visaBtnPrimary {
+  background: linear-gradient(135deg, var(--green), var(--dark-green));
+  color: var(--white);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+}
+.visaBtnPrimary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+.visaBtnSecondary {
+  background: rgba(16, 185, 129, 0.08);
+  color: var(--dark-green);
+  border: 1.5px solid rgba(16, 185, 129, 0.2);
+}
+.visaBtnSecondary:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.15);
 }
 
-.visaAssistIcon {
-  font-size: clamp(16px, 2vw, 18px);
-  animation: pulse 2s infinite;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@media (max-width: 1200px) {
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
   .visaContentArea {
     grid-template-columns: 1fr;
-    gap: 30px;
+    gap: 16px;
   }
-
   .visaSidePanelSticky {
     position: static;
-  }
-
-  .visaSidePanel {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 24px;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .visaCurrentStepInfo {
+    grid-column: 1 / -1;
+  }
+  .visaCompleteDetails {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 768px) {
-  .visaStepIndicators {
-    gap: 4px;
+  .visaMain {
+    padding: 70px 0 24px;
   }
-
+  .visaContainer {
+    padding: 0 10px;
+  }
+  .visaStepName {
+    display: none;
+  }
   .visaStepIndicator {
+    gap: 0;
     padding: 4px 0;
   }
-
-  .visaStepName {
-    font-size: 9px;
-    letter-spacing: 0.2px;
-  }
-
   .visaIndicatorRing {
     width: 28px;
     height: 28px;
   }
-
   .visaStepIcon {
-    font-size: 10px;
-  }
-
-  /* HIDE visaCurrentStepInfo ON MOBILE */
-  .visaCurrentStepInfo {
-    display: none !important;
-  }
-
-  .visaQuickHelp {
-    display: block !important;
-    order: 2;
-  }
-
-  .pricing-summary {
-    order: 1;
-    margin-bottom: 0;
-  }
-
-  .visaCardContent {
-    padding: 0 20px 20px;
-    overflow: visible;
-  }
-
-  .visaMainCard {
-    margin-top: 0;
-  }
-
-  .visaContentArea {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .visaSidePanel {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    font-size: 11px;
   }
 
   .visaSidePanelSticky {
-    position: static;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .visaCurrentStepInfo {
+    padding: 14px;
+  }
+  .visaStepNumber {
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  .visaStepTitle {
+    font-size: 15px;
+  }
+  .visaStepDescription {
+    font-size: 12px;
+  }
+
+  .visaCardHeader {
+    padding: 16px 14px 10px;
+    margin-bottom: 12px;
+  }
+  .visaCardTitle {
+    font-size: 18px;
+  }
+  .visaSubtitleText {
+    font-size: 12px;
+  }
+  .visaSubtitleLine {
+    width: 20px;
+  }
+  .visaCardContent {
+    padding: 0 12px 14px;
+  }
+
+  .countryDropdownTrigger {
+    padding: 12px 14px;
+  }
+  .countryDropdownFlag {
+    font-size: 22px;
+  }
+  .countryDropdownName {
+    font-size: 14px;
+  }
+  .countryDropdownPrice {
+    padding: 5px 9px;
+  }
+  .countryDropdownPrice .price-amounts {
+    font-size: 12px;
+  }
+
+  .countryDropdownPortal {
+    max-width: calc(100vw - 24px);
+  }
+  .countryDropdownSearch input {
+    padding: 9px 11px;
+    font-size: 13px;
+  }
+  .countryDropdownMenu {
+    max-height: 240px;
+  }
+  .countryDropdownItem {
+    padding: 9px 10px;
+  }
+  .countryDropdownItemFlag {
+    font-size: 20px;
+  }
+  .countryDropdownItemName {
+    font-size: 13px;
+  }
+
+  .optionListItem {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+  .optionListIcon {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+  .optionListLabel {
+    font-size: 13px;
+  }
+  .optionListBadge {
+    font-size: 9px;
+    padding: 3px 6px;
   }
 
   .formGrid {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
 
-  .departure-option,
-  .duration-option {
-    padding: 16px;
+  .pricing-summary {
+    padding: 12px;
   }
-
-  .departure-option-icon,
-  .duration-option-icon {
-    width: 40px;
-    height: 40px;
-    margin-right: 16px;
+  .pricing-title {
+    font-size: 14px;
   }
-
-  .departure-option-icon svg,
-  .duration-option-icon svg {
-    font-size: 20px;
+  .pricing-total .price-amounts {
+    font-size: 16px;
   }
-
-  .departure-option-label,
-  .duration-option-label {
-    font-size: 15px;
-  }
-
-  .departure-option-description,
-  .duration-option-description {
-    font-size: 12px;
-  }
-
   .pricing-details {
-    grid-template-columns: 1fr;
-  }
-
-  .applicationDetailsGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .visaCardFooter {
-    flex-direction: column;
-    align-items: stretch;
-    text-align: center;
-  }
-
-  .visaFooterStats {
-    justify-content: space-between;
-    width: 100%;
-  }
-
-  .selected-country-info {
-    flex-direction: column;
-    text-align: center;
-    gap: 20px;
-    padding: 25px;
-  }
-
-  .selected-country-flag {
-    width: 80px;
-    height: 80px;
-    font-size: 48px;
-  }
-
-  .selected-country-name {
-    font-size: 24px;
-    justify-content: center;
-  }
-
-  .selected-country-price {
-    justify-content: center;
-    gap: 15px;
-  }
-
-  .passport-preview {
-    flex-direction: column;
-    text-align: center;
-    gap: 20px;
-    padding: 25px;
-  }
-
-  .passport-preview-meta {
-    flex-direction: column;
     gap: 8px;
   }
 
-  .passport-preview-actions {
-    flex-direction: column;
-    width: 100%;
+  .visaQuickHelp {
+    padding: 12px;
+  }
+  .visaHelpHeader {
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+  .visaTipsList li {
+    font-size: 11px;
+    padding: 5px 0 5px 14px;
   }
 
-  .passport-preview-actions button {
-    width: 100%;
+  .section-title {
+    font-size: 15px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+  }
+  .section-subtitle {
+    font-size: 12px;
+    margin-bottom: 14px;
+  }
+
+  .visaBtn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+  .visaActions {
+    gap: 8px;
+  }
+
+  .visaCompleteIcon {
+    width: 60px;
+    height: 60px;
+    font-size: 28px;
+    margin-bottom: 16px;
+  }
+  .visaCompleteTitle {
+    font-size: 18px;
+  }
+  .visaCompleteText {
+    font-size: 12px;
+  }
+
+  .paymentTotal {
+    padding: 12px;
+    font-size: 13px;
+  }
+  .paymentAmount .price-amounts {
+    font-size: 18px;
+  }
+
+  .reviewGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .reviewCard {
+    padding: 8px 10px;
+  }
+  .reviewCard__label {
+    font-size: 10px;
+  }
+  .reviewCard__value {
+    font-size: 12px;
+  }
+
+  .paymentMethodList--row {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .paymentMethodItem {
+    padding: 9px 10px;
+    gap: 8px;
+  }
+  .paymentMethodIcon {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+  .paymentMethodName {
+    font-size: 12.5px;
+  }
+  .paymentMethodDesc {
+    font-size: 10px;
+  }
+
+  .cardForm {
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .cardFormRow {
+    gap: 10px;
+  }
+  .cardForm .formField label {
+    font-size: 12px;
+  }
+  .cardForm .formField input {
+    padding: 11px 12px;
+    font-size: 13px;
   }
 }
 
-@media (max-width: 640px) {
-  .visaStepIndicators {
-    overflow-x: auto;
-    gap: 12px;
-    padding: 8px 0 12px 0;
-    justify-content: flex-start;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
+@media (max-width: 480px) {
+  .visaMain {
+    padding: 60px 0 20px;
+  }
+  .visaContainer {
+    padding: 0 8px;
+  }
+  .visaIndicatorRing {
+    width: 24px;
+    height: 24px;
+  }
+  .visaStepIcon {
+    font-size: 10px;
+  }
+  .visaStepProgress {
+    margin-bottom: 16px;
   }
 
-  .visaStepIndicators::-webkit-scrollbar {
+  .countryDropdownFlag {
+    font-size: 20px;
+  }
+  .countryDropdownName {
+    font-size: 13px;
+  }
+  .countryDropdownMeta {
+    font-size: 10px;
+  }
+  .countryDropdownPrice {
+    display: none;
+  }
+  .countryDropdownItemPrice {
+    font-size: 11px;
+  }
+
+  .optionListItem {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+  .optionListIcon {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+  .optionListLabel {
+    font-size: 12px;
+  }
+  .optionListBadge {
     display: none;
   }
 
-  .visaStepIndicator {
-    flex: 0 0 auto;
-    min-width: 60px;
-    padding: 4px 8px;
+  .visaCardTitle {
+    font-size: 16px;
   }
-
-  .visaStepName {
-    font-size: 8px;
+  .pricing-summary {
+    padding: 10px;
   }
-
-  .departure-option,
-  .duration-option {
-    padding: 14px;
+  .visaActions {
+    flex-direction: column-reverse;
   }
-
-  .departure-option-icon,
-  .duration-option-icon {
-    width: 36px;
-    height: 36px;
-    margin-right: 12px;
+  .visaBtn {
+    width: 100%;
   }
-
-  .departure-option-icon svg,
-  .duration-option-icon svg {
-    font-size: 18px;
-  }
-
-  .pricing-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .visaSidePanel {
+  .visaCompleteDetails {
     grid-template-columns: 1fr;
   }
 
-  .visaCurrentStepInfo,
-  .visaQuickHelp {
-    padding: 20px;
+  .reviewGrid {
+    grid-template-columns: 1fr 1fr;
   }
-
-  .visaCardHeader {
-    padding: 20px 20px 16px;
+  .paymentMethodList--row {
+    grid-template-columns: 1fr;
   }
-
-  .visaSuccessCard {
-    padding: 24px 20px;
+  .cardFormRow {
+    grid-template-columns: 1fr 1fr;
   }
-
-  .applicationSummary {
-    padding: 20px 16px;
-  }
-
-  .upload-data-section {
-    padding: 20px;
-  }
-
-  .passport-upload-zone {
-    padding: 30px 15px;
-  }
-
-  .upload-zone-icon {
-    font-size: 40px;
-  }
-
-  .upload-zone-title {
-    font-size: 18px;
-  }
-}
-
-@media (max-width: 480px) {
-  .visaContainer {
-    padding: 0 12px;
-  }
-
-  .visaMain {
-    padding: 60px 0 30px;
-  }
-
-  .visaStepIndicator {
-    min-width: 55px;
-  }
-
-  .visaIndicatorRing {
-    width: 26px;
-    height: 26px;
-  }
-
-  .visaStepIcon {
-    font-size: 9px;
-  }
-
-  .visaCardTitle {
-    font-size: 22px;
-  }
-
-  .visaSubtitleText {
+  .cardForm .formField input {
     font-size: 13px;
-  }
-
-  .country-select {
-    padding: 14px 48px 14px 14px;
-    font-size: 14px;
-  }
-
-  .price-tag {
-    font-size: 16px;
-    padding: 8px 16px;
-  }
-
-  .price-tag .currency-symbols {
-    font-size: 14px;
-  }
-
-  .price-tag .price-amounts {
-    font-size: 18px;
-  }
-
-  .visaSuccessTitle {
-    font-size: 22px;
-  }
-
-  .visaSuccessSubtitle {
-    font-size: 13px;
-  }
-}
-
-/* Touch device optimizations */
-@media (hover: none) and (pointer: coarse) {
-  .visaStepIndicator {
-    padding: 8px 4px;
-    min-height: 50px;
-  }
-
-  .visaIndicatorRing {
-    min-width: 32px;
-    min-height: 32px;
-  }
-
-  .visaPrimaryButton,
-  .visaSecondaryButton,
-  .visaAssistButton {
-    min-height: 48px;
-    padding: 14px 20px;
-  }
-
-  button,
-  input,
-  select,
-  .visaStepIndicator,
-  .departure-option,
-  .duration-option {
-    min-height: 44px;
-  }
-}
-
-/* Safe area insets for modern mobile devices */
-@supports (padding: max(0px)) {
-  .visaContainer {
-    padding-left: max(12px, env(safe-area-inset-left));
-    padding-right: max(12px, env(safe-area-inset-right));
-  }
-
-  .visaMain {
-    padding-top: max(60px, env(safe-area-inset-top));
-    padding-bottom: max(30px, env(safe-area-inset-bottom));
-  }
-
-  @media (max-width: 768px) {
-    .visaContainer {
-      padding-left: max(16px, env(safe-area-inset-left));
-      padding-right: max(16px, env(safe-area-inset-right));
-    }
-  }
-}
-
-/* VisaService.css - Clean Grid Layout */
-
-/* ===== CLEAN DEPARTURE TIME GRID ===== */
-.departure-time-grid-compact {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-  margin-bottom: 30px;
-}
-
-.departure-option-compact {
-  padding: 18px;
-  border: 2px solid rgba(16, 185, 129, 0.1);
-  border-radius: 14px;
-  background: var(--white);
-  cursor: pointer;
-  transition: var(--transition);
-  box-shadow: var(--shadow-sm);
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-.departure-option-compact:hover {
-  transform: translateY(-2px);
-  border-color: var(--orange);
-  box-shadow: 0 6px 15px rgba(249, 115, 22, 0.1);
-}
-
-.departure-option-compact.selected {
-  border-color: var(--orange);
-  background: linear-gradient(135deg, rgba(249, 115, 22, 0.05), transparent);
-}
-
-.departure-icon-compact {
-  width: 40px;
-  height: 40px;
-  background: rgba(249, 115, 22, 0.1);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 12px;
-}
-
-.departure-icon-compact svg {
-  font-size: 18px;
-  color: var(--orange);
-}
-
-.departure-title-compact {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--dark-green);
-  margin-bottom: 6px;
-  line-height: 1.3;
-}
-
-.departure-time-compact {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--orange);
-  margin-bottom: 8px;
-}
-
-.departure-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  background: rgba(249, 115, 22, 0.1);
-  color: var(--orange);
-  font-size: 11px;
-  font-weight: 600;
-  border-radius: 20px;
-  margin-top: 4px;
-}
-
-/* ===== CLEAN DURATION GRID ===== */
-.duration-grid-compact {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 15px;
-  margin-bottom: 30px;
-}
-
-.duration-option-compact {
-  padding: 18px;
-  border: 2px solid rgba(16, 185, 129, 0.1);
-  border-radius: 14px;
-  background: var(--white);
-  cursor: pointer;
-  transition: var(--transition);
-  box-shadow: var(--shadow-sm);
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-.duration-option-compact:hover {
-  transform: translateY(-2px);
-  border-color: var(--green);
-  box-shadow: 0 6px 15px rgba(16, 185, 129, 0.1);
-}
-
-.duration-option-compact.selected {
-  border-color: var(--green);
-  background: rgba(16, 185, 129, 0.05);
-}
-
-.duration-icon-compact {
-  width: 40px;
-  height: 40px;
-  background: rgba(16, 185, 129, 0.1);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 12px;
-}
-
-.duration-icon-compact svg {
-  font-size: 18px;
-  color: var(--green);
-}
-
-.duration-title-compact {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--dark-green);
-  margin-bottom: 6px;
-  line-height: 1.3;
-}
-
-.duration-time-compact {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--green);
-  margin-bottom: 8px;
-}
-
-.duration-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--green);
-  font-size: 11px;
-  font-weight: 600;
-  border-radius: 20px;
-  margin-top: 4px;
-}
-
-/* Selection indicator */
-.selection-indicator {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(16, 185, 129, 0.2);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: var(--transition);
-}
-
-.selection-indicator::before {
-  content: "";
-  width: 10px;
-  height: 10px;
-  background: var(--green);
-  border-radius: 50%;
-  transform: scale(0);
-  transition: transform 0.3s ease;
-}
-
-.duration-option-compact.selected .selection-indicator::before,
-.departure-option-compact.selected .selection-indicator::before {
-  transform: scale(1);
-}
-
-.orange-indicator::before {
-  background: var(--orange);
-}
-
-/* Quick info sections */
-.quick-info-section {
-  background: rgba(16, 185, 129, 0.03);
-  border: 1px solid rgba(16, 185, 129, 0.1);
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 25px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.quick-info-section svg {
-  color: var(--green);
-  font-size: 18px;
-  flex-shrink: 0;
-}
-
-.quick-info-text {
-  font-size: 13px;
-  color: var(--gray);
-  line-height: 1.5;
-}
-
-.quick-info-text strong {
-  color: var(--dark-green);
-}
-
-/* Mobile optimization */
-@media (max-width: 768px) {
-  .departure-time-grid-compact,
-  .duration-grid-compact {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-
-  .departure-option-compact,
-  .duration-option-compact {
-    padding: 16px 12px;
-  }
-
-  .departure-icon-compact,
-  .duration-icon-compact {
-    width: 36px;
-    height: 36px;
-    margin-bottom: 10px;
-  }
-
-  .departure-icon-compact svg,
-  .duration-icon-compact svg {
-    font-size: 16px;
-  }
-
-  .departure-title-compact,
-  .duration-title-compact {
-    font-size: 13px;
-  }
-
-  .departure-time-compact,
-  .duration-time-compact {
-    font-size: 15px;
-  }
-
-  .quick-info-section {
-    padding: 14px;
-    gap: 10px;
-  }
-
-  .quick-info-text {
-    font-size: 12px;
-  }
-}
-
-@media (max-width: 480px) {
-  .departure-time-grid-compact,
-  .duration-grid-compact {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-  }
-
-  .departure-option-compact,
-  .duration-option-compact {
-    padding: 14px 10px;
-  }
-
-  .departure-title-compact,
-  .duration-title-compact {
-    font-size: 12px;
-  }
-
-  .departure-time-compact,
-  .duration-time-compact {
-    font-size: 14px;
-  }
-
-  .departure-badge,
-  .duration-badge {
-    font-size: 10px;
-    padding: 3px 8px;
   }
 }

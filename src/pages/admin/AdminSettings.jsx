@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FiSettings,
   FiSave,
@@ -15,49 +15,77 @@ import {
 } from "react-icons/fi";
 import styles from "./AdminSettings.module.css";
 
+const SETTINGS_KEY = "adminSettings";
+
+const defaultSettings = {
+  general: {
+    siteName: "TravelFin",
+    siteUrl: "https://travelfin.com",
+    timezone: "UTC+0",
+    dateFormat: "YYYY-MM-DD",
+    currency: "USD",
+    language: "English",
+  },
+  exchange: {
+    baseCurrency: "USD",
+    autoUpdate: true,
+    updateInterval: 15,
+    markup: 1.5,
+    commission: 0.5,
+    minAmount: 10,
+    maxAmount: 10000,
+  },
+  payment: {
+    enabledMethods: ["credit_card", "bank_transfer", "digital_wallet"],
+    stripeEnabled: true,
+    paypalEnabled: true,
+    autoConfirm: false,
+    holdPeriod: 24,
+  },
+  notifications: {
+    emailNotifications: true,
+    adminAlerts: true,
+    bookingConfirmation: true,
+    paymentAlerts: true,
+    exchangeAlerts: true,
+    newsletter: false,
+  },
+  security: {
+    twoFactor: true,
+    sessionTimeout: 60,
+    maxLoginAttempts: 5,
+    ipWhitelist: "",
+    passwordExpiry: 90,
+  },
+};
+
+const read = (key, fallback) => {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("general");
-  const [settings, setSettings] = useState({
-    general: {
-      siteName: "TravelFin",
-      siteUrl: "https://travelfin.com",
-      timezone: "UTC+0",
-      dateFormat: "YYYY-MM-DD",
-      currency: "USD",
-      language: "English",
-    },
-    exchange: {
-      baseCurrency: "USD",
-      autoUpdate: true,
-      updateInterval: 15,
-      markup: 1.5,
-      commission: 0.5,
-      minAmount: 10,
-      maxAmount: 10000,
-    },
-    payment: {
-      enabledMethods: ["credit_card", "bank_transfer", "digital_wallet"],
-      stripeEnabled: true,
-      paypalEnabled: true,
-      autoConfirm: false,
-      holdPeriod: 24,
-    },
-    notifications: {
-      emailNotifications: true,
-      adminAlerts: true,
-      bookingConfirmation: true,
-      paymentAlerts: true,
-      exchangeAlerts: true,
-      newsletter: false,
-    },
-    security: {
-      twoFactor: true,
-      sessionTimeout: 60,
-      maxLoginAttempts: 5,
-      ipWhitelist: "",
-      passwordExpiry: 90,
-    },
-  });
+  const [settings, setSettings] = useState(() =>
+    read(SETTINGS_KEY, defaultSettings),
+  );
+  const [saved, setSaved] = useState(false);
+
+  // Merge stored settings over defaults so new keys always exist
+  useEffect(() => {
+    const stored = read(SETTINGS_KEY, null);
+    if (stored) {
+      const merged = { ...defaultSettings };
+      Object.keys(defaultSettings).forEach((section) => {
+        merged[section] = { ...defaultSettings[section], ...stored[section] };
+      });
+      setSettings(merged);
+    }
+  }, []);
 
   const tabs = [
     { id: "general", label: "General", icon: <FiGlobe /> },
@@ -73,67 +101,24 @@ const Settings = () => {
   const handleInputChange = (section, field, value) => {
     setSettings((prev) => ({
       ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: value,
-      },
+      [section]: { ...prev[section], [field]: value },
     }));
+    setSaved(false);
   };
 
   const handleSaveSettings = () => {
-    // In a real app, this would save to backend
-    console.log("Saving settings:", settings);
-    alert("Settings saved successfully!");
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
   };
 
   const handleResetSettings = () => {
-    if (
-      window.confirm("Are you sure you want to reset all settings to default?")
-    ) {
-      // Reset to default values
-      setSettings({
-        general: {
-          siteName: "TravelFin",
-          siteUrl: "https://travelfin.com",
-          timezone: "UTC+0",
-          dateFormat: "YYYY-MM-DD",
-          currency: "USD",
-          language: "English",
-        },
-        exchange: {
-          baseCurrency: "USD",
-          autoUpdate: true,
-          updateInterval: 15,
-          markup: 1.5,
-          commission: 0.5,
-          minAmount: 10,
-          maxAmount: 10000,
-        },
-        payment: {
-          enabledMethods: ["credit_card", "bank_transfer", "digital_wallet"],
-          stripeEnabled: true,
-          paypalEnabled: true,
-          autoConfirm: false,
-          holdPeriod: 24,
-        },
-        notifications: {
-          emailNotifications: true,
-          adminAlerts: true,
-          bookingConfirmation: true,
-          paymentAlerts: true,
-          exchangeAlerts: true,
-          newsletter: false,
-        },
-        security: {
-          twoFactor: true,
-          sessionTimeout: 60,
-          maxLoginAttempts: 5,
-          ipWhitelist: "",
-          passwordExpiry: 90,
-        },
-      });
-    }
+    if (!window.confirm("Reset all settings to default?")) return;
+    setSettings(defaultSettings);
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(defaultSettings));
   };
+
+  /* ---------------- Tab content ---------------- */
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -153,6 +138,7 @@ const Settings = () => {
                   className={styles.settingInput}
                 />
               </div>
+
               <div className={styles.settingItem}>
                 <label className={styles.settingLabel}>Site URL</label>
                 <input
@@ -164,6 +150,7 @@ const Settings = () => {
                   className={styles.settingInput}
                 />
               </div>
+
               <div className={styles.settingItem}>
                 <label className={styles.settingLabel}>Timezone</label>
                 <select
@@ -178,6 +165,7 @@ const Settings = () => {
                   <option value="UTC-8">UTC-8 (PST)</option>
                 </select>
               </div>
+
               <div className={styles.settingItem}>
                 <label className={styles.settingLabel}>Date Format</label>
                 <select
@@ -191,6 +179,7 @@ const Settings = () => {
                   <option value="DD/MM/YYYY">DD/MM/YYYY</option>
                 </select>
               </div>
+
               <div className={styles.settingItem}>
                 <label className={styles.settingLabel}>Default Currency</label>
                 <select
@@ -205,6 +194,7 @@ const Settings = () => {
                   <option value="JPY">Japanese Yen (JPY)</option>
                 </select>
               </div>
+
               <div className={styles.settingItem}>
                 <label className={styles.settingLabel}>Language</label>
                 <select
@@ -236,7 +226,7 @@ const Settings = () => {
                     handleInputChange(
                       "exchange",
                       "baseCurrency",
-                      e.target.value
+                      e.target.value,
                     )
                   }
                   className={styles.settingSelect}>
@@ -245,27 +235,30 @@ const Settings = () => {
                   <option value="GBP">GBP</option>
                 </select>
               </div>
+
               <div className={styles.settingItem}>
-                <label className={styles.settingLabel}>
-                  Auto Update Rates
-                  <input
-                    type="checkbox"
-                    checked={settings.exchange.autoUpdate}
-                    onChange={(e) =>
-                      handleInputChange(
-                        "exchange",
-                        "autoUpdate",
-                        e.target.checked
-                      )
-                    }
-                    className={styles.settingCheckbox}
-                  />
-                  <span className={styles.checkboxSlider}></span>
+                <label className={styles.toggleLabel}>
+                  <span className={styles.toggleText}>Auto Update Rates</span>
+                  <div className={styles.toggle}>
+                    <input
+                      type="checkbox"
+                      checked={settings.exchange.autoUpdate}
+                      onChange={(e) =>
+                        handleInputChange(
+                          "exchange",
+                          "autoUpdate",
+                          e.target.checked,
+                        )
+                      }
+                    />
+                    <span className={styles.toggleTrack}></span>
+                  </div>
                 </label>
               </div>
+
               <div className={styles.settingItem}>
                 <label className={styles.settingLabel}>
-                  Update Interval (minutes)
+                  Update Interval (min)
                 </label>
                 <input
                   type="number"
@@ -274,7 +267,7 @@ const Settings = () => {
                     handleInputChange(
                       "exchange",
                       "updateInterval",
-                      parseInt(e.target.value)
+                      parseInt(e.target.value, 10) || 0,
                     )
                   }
                   className={styles.settingInput}
@@ -282,6 +275,7 @@ const Settings = () => {
                   max="60"
                 />
               </div>
+
               <div className={styles.settingItem}>
                 <label className={styles.settingLabel}>
                   Markup Percentage (%)
@@ -293,7 +287,7 @@ const Settings = () => {
                     handleInputChange(
                       "exchange",
                       "markup",
-                      parseFloat(e.target.value)
+                      parseFloat(e.target.value) || 0,
                     )
                   }
                   className={styles.settingInput}
@@ -302,6 +296,7 @@ const Settings = () => {
                   max="10"
                 />
               </div>
+
               <div className={styles.settingItem}>
                 <label className={styles.settingLabel}>Commission (%)</label>
                 <input
@@ -311,7 +306,7 @@ const Settings = () => {
                     handleInputChange(
                       "exchange",
                       "commission",
-                      parseFloat(e.target.value)
+                      parseFloat(e.target.value) || 0,
                     )
                   }
                   className={styles.settingInput}
@@ -320,6 +315,7 @@ const Settings = () => {
                   max="5"
                 />
               </div>
+
               <div className={styles.settingItem}>
                 <label className={styles.settingLabel}>Minimum Amount</label>
                 <input
@@ -329,13 +325,14 @@ const Settings = () => {
                     handleInputChange(
                       "exchange",
                       "minAmount",
-                      parseInt(e.target.value)
+                      parseInt(e.target.value, 10) || 0,
                     )
                   }
                   className={styles.settingInput}
                   min="1"
                 />
               </div>
+
               <div className={styles.settingItem}>
                 <label className={styles.settingLabel}>Maximum Amount</label>
                 <input
@@ -345,7 +342,7 @@ const Settings = () => {
                     handleInputChange(
                       "exchange",
                       "maxAmount",
-                      parseInt(e.target.value)
+                      parseInt(e.target.value, 10) || 0,
                     )
                   }
                   className={styles.settingInput}
@@ -362,59 +359,67 @@ const Settings = () => {
             <h3 className={styles.sectionTitle}>Payment Settings</h3>
             <div className={styles.settingsGrid}>
               <div className={styles.settingItem}>
-                <label className={styles.settingLabel}>
-                  Enable Stripe
-                  <input
-                    type="checkbox"
-                    checked={settings.payment.stripeEnabled}
-                    onChange={(e) =>
-                      handleInputChange(
-                        "payment",
-                        "stripeEnabled",
-                        e.target.checked
-                      )
-                    }
-                    className={styles.settingCheckbox}
-                  />
-                  <span className={styles.checkboxSlider}></span>
+                <label className={styles.toggleLabel}>
+                  <span className={styles.toggleText}>Enable Stripe</span>
+                  <div className={styles.toggle}>
+                    <input
+                      type="checkbox"
+                      checked={settings.payment.stripeEnabled}
+                      onChange={(e) =>
+                        handleInputChange(
+                          "payment",
+                          "stripeEnabled",
+                          e.target.checked,
+                        )
+                      }
+                    />
+                    <span className={styles.toggleTrack}></span>
+                  </div>
                 </label>
               </div>
+
               <div className={styles.settingItem}>
-                <label className={styles.settingLabel}>
-                  Enable PayPal
-                  <input
-                    type="checkbox"
-                    checked={settings.payment.paypalEnabled}
-                    onChange={(e) =>
-                      handleInputChange(
-                        "payment",
-                        "paypalEnabled",
-                        e.target.checked
-                      )
-                    }
-                    className={styles.settingCheckbox}
-                  />
-                  <span className={styles.checkboxSlider}></span>
+                <label className={styles.toggleLabel}>
+                  <span className={styles.toggleText}>Enable PayPal</span>
+                  <div className={styles.toggle}>
+                    <input
+                      type="checkbox"
+                      checked={settings.payment.paypalEnabled}
+                      onChange={(e) =>
+                        handleInputChange(
+                          "payment",
+                          "paypalEnabled",
+                          e.target.checked,
+                        )
+                      }
+                    />
+                    <span className={styles.toggleTrack}></span>
+                  </div>
                 </label>
               </div>
+
               <div className={styles.settingItem}>
-                <label className={styles.settingLabel}>
-                  Auto Confirm Payments
-                  <input
-                    type="checkbox"
-                    checked={settings.payment.autoConfirm}
-                    onChange={(e) =>
-                      handleInputChange(
-                        "payment",
-                        "autoConfirm",
-                        e.target.checked
-                      )
-                    }
-                    className={styles.settingCheckbox}
-                  />
-                  <span className={styles.checkboxSlider}></span>
+                <label className={styles.toggleLabel}>
+                  <span className={styles.toggleText}>
+                    Auto Confirm Payments
+                  </span>
+                  <div className={styles.toggle}>
+                    <input
+                      type="checkbox"
+                      checked={settings.payment.autoConfirm}
+                      onChange={(e) =>
+                        handleInputChange(
+                          "payment",
+                          "autoConfirm",
+                          e.target.checked,
+                        )
+                      }
+                    />
+                    <span className={styles.toggleTrack}></span>
+                  </div>
                 </label>
               </div>
+
               <div className={styles.settingItem}>
                 <label className={styles.settingLabel}>
                   Payment Hold Period (hours)
@@ -426,12 +431,151 @@ const Settings = () => {
                     handleInputChange(
                       "payment",
                       "holdPeriod",
-                      parseInt(e.target.value)
+                      parseInt(e.target.value, 10) || 0,
                     )
                   }
                   className={styles.settingInput}
                   min="1"
                   max="72"
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case "notifications":
+        return (
+          <div className={styles.settingsSection}>
+            <h3 className={styles.sectionTitle}>Notifications</h3>
+            <div className={styles.settingsGrid}>
+              {[
+                ["emailNotifications", "Email Notifications"],
+                ["adminAlerts", "Admin Alerts"],
+                ["bookingConfirmation", "Booking Confirmation"],
+                ["paymentAlerts", "Payment Alerts"],
+                ["exchangeAlerts", "Exchange Alerts"],
+                ["newsletter", "Newsletter"],
+              ].map(([key, label]) => (
+                <div className={styles.settingItem} key={key}>
+                  <label className={styles.toggleLabel}>
+                    <span className={styles.toggleText}>{label}</span>
+                    <div className={styles.toggle}>
+                      <input
+                        type="checkbox"
+                        checked={settings.notifications[key]}
+                        onChange={(e) =>
+                          handleInputChange(
+                            "notifications",
+                            key,
+                            e.target.checked,
+                          )
+                        }
+                      />
+                      <span className={styles.toggleTrack}></span>
+                    </div>
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
+      case "security":
+        return (
+          <div className={styles.settingsSection}>
+            <h3 className={styles.sectionTitle}>Security</h3>
+            <div className={styles.settingsGrid}>
+              <div className={styles.settingItem}>
+                <label className={styles.toggleLabel}>
+                  <span className={styles.toggleText}>
+                    Two-Factor Authentication
+                  </span>
+                  <div className={styles.toggle}>
+                    <input
+                      type="checkbox"
+                      checked={settings.security.twoFactor}
+                      onChange={(e) =>
+                        handleInputChange(
+                          "security",
+                          "twoFactor",
+                          e.target.checked,
+                        )
+                      }
+                    />
+                    <span className={styles.toggleTrack}></span>
+                  </div>
+                </label>
+              </div>
+
+              <div className={styles.settingItem}>
+                <label className={styles.settingLabel}>
+                  Session Timeout (minutes)
+                </label>
+                <input
+                  type="number"
+                  value={settings.security.sessionTimeout}
+                  onChange={(e) =>
+                    handleInputChange(
+                      "security",
+                      "sessionTimeout",
+                      parseInt(e.target.value, 10) || 0,
+                    )
+                  }
+                  className={styles.settingInput}
+                  min="5"
+                />
+              </div>
+
+              <div className={styles.settingItem}>
+                <label className={styles.settingLabel}>
+                  Max Login Attempts
+                </label>
+                <input
+                  type="number"
+                  value={settings.security.maxLoginAttempts}
+                  onChange={(e) =>
+                    handleInputChange(
+                      "security",
+                      "maxLoginAttempts",
+                      parseInt(e.target.value, 10) || 0,
+                    )
+                  }
+                  className={styles.settingInput}
+                  min="1"
+                />
+              </div>
+
+              <div className={styles.settingItem}>
+                <label className={styles.settingLabel}>
+                  Password Expiry (days)
+                </label>
+                <input
+                  type="number"
+                  value={settings.security.passwordExpiry}
+                  onChange={(e) =>
+                    handleInputChange(
+                      "security",
+                      "passwordExpiry",
+                      parseInt(e.target.value, 10) || 0,
+                    )
+                  }
+                  className={styles.settingInput}
+                  min="0"
+                />
+              </div>
+
+              <div className={`${styles.settingItem} ${styles.fullWidth}`}>
+                <label className={styles.settingLabel}>
+                  IP Whitelist (comma-separated)
+                </label>
+                <input
+                  type="text"
+                  value={settings.security.ipWhitelist}
+                  onChange={(e) =>
+                    handleInputChange("security", "ipWhitelist", e.target.value)
+                  }
+                  className={styles.settingInput}
+                  placeholder="e.g. 192.168.1.1, 10.0.0.1"
                 />
               </div>
             </div>
@@ -444,15 +588,11 @@ const Settings = () => {
             <h3 className={styles.sectionTitle}>
               {tabs.find((t) => t.id === activeTab)?.label} Settings
             </h3>
-            <div className={styles.settingsGrid}>
-              <div className={styles.settingItem}>
-                <label className={styles.settingLabel}>
-                  Feature Coming Soon
-                </label>
-                <p className={styles.comingSoonText}>
-                  This section is under development and will be available soon.
-                </p>
-              </div>
+            <div className={styles.comingSoonBox}>
+              <FiActivity className={styles.comingSoonIcon} />
+              <p className={styles.comingSoonText}>
+                This section is under development and will be available soon.
+              </p>
             </div>
           </div>
         );
@@ -478,14 +618,13 @@ const Settings = () => {
           </button>
           <button className={styles.saveBtn} onClick={handleSaveSettings}>
             <FiSave />
-            Save Changes
+            {saved ? "Saved!" : "Save Changes"}
           </button>
         </div>
       </div>
 
-      {/* Settings Layout */}
+      {/* Layout */}
       <div className={styles.settingsLayout}>
-        {/* Tabs Sidebar */}
         <div className={styles.settingsSidebar}>
           <div className={styles.tabsList}>
             {tabs.map((tab) => (
@@ -496,7 +635,7 @@ const Settings = () => {
                 }`}
                 onClick={() => setActiveTab(tab.id)}>
                 {tab.icon}
-                {tab.label}
+                <span>{tab.label}</span>
                 {activeTab === tab.id && (
                   <FiCheck className={styles.activeIcon} />
                 )}
@@ -510,28 +649,26 @@ const Settings = () => {
               System Status
             </div>
             <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>Platform Version:</span>
+              <span className={styles.infoLabel}>Version</span>
               <span className={styles.infoValue}>v2.4.1</span>
             </div>
             <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>Last Backup:</span>
-              <span className={styles.infoValue}>Today, 02:00 AM</span>
+              <span className={styles.infoLabel}>Last Backup</span>
+              <span className={styles.infoValue}>Today, 02:00</span>
             </div>
             <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>Storage Used:</span>
-              <span className={styles.infoValue}>1.2 GB / 10 GB</span>
+              <span className={styles.infoLabel}>Storage</span>
+              <span className={styles.infoValue}>1.2 / 10 GB</span>
             </div>
           </div>
         </div>
 
-        {/* Settings Content */}
         <div className={styles.settingsContent}>
           {renderTabContent()}
 
-          {/* Settings Actions */}
           <div className={styles.settingsActions}>
             <button className={styles.actionBtnSecondary}>
-              Test Email Configuration
+              Test Email Config
             </button>
             <button className={styles.actionBtnSecondary}>Clear Cache</button>
             <button className={styles.actionBtnSecondary}>

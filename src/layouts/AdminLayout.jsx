@@ -7,19 +7,29 @@ import styles from "./AdminLayout.module.css";
 
 function AdminLayout() {
   const { isAdmin, user, userRole, isLoading } = useAdminAuth();
+
+  // Desktop collapse state (unchanged)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+
+  // 👇 New: mobile drawer open/close state
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+  // 👇 isMobile now lives here and is passed to both navbar & sidebar
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth < 1025 : false,
+  );
+
   const navigate = useNavigate();
 
-  // Check if mobile on mount
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1025);
+      const mobile = window.innerWidth < 1025;
+      setIsMobile(mobile);
+      if (!mobile) setIsMobileOpen(false); // close drawer when resizing up
     };
 
     checkMobile();
     window.addEventListener("resize", checkMobile);
-
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
@@ -40,8 +50,13 @@ function AdminLayout() {
     navigate("/login");
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarCollapsed(!isSidebarCollapsed);
+  // Unified toggle — mobile opens the drawer, desktop collapses the rail
+  const handleToggleSidebar = () => {
+    if (isMobile) {
+      setIsMobileOpen((v) => !v);
+    } else {
+      setIsSidebarCollapsed((v) => !v);
+    }
   };
 
   return (
@@ -50,18 +65,21 @@ function AdminLayout() {
         userRole={userRole}
         onLogout={handleLogout}
         isCollapsed={isSidebarCollapsed}
-        onToggle={toggleSidebar}
+        onToggle={setIsSidebarCollapsed}
+        isMobile={isMobile}
+        isMobileOpen={isMobileOpen}
+        onCloseMobile={() => setIsMobileOpen(false)}
       />
 
-      {/* Main content area with proper spacing */}
       <div
         className={`${styles.mainContent} ${
           isSidebarCollapsed && !isMobile ? styles.sidebarCollapsed : ""
         } ${isMobile ? styles.mobile : ""}`}>
         <AdminNavbar
           user={user}
-          isSidebarCollapsed={isSidebarCollapsed}
-          onToggleSidebar={toggleSidebar}
+          isMobile={isMobile}
+          isSidebarOpen={isMobileOpen}
+          onToggleSidebar={handleToggleSidebar}
         />
 
         <div className={styles.contentWrapper}>

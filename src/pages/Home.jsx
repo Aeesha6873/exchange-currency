@@ -123,7 +123,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Services Section - 4 Equal Cards */}
+      {/* Services Section  */}
       <section className="section services-section">
         <div className="section-headers">
           <h2 className="section-title">Our Services</h2>
@@ -197,7 +197,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Offers Section - 3 Equal Cards */}
+      {/* Offers Section */}
       <section className="offers-section">
         <div className="section-headers">
           <h2 className="section-title">Special Offers</h2>
@@ -261,7 +261,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Why Choose Us - 4 Equal Cards */}
+      {/* Why Choose Us */}
       <section className="features-section">
         <div className="section-headers">
           <h2 className="section-title">Why Choose Us</h2>

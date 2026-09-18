@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-// import Navbar from "../../components/Navbar";
-// import Footer from "../../components/Footer";
+import { authApi, travelApi } from "../../services/api";
 import DestinationInspiration from "../../components/travelAgency/DestinationInspiration";
 import TravelPackages from "../../components/travelAgency/TravelPackages";
 import PackageCustomizer from "../../components/travelAgency/PackageCustomizer";
@@ -10,16 +10,52 @@ import GroupBooking from "../../components/travelAgency/GroupBooking";
 import TravelItinerary from "../../components/travelAgency/TravelItinerary";
 import TravelDocuments from "../../components/travelAgency/TravelDocuments";
 import { TravelIcons } from "../../components/travelAgency/TravelIcons";
-import ChatInterface from "../../components/travelAgency/ChatInterface";
 import styles from "./TravelAgencyPage.module.css";
 
 export default function TravelAgencyPage() {
+  const navigate = useNavigate();
+
   const [currentStep, setCurrentStep] = useState("inspiration");
   const [selectedDestination, setSelectedDestination] = useState(null);
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [customizedPackage, setCustomizedPackage] = useState(null);
   const [bookingData, setBookingData] = useState(null);
   const [isAnimating, setIsAnimating] = useState(false);
+
+  // Data from storage
+  const [destinations, setDestinations] = useState([]);
+  const [packages, setPackages] = useState([]);
+  const [loadingData, setLoadingData] = useState(true);
+
+  /* ------------------------------------------------------------------ */
+  /* Load destinations + packages from API                              */
+  /* ------------------------------------------------------------------ */
+  useEffect(() => {
+    (async () => {
+      const [d, p] = await Promise.all([
+        travelApi.getDestinations(),
+        travelApi.getPackages(),
+      ]);
+      setDestinations(d.filter((x) => x.isActive !== false));
+      setPackages(p.filter((x) => x.isActive !== false));
+      setLoadingData(false);
+    })();
+
+    const onStorage = (e) => {
+      if (["travelDestinations", "travelPackages"].includes(e.key)) {
+        (async () => {
+          const [d, p] = await Promise.all([
+            travelApi.getDestinations(),
+            travelApi.getPackages(),
+          ]);
+          setDestinations(d.filter((x) => x.isActive !== false));
+          setPackages(p.filter((x) => x.isActive !== false));
+        })();
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
 
   const steps = [
     {
@@ -69,6 +105,10 @@ export default function TravelAgencyPage() {
     documents: "Access your travel documents and itinerary",
   };
 
+  /* ------------------------------------------------------------------ */
+  /* Flow handlers                                                      */
+  /* ------------------------------------------------------------------ */
+
   const handleSelectDestination = (destination) => {
     setIsAnimating(true);
     setTimeout(() => {
@@ -104,10 +144,36 @@ export default function TravelAgencyPage() {
     }, 400);
   };
 
-  const handleBookingComplete = (data) => {
+  const handleBookingComplete = async (data) => {
+    const currentUser = authApi.getCurrentUser();
+    if (!currentUser) {
+      // Safety net — shouldn't happen because book step requires login
+      navigate("/login");
+      return;
+    }
+
     setIsAnimating(true);
+
+    // Persist the booking so it shows in /dashboard/bookings and admin
+    const saved = await travelApi.createBooking(currentUser.id, {
+      destination: `${selectedDestination?.name}, ${selectedDestination?.country}`,
+      destinationId: selectedDestination?.id,
+      packageId: selectedPackage?.id,
+      package: selectedPackage?.name || data?.package || "Custom Package",
+      duration: selectedPackage?.duration || "",
+      price: data?.totalPrice || customizedPackage?.totalPrice || 0,
+      currency: customizedPackage?.currency || "USD",
+      guests: data?.travelers || data?.guests || 2,
+      travelers: data?.travelers || data?.guests || 2,
+      bookingDate: new Date().toISOString().slice(0, 10),
+      startDate: data?.startDate || customizedPackage?.startDate || null,
+      amenities: customizedPackage?.addons?.map((a) => a.name) || [],
+      inclusions: selectedPackage?.inclusions || [],
+      customized: customizedPackage || null,
+    });
+
     setTimeout(() => {
-      setBookingData(data);
+      setBookingData({ ...data, reference: saved.reference, id: saved.id });
       setCurrentStep("documents");
       setIsAnimating(false);
     }, 400);
@@ -125,7 +191,7 @@ export default function TravelAgencyPage() {
     }, 400);
   };
 
-  const currentStepIndex = steps.findIndex((step) => step.id === currentStep);
+  const currentStepIndex = steps.findIndex((s) => s.id === currentStep);
   const currentStepConfig = steps[currentStepIndex];
 
   const stepVariants = {
@@ -133,25 +199,35 @@ export default function TravelAgencyPage() {
     visible: {
       opacity: 1,
       scale: 1,
-      transition: {
-        duration: 0.6,
-        ease: [0.22, 1, 0.36, 1],
-      },
+      transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
     },
-    exit: {
-      opacity: 0,
-      scale: 0.95,
-      transition: {
-        duration: 0.4,
-      },
-    },
+    exit: { opacity: 0, scale: 0.95, transition: { duration: 0.4 } },
   };
+
+  /* ------------------------------------------------------------------ */
+  /* Render                                                             */
+  /* ------------------------------------------------------------------ */
+
+  if (loadingData) {
+    return (
+      <div className={styles.travelAgencyPage}>
+        <main className={styles.main}>
+          <div className={styles.container}>
+            <div className={styles.loadingState}>
+              <div className={styles.neonSpinner}>
+                <div className={styles.spinnerCore}></div>
+                <div className={styles.spinnerRing}></div>
+              </div>
+              <p className={styles.loadingText}>Loading travel options...</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.travelAgencyPage}>
-      {/* <Navbar /> */}
-
-      {/* Background Elements */}
       <div className={styles.backgroundElements}>
         <div className={styles.gridLines}></div>
         <div className={styles.floatingOrbs}>
@@ -161,10 +237,8 @@ export default function TravelAgencyPage() {
         </div>
       </div>
 
-      {/* Main Content */}
       <main className={styles.main}>
         <div className={styles.container}>
-          {/* Step Navigation - Only show after inspiration */}
           {currentStep !== "inspiration" && (
             <div className={styles.stepNavigation}>
               <div className={styles.stepProgress}>
@@ -173,23 +247,21 @@ export default function TravelAgencyPage() {
                   style={{
                     width: `${(currentStepIndex / (steps.length - 1)) * 100}%`,
                     background: `linear-gradient(90deg, var(--green), var(--orange))`,
-                  }}></div>
+                  }}
+                />
               </div>
 
               <div className={styles.stepIndicators}>
                 {steps.map((step, index) => {
                   const isActive = index === currentStepIndex;
                   const isCompleted = index < currentStepIndex;
-
                   return (
                     <div
                       key={step.id}
                       className={`${styles.stepIndicator} ${
                         isActive ? styles.active : ""
                       } ${isCompleted ? styles.completed : ""}`}
-                      style={{
-                        "--step-color": step.color,
-                      }}>
+                      style={{ "--step-color": step.color }}>
                       <div className={styles.indicatorRing}>
                         <div className={styles.indicatorDot}></div>
                         <span className={styles.stepIcon}>{step.icon}</span>
@@ -209,13 +281,10 @@ export default function TravelAgencyPage() {
             </div>
           )}
 
-          {/* Content Area */}
           <div className={styles.contentArea}>
-            {/* Side Panel - Only show after inspiration */}
             {currentStep !== "inspiration" && (
               <div className={styles.sidePanel}>
                 <div className={styles.sidePanelSticky}>
-                  {/* Current Step Info */}
                   <div className={styles.currentStepInfo}>
                     <motion.div
                       className={styles.stepNumber}
@@ -249,7 +318,6 @@ export default function TravelAgencyPage() {
                     </div>
                   </div>
 
-                  {/* Quick Help */}
                   {currentStep !== "documents" && (
                     <div className={styles.quickHelp}>
                       <div className={styles.helpHeader}>
@@ -269,7 +337,6 @@ export default function TravelAgencyPage() {
               </div>
             )}
 
-            {/* Main Card */}
             <div
               className={`${styles.mainCard} ${
                 currentStep === "inspiration" ? styles.fullWidth : ""
@@ -303,7 +370,7 @@ export default function TravelAgencyPage() {
                     animate="visible"
                     exit="exit"
                     className={styles.contentWrapper}>
-                    {isAnimating ? (
+                    {isAnimating ?
                       <div className={styles.loadingState}>
                         <div className={styles.neonSpinner}>
                           <div className={styles.spinnerCore}></div>
@@ -316,37 +383,40 @@ export default function TravelAgencyPage() {
                           <span></span>
                         </div>
                       </div>
-                    ) : (
-                      <>
+                    : <>
                         {currentStep === "inspiration" && (
                           <DestinationInspiration
+                            destinations={destinations}
                             onSelectDestination={handleSelectDestination}
                           />
                         )}
                         {currentStep === "packages" && selectedDestination && (
                           <TravelPackages
                             destination={selectedDestination}
+                            packages={packages.filter(
+                              (p) => p.destinationId === selectedDestination.id,
+                            )}
                             onSelectPackage={handleSelectPackage}
                             onBack={() => setCurrentStep("inspiration")}
                           />
                         )}
                         {currentStep === "customize" && selectedPackage && (
                           <PackageCustomizer
-                            package={selectedPackage}
+                            packageData={selectedPackage}
                             onComplete={handleCustomizeComplete}
                             onBack={() => setCurrentStep("packages")}
                           />
                         )}
                         {currentStep === "consult" && customizedPackage && (
                           <TravelConsultant
-                            package={customizedPackage}
+                            packageData={customizedPackage}
                             onComplete={handleConsultationComplete}
                             onBack={() => setCurrentStep("customize")}
                           />
                         )}
                         {currentStep === "book" && customizedPackage && (
                           <GroupBooking
-                            package={customizedPackage}
+                            packageData={customizedPackage}
                             onComplete={handleBookingComplete}
                             onBack={() => setCurrentStep("consult")}
                           />
@@ -358,12 +428,11 @@ export default function TravelAgencyPage() {
                           />
                         )}
                       </>
-                    )}
+                    }
                   </motion.div>
                 </AnimatePresence>
               </div>
 
-              {/* Card Footer */}
               {currentStep !== "inspiration" && (
                 <div className={styles.cardFooter}>
                   <div className={styles.footerStats}>
@@ -376,9 +445,9 @@ export default function TravelAgencyPage() {
                     <div className={styles.stat}>
                       <span className={styles.statLabel}>Status</span>
                       <span className={styles.statValue}>
-                        {currentStep === "documents"
-                          ? "Complete"
-                          : "In Progress"}
+                        {currentStep === "documents" ?
+                          "Complete"
+                        : "In Progress"}
                       </span>
                     </div>
                   </div>
@@ -396,8 +465,6 @@ export default function TravelAgencyPage() {
           </div>
         </div>
       </main>
-
-      {/* <Footer /> */}
     </div>
   );
 }

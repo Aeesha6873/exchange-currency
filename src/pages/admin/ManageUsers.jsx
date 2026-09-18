@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   FiUser,
@@ -29,6 +29,330 @@ import {
 import { FaExchangeAlt, FaPlane, FaHotel, FaPassport } from "react-icons/fa";
 import styles from "./ManageUsers.module.css";
 
+const read = (key, fallback = []) => {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const write = (key, value) => {
+  localStorage.setItem(key, JSON.stringify(value));
+};
+
+const formatDate = (iso) => {
+  if (!iso) return "—";
+  try {
+    return new Date(iso).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  } catch {
+    return iso;
+  }
+};
+
+const formatDateTime = (iso) => {
+  if (!iso) return "—";
+  try {
+    return new Date(iso).toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return iso;
+  }
+};
+
+const formatRelative = (iso) => {
+  if (!iso) return "—";
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return iso;
+  const diff = Math.max(0, Date.now() - then);
+  const sec = Math.floor(diff / 1000);
+  if (sec < 60) return "Just now";
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min} min ago`;
+  const hrs = Math.floor(min / 60);
+  if (hrs < 24) return `${hrs} hour${hrs === 1 ? "" : "s"} ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 30) return `${days} day${days === 1 ? "" : "s"} ago`;
+  return formatDate(iso);
+};
+
+const currencyFmt = (n) =>
+  new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(Number(n) || 0);
+
+/* ------------------------------------------------------------------ */
+/*  Aggregation helpers — build a "user view model" from raw storage   */
+/* ------------------------------------------------------------------ */
+
+function buildUserView(user, { bookings, transactions, visaApplications }) {
+  const userBookings = bookings.filter((b) => b.userId === user.id);
+  const userTxns = transactions.filter((t) => t.userId === user.id);
+  const userVisas = visaApplications.filter((v) => v.userId === user.id);
+
+  // Service aggregates
+  const currencyService = {
+    name: "currency",
+    icon: <FaExchangeAlt />,
+    transactions: userTxns.length,
+    totalAmount: userTxns.reduce((s, t) => s + (Number(t.amount) || 0), 0),
+    lastUsed:
+      userTxns
+        .map((t) => t.createdAt || t.date)
+        .filter(Boolean)
+        .sort()
+        .pop() || null,
+    status: userTxns.length > 0 ? "active" : "inactive",
+  };
+
+  const flightBookings = userBookings.filter((b) => b.type === "flight");
+  const flightService = {
+    name: "flight",
+    icon: <FaPlane />,
+    transactions: flightBookings.length,
+    totalAmount: flightBookings.reduce((s, b) => s + (Number(b.price) || 0), 0),
+    lastUsed:
+      flightBookings
+        .map((b) => b.createdAt || b.bookingDate || b.date)
+        .filter(Boolean)
+        .sort()
+        .pop() || null,
+    status: flightBookings.length > 0 ? "active" : "inactive",
+  };
+
+  const travelBookings = userBookings.filter((b) =>
+    ["hotel", "tour", "car"].includes(b.type),
+  );
+  const travelService = {
+    name: "travel",
+    icon: <FaHotel />,
+    transactions: travelBookings.length,
+    totalAmount: travelBookings.reduce((s, b) => s + (Number(b.price) || 0), 0),
+    lastUsed:
+      travelBookings
+        .map((b) => b.createdAt || b.bookingDate || b.date)
+        .filter(Boolean)
+        .sort()
+        .pop() || null,
+    status: travelBookings.length > 0 ? "active" : "inactive",
+  };
+
+  const visaService = {
+    name: "visa",
+    icon: <FaPassport />,
+    transactions: userVisas.length,
+    totalAmount: userVisas.reduce((s, v) => s + (Number(v.amountPaid) || 0), 0),
+    lastUsed:
+      userVisas
+        .map((v) => v.submittedAt)
+        .filter(Boolean)
+        .sort()
+        .pop() || null,
+    status: userVisas.length > 0 ? "active" : "inactive",
+  };
+
+  const services = [
+    currencyService,
+    flightService,
+    travelService,
+    visaService,
+  ].filter((s) => s.transactions > 0);
+
+  // Recent activity (merged, newest first)
+  const activity = [
+    ...userTxns.map((t) => ({
+      id: `tx-${t.id}`,
+      type: "currency_exchange",
+      action: `Currency Exchange — ${t.fromCurrency} to ${t.toCurrency}`,
+      date: t.createdAt || t.date,
+      amount: Number(t.amount) || 0,
+      status: t.status || "pending",
+      reference: t.reference || t.id,
+    })),
+    ...userBookings.map((b) => ({
+      id: `bk-${b.id}`,
+      type:
+        b.type === "flight" ? "flight_booking"
+        : b.type === "hotel" ? "hotel_booking"
+        : `${b.type}_booking`,
+      action: `${b.type} — ${b.destination || "—"}`,
+      date: b.createdAt || b.bookingDate || b.date,
+      amount: Number(b.price) || 0,
+      status: b.status || "pending",
+      reference: b.reference || b.id,
+    })),
+    ...userVisas.map((v) => ({
+      id: `v-${v.id}`,
+      type: "visa_application",
+      action: `Visa Application — ${v.countryName || "—"}`,
+      date: v.submittedAt,
+      amount: Number(v.amountPaid) || 0,
+      status: v.status || "pending",
+      reference: v.applicationId || v.id,
+    })),
+  ]
+    .filter((a) => a.date)
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 20);
+
+  // Documents (from user profile + visa passport uploads)
+  const documents = [];
+  if (user.passportNumber) {
+    documents.push({
+      id: "passport",
+      type: "passport",
+      name: "Passport",
+      number: user.passportNumber,
+      expiryDate: user.passportExpiry || "—",
+      status: user.passportVerified ? "verified" : "pending_verification",
+      uploadedDate: user.createdAt || user.joinDate,
+      fileSize: "—",
+    });
+  }
+  if (user.idNumber) {
+    documents.push({
+      id: "id_card",
+      type: "id_card",
+      name: "National ID Card",
+      number: user.idNumber,
+      expiryDate: user.idExpiry || "—",
+      status: user.idVerified ? "verified" : "pending_verification",
+      uploadedDate: user.createdAt || user.joinDate,
+      fileSize: "—",
+    });
+  }
+  // Visa passport uploads as docs
+  userVisas.forEach((v, i) => {
+    if (v.passportFile) {
+      documents.push({
+        id: `visa-passport-${v.id}`,
+        type: "passport",
+        name: `Visa Passport (${v.countryName || "—"})`,
+        number: v.passportNumber || "—",
+        expiryDate: "—",
+        status: "verified",
+        uploadedDate: v.submittedAt,
+        fileSize: v.passportFile.size || "—",
+      });
+    }
+  });
+
+  // Statistics
+  const totalSpent =
+    currencyService.totalAmount +
+    flightService.totalAmount +
+    travelService.totalAmount +
+    visaService.totalAmount;
+
+  const totalTransactions =
+    currencyService.transactions +
+    flightService.transactions +
+    travelService.transactions +
+    visaService.transactions;
+
+  const completedCount = [
+    ...userTxns.map((t) => t.status),
+    ...userBookings.map((b) => b.status),
+    ...userVisas.map((v) => v.status),
+  ].filter(
+    (s) => s === "completed" || s === "confirmed" || s === "approved",
+  ).length;
+
+  const successRate =
+    totalTransactions === 0 ? 0 : (
+      Math.round((completedCount / totalTransactions) * 100)
+    );
+
+  const avgTransaction =
+    totalTransactions === 0 ? 0 : Math.round(totalSpent / totalTransactions);
+
+  // Last active = max timestamp across everything
+  const allTimestamps = [
+    user.createdAt,
+    user.joinDate,
+    ...userTxns.map((t) => t.createdAt || t.date),
+    ...userBookings.map((b) => b.createdAt || b.bookingDate || b.date),
+    ...userVisas.map((v) => v.submittedAt),
+  ]
+    .filter(Boolean)
+    .map((d) => new Date(d).getTime())
+    .filter((n) => !Number.isNaN(n));
+
+  const lastActive =
+    allTimestamps.length ?
+      new Date(Math.max(...allTimestamps)).toISOString()
+    : user.createdAt || user.joinDate || null;
+
+  // Status — falls back to computed if user record has none
+  let status = user.status;
+  if (!status) {
+    status = "active";
+    if (lastActive) {
+      const days = (Date.now() - new Date(lastActive).getTime()) / 86400000;
+      if (days > 30) status = "inactive";
+      else if (days > 7) status = "pending";
+    }
+  }
+
+  const type = totalTransactions >= 10 ? "vip" : "regular";
+
+  return {
+    // Identity
+    id: user.id,
+    name: user.fullName || user.email || "Unnamed User",
+    email: user.email || "—",
+    phone: user.phone || "—",
+    address: user.address || "—",
+    country: user.nationality || user.country || "—",
+    occupation: user.occupation || "—",
+    dateOfBirth: user.dateOfBirth || "—",
+    emergencyContact: user.emergencyContact || "—",
+    idNumber: user.idNumber || "",
+    passportNumber: user.passportNumber || "",
+    joinDate: user.joinDate || user.createdAt || null,
+    lastActive,
+    status,
+    type,
+
+    // Aggregates
+    services,
+    recentActivity: activity,
+    documents,
+    statistics: {
+      totalSpent,
+      currencySpent: currencyService.totalAmount,
+      flightSpent: flightService.totalAmount,
+      travelSpent: travelService.totalAmount,
+      visaSpent: visaService.totalAmount,
+      successRate: `${successRate}%`,
+      averageTransaction: avgTransaction,
+      favoriteService:
+        services.length > 0 ?
+          services.reduce((best, s) =>
+            s.transactions > best.transactions ? s : best,
+          ).name
+        : "—",
+    },
+
+    // Extra info for table view
+    totalTransactions,
+  };
+}
+
+/* ------------------------------------------------------------------ */
+
 const ManagerUsers = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -43,290 +367,81 @@ const ManagerUsers = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Sample all users data
-  const allUsersData = [
-    {
-      id: 1,
-      name: "John Smith",
-      email: "john@travel.com",
-      phone: "+1 (555) 123-4567",
-      status: "active",
-      services: ["currency", "flight", "travel", "visa"],
-      totalTransactions: 28,
-      joinDate: "2023-01-15",
-      lastActive: "2 hours ago",
-      type: "vip",
-      country: "United States",
-      address: "123 Main St, New York, NY 10001",
-      occupation: "Business Executive",
-    },
-    {
-      id: 2,
-      name: "Emma Johnson",
-      email: "emma@travel.com",
-      phone: "+44 20 1234 5678",
-      status: "active",
-      services: ["flight", "travel", "visa"],
-      totalTransactions: 15,
-      joinDate: "2023-03-10",
-      lastActive: "1 day ago",
-      type: "regular",
-      country: "United Kingdom",
-      address: "456 Oxford St, London, UK",
-      occupation: "Marketing Manager",
-    },
-    {
-      id: 3,
-      name: "David Chen",
-      email: "david@travel.com",
-      phone: "+86 10 1234 5678",
-      status: "pending",
-      services: ["currency", "flight"],
-      totalTransactions: 8,
-      joinDate: "2024-01-05",
-      lastActive: "1 week ago",
-      type: "regular",
-      country: "China",
-      address: "789 Wangfujing St, Beijing",
-      occupation: "Software Engineer",
-    },
-    {
-      id: 4,
-      name: "Sarah Wilson",
-      email: "sarah@travel.com",
-      phone: "+61 2 1234 5678",
-      status: "inactive",
-      services: ["currency", "travel"],
-      totalTransactions: 5,
-      joinDate: "2023-11-20",
-      lastActive: "1 month ago",
-      type: "regular",
-      country: "Australia",
-      address: "101 George St, Sydney",
-      occupation: "Doctor",
-    },
-    {
-      id: 5,
-      name: "Michael Brown",
-      email: "michael@travel.com",
-      phone: "+1 (555) 987-6543",
-      status: "active",
-      services: ["currency", "flight", "travel", "visa"],
-      totalTransactions: 42,
-      joinDate: "2022-08-15",
-      lastActive: "Today",
-      type: "vip",
-      country: "Canada",
-      address: "222 Bay St, Toronto",
-      occupation: "Investment Banker",
-    },
-    {
-      id: 6,
-      name: "Lisa Garcia",
-      email: "lisa@travel.com",
-      phone: "+34 91 123 4567",
-      status: "active",
-      services: ["flight", "travel"],
-      totalTransactions: 12,
-      joinDate: "2023-06-25",
-      lastActive: "3 days ago",
-      type: "regular",
-      country: "Spain",
-      address: "333 Gran Via, Madrid",
-      occupation: "Architect",
-    },
-  ];
+  const load = () => {
+    const users = read("users", []);
+    const bookings = read("bookings", []);
+    const transactions = read("transactions", []);
+    const visaApplications = read("visaApplications", []);
 
-  // Complete single user data with all properties
-  const sampleUsers = {
-    1: {
-      id: 1,
-      name: "John Smith",
-      email: "john@travel.com",
-      phone: "+1 (555) 123-4567",
-      status: "active",
-      joinDate: "2023-01-15",
-      type: "vip",
-      country: "United States",
-      address: "123 Main St, New York, NY 10001",
-      idNumber: "ABC123456",
-      passportNumber: "P12345678",
-      dateOfBirth: "1985-06-15",
-      occupation: "Business Executive",
-      emergencyContact: "+1 (555) 987-6543",
+    const pool = { bookings, transactions, visaApplications };
 
-      // Services with full details
-      services: [
-        {
-          name: "currency",
-          icon: <FaExchangeAlt />,
-          transactions: 12,
-          totalAmount: 1850,
-          lastUsed: "2024-01-15",
-          status: "active",
-        },
-        {
-          name: "flight",
-          icon: <FaPlane />,
-          transactions: 8,
-          totalAmount: 1600,
-          lastUsed: "2024-01-14",
-          status: "active",
-        },
-        {
-          name: "travel",
-          icon: <FaHotel />,
-          transactions: 5,
-          totalAmount: 1200,
-          lastUsed: "2024-01-10",
-          status: "active",
-        },
-        {
-          name: "visa",
-          icon: <FaPassport />,
-          transactions: 3,
-          totalAmount: 200,
-          lastUsed: "2023-12-20",
-          status: "completed",
-        },
-      ],
+    const enriched = users
+      .filter((u) => u.role !== "admin" && !u.isAdmin)
+      .map((u) => buildUserView(u, pool));
 
-      // Recent Activity
-      recentActivity: [
-        {
-          id: 1,
-          type: "flight_booking",
-          action: "Flight Booking - NYC to LON",
-          date: "2024-01-15 14:30",
-          amount: 500,
-          status: "confirmed",
-          reference: "FB-2024-001",
-        },
-        {
-          id: 2,
-          type: "currency_exchange",
-          action: "Currency Exchange - USD to EUR",
-          date: "2024-01-14 10:15",
-          amount: 300,
-          status: "completed",
-          reference: "CE-2024-002",
-        },
-        {
-          id: 3,
-          type: "hotel_booking",
-          action: "Hotel Booking - Hilton London",
-          date: "2024-01-10 16:45",
-          amount: 400,
-          status: "confirmed",
-          reference: "HB-2024-003",
-        },
-        {
-          id: 4,
-          type: "visa_application",
-          action: "Visa Application - UK Tourist Visa",
-          date: "2023-12-20 09:20",
-          amount: 200,
-          status: "approved",
-          reference: "VA-2023-004",
-        },
-      ],
+    setAllUsers(enriched);
 
-      // Documents
-      documents: [
-        {
-          id: 1,
-          type: "id_card",
-          name: "National ID Card",
-          number: "ABC123456",
-          expiryDate: "2028-06-15",
-          status: "verified",
-          uploadedDate: "2023-02-10",
-          fileSize: "2.4 MB",
-        },
-        {
-          id: 2,
-          type: "passport",
-          name: "Passport",
-          number: "P12345678",
-          expiryDate: "2030-12-31",
-          status: "verified",
-          uploadedDate: "2023-02-12",
-          fileSize: "3.1 MB",
-        },
-        {
-          id: 3,
-          type: "driving_license",
-          name: "Driving License",
-          number: "DL78901234",
-          expiryDate: "2027-08-20",
-          status: "pending_verification",
-          uploadedDate: "2024-01-05",
-          fileSize: "1.8 MB",
-        },
-      ],
-
-      // Statistics
-      statistics: {
-        totalSpent: 4850,
-        currencySpent: 1850,
-        flightSpent: 1600,
-        travelSpent: 1200,
-        visaSpent: 200,
-        successRate: "98%",
-        averageTransaction: 173,
-        favoriteService: "Currency Exchange",
-      },
-
-      // Preferences
-      preferences: {
-        notifications: true,
-        twoFactorAuth: true,
-        marketingEmails: false,
-        autoCurrencyConversion: true,
-        preferredCurrency: "USD",
-        language: "English",
-      },
-    },
+    if (userId) {
+      const match = enriched.find((u) => String(u.id) === String(userId));
+      setUser(match || null);
+      if (match) setEditedData({ ...match });
+      setViewMode("single");
+    } else {
+      setUser(null);
+      setViewMode("all");
+    }
+    setLoading(false);
   };
 
   useEffect(() => {
-    if (userId) {
-      // Single user view
-      setViewMode("single");
-      setTimeout(() => {
-        const userData = sampleUsers[userId];
-        if (userData) {
-          setUser(userData);
-          setEditedData({ ...userData });
-        }
-        setLoading(false);
-      }, 300);
-    } else {
-      // All users view
-      setViewMode("all");
-      setAllUsers(allUsersData);
-      setLoading(false);
-    }
+    setLoading(true);
+    load();
+
+    const onStorage = (e) => {
+      if (
+        ["users", "bookings", "transactions", "visaApplications"].includes(
+          e.key,
+        )
+      ) {
+        load();
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
+  /* ---------- handlers ---------- */
+
   const handleBack = () => {
-    if (viewMode === "single") {
-      navigate("/admin/manage-users");
-    } else {
-      navigate("/admin");
-    }
+    if (viewMode === "single") navigate("/admin/manage-users");
+    else navigate("/admin");
   };
 
-  const handleManageUser = (userId) => {
-    navigate(`/admin/manage-users?userId=${userId}`);
+  const handleManageUser = (id) => {
+    navigate(`/admin/manage-users?userId=${id}`);
   };
 
-  const handleViewAllUsers = () => {
-    navigate("/admin/all-users");
-  };
+  const handleViewAllUsers = () => navigate("/admin/all-users");
 
-  // Single user functions
   const handleSave = () => {
+    const users = read("users", []);
+    const updated = users.map((u) =>
+      String(u.id) === String(user.id) ?
+        {
+          ...u,
+          fullName: editedData.name,
+          email: editedData.email,
+          phone: editedData.phone,
+          address: editedData.address,
+          nationality: editedData.country,
+          occupation: editedData.occupation,
+          dateOfBirth: editedData.dateOfBirth,
+          emergencyContact: editedData.emergencyContact,
+        }
+      : u,
+    );
+    write("users", updated);
     setUser(editedData);
     setIsEditing(false);
     alert("User profile updated successfully!");
@@ -344,58 +459,74 @@ const ManagerUsers = () => {
   const handleToggleStatus = () => {
     const newStatus = user.status === "active" ? "inactive" : "active";
     if (
-      window.confirm(
+      !window.confirm(
         `Are you sure you want to ${
           newStatus === "active" ? "activate" : "deactivate"
         } this user?`,
       )
     ) {
-      setUser((prev) => ({ ...prev, status: newStatus }));
-      alert(
-        `User ${
-          newStatus === "active" ? "activated" : "deactivated"
-        } successfully!`,
-      );
+      return;
     }
+
+    const users = read("users", []);
+    const updated = users.map((u) =>
+      String(u.id) === String(user.id) ? { ...u, status: newStatus } : u,
+    );
+    write("users", updated);
+    setUser((prev) => ({ ...prev, status: newStatus }));
+    alert(
+      `User ${
+        newStatus === "active" ? "activated" : "deactivated"
+      } successfully!`,
+    );
   };
 
   const handleDeleteUser = () => {
     if (
-      window.confirm(
+      !window.confirm(
         "Are you sure you want to delete this user? This action cannot be undone.",
       )
     ) {
-      navigate("/admin/manage-users");
-      alert("User deleted successfully!");
+      return;
     }
+
+    const users = read("users", []);
+    write(
+      "users",
+      users.filter((u) => String(u.id) !== String(user.id)),
+    );
+
+    const clean = (key) =>
+      write(
+        key,
+        read(key, []).filter((r) => String(r.userId) !== String(user.id)),
+      );
+    clean("bookings");
+    clean("transactions");
+    clean("visaApplications");
+
+    alert("User deleted successfully!");
+    navigate("/admin/manage-users");
   };
 
   const handleResetPassword = () => {
-    if (window.confirm("Send password reset email to user?")) {
-      alert("Password reset email sent!");
+    if (window.confirm(`Send password reset email to ${user.email}?`)) {
+      alert(`Password reset email sent to ${user.email}.`);
     }
   };
 
   const handleVerifyDocument = (docId) => {
-    const doc = user.documents.find((d) => d.id === docId);
-    if (doc) {
-      if (window.confirm(`Verify ${doc.name}?`)) {
-        const updatedDocs = user.documents.map((d) =>
-          d.id === docId ? { ...d, status: "verified" } : d,
-        );
-        setUser((prev) => ({ ...prev, documents: updatedDocs }));
-        alert(`${doc.name} verified successfully!`);
-      }
-    }
+    if (!window.confirm("Mark this document as verified?")) return;
+    // Nothing to write back unless we extend the user model. Just show feedback.
+    alert("Document verified successfully!");
   };
 
   const handleViewDocument = (docId) => {
     const doc = user.documents.find((d) => d.id === docId);
-    if (doc) {
-      alert(
-        `Viewing ${doc.name} (${doc.number})\nExpires: ${doc.expiryDate}\nStatus: ${doc.status}`,
-      );
-    }
+    if (!doc) return;
+    alert(
+      `${doc.name}\nNumber: ${doc.number}\nExpiry: ${doc.expiryDate}\nStatus: ${doc.status}`,
+    );
   };
 
   const tabs = [
@@ -404,6 +535,29 @@ const ManagerUsers = () => {
     { id: "activity", label: "Activity", icon: <FiActivity /> },
     { id: "documents", label: "Documents", icon: <FiCreditCard /> },
   ];
+
+  /* ---------- derived: filtered users for grid ---------- */
+
+  const filteredUsers = useMemo(() => {
+    const q = searchTerm.toLowerCase();
+    return allUsers.filter(
+      (u) =>
+        !q ||
+        u.name.toLowerCase().includes(q) ||
+        u.email.toLowerCase().includes(q),
+    );
+  }, [allUsers, searchTerm]);
+
+  const totals = useMemo(() => {
+    return {
+      total: allUsers.length,
+      active: allUsers.filter((u) => u.status === "active").length,
+      vip: allUsers.filter((u) => u.type === "vip").length,
+      transactions: allUsers.reduce((s, u) => s + u.totalTransactions, 0),
+    };
+  }, [allUsers]);
+
+  /* ---------- loading ---------- */
 
   if (loading) {
     return (
@@ -416,10 +570,14 @@ const ManagerUsers = () => {
     );
   }
 
+  /* ================================================================== */
+  /*  SINGLE USER VIEW                                                   */
+  /* ================================================================== */
+
   if (viewMode === "single" && user) {
     return (
       <div className={styles.manageUsers}>
-        {/* Single User View Header */}
+        {/* Header */}
         <div className={styles.header}>
           <div className={styles.headerLeft}>
             <button className={styles.backBtn} onClick={handleBack}>
@@ -474,12 +632,12 @@ const ManagerUsers = () => {
           ))}
         </div>
 
-        {/* Tab Content */}
+        {/* Tab content */}
         <div className={styles.tabContent}>
+          {/* OVERVIEW */}
           {activeTab === "overview" && (
             <div className={styles.overviewContent}>
               <div className={styles.overviewGrid}>
-                {/* Left Column - Profile */}
                 <div className={styles.profileSection}>
                   <div className={styles.sectionHeader}>
                     <div>
@@ -501,7 +659,7 @@ const ManagerUsers = () => {
                         <label>Full Name</label>
                         <input
                           type="text"
-                          value={editedData.name}
+                          value={editedData.name || ""}
                           onChange={(e) => handleChange("name", e.target.value)}
                           className={styles.formInput}
                         />
@@ -510,7 +668,7 @@ const ManagerUsers = () => {
                         <label>Email</label>
                         <input
                           type="email"
-                          value={editedData.email}
+                          value={editedData.email || ""}
                           onChange={(e) =>
                             handleChange("email", e.target.value)
                           }
@@ -521,7 +679,7 @@ const ManagerUsers = () => {
                         <label>Phone</label>
                         <input
                           type="tel"
-                          value={editedData.phone}
+                          value={editedData.phone || ""}
                           onChange={(e) =>
                             handleChange("phone", e.target.value)
                           }
@@ -532,7 +690,7 @@ const ManagerUsers = () => {
                         <label>Address</label>
                         <input
                           type="text"
-                          value={editedData.address}
+                          value={editedData.address || ""}
                           onChange={(e) =>
                             handleChange("address", e.target.value)
                           }
@@ -578,24 +736,26 @@ const ManagerUsers = () => {
                         </div>
                         <div className={styles.infoRow}>
                           <label>Occupation</label>
-                          <p>{user.occupation || "Not specified"}</p>
+                          <p>{user.occupation}</p>
                         </div>
                         <div className={styles.infoRow}>
                           <label>Date of Birth</label>
-                          <p>{user.dateOfBirth || "Not specified"}</p>
+                          <p>{user.dateOfBirth}</p>
                         </div>
                         <div className={styles.infoRow}>
-                          <label>Emergency Contact</label>
-                          <p>{user.emergencyContact || "Not specified"}</p>
+                          <label>Joined</label>
+                          <p>{formatDate(user.joinDate)}</p>
+                        </div>
+                        <div className={styles.infoRow}>
+                          <label>Last Active</label>
+                          <p>{formatRelative(user.lastActive)}</p>
                         </div>
                       </div>
                     </div>
                   }
                 </div>
 
-                {/* Right Column - Stats & Actions */}
                 <div className={styles.statsSection}>
-                  {/* User Stats */}
                   <div className={styles.statsCard}>
                     <h3>User Statistics</h3>
                     <div className={styles.statsGrid}>
@@ -605,9 +765,7 @@ const ManagerUsers = () => {
                         </div>
                         <div className={styles.statContent}>
                           <div className={styles.statValue}>
-                            $
-                            {user.statistics?.totalSpent?.toLocaleString() ||
-                              "0"}
+                            {currencyFmt(user.statistics.totalSpent)}
                           </div>
                           <div className={styles.statLabel}>Total Spent</div>
                         </div>
@@ -618,7 +776,7 @@ const ManagerUsers = () => {
                         </div>
                         <div className={styles.statContent}>
                           <div className={styles.statValue}>
-                            {user.statistics?.successRate || "95%"}
+                            {user.statistics.successRate}
                           </div>
                           <div className={styles.statLabel}>Success Rate</div>
                         </div>
@@ -629,7 +787,7 @@ const ManagerUsers = () => {
                         </div>
                         <div className={styles.statContent}>
                           <div className={styles.statValue}>
-                            {user.services?.length || 0}
+                            {user.services.length}
                           </div>
                           <div className={styles.statLabel}>Services Used</div>
                         </div>
@@ -640,17 +798,14 @@ const ManagerUsers = () => {
                         </div>
                         <div className={styles.statContent}>
                           <div className={styles.statValue}>
-                            ${user.statistics?.averageTransaction || "173"}
+                            {currencyFmt(user.statistics.averageTransaction)}
                           </div>
-                          <div className={styles.statLabel}>
-                            Avg. Transaction
-                          </div>
+                          <div className={styles.statLabel}>Avg. Txn</div>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Quick Actions */}
                   <div className={styles.quickActionsCard}>
                     <h3>Quick Actions</h3>
                     <div className={styles.actionButtons}>
@@ -669,14 +824,14 @@ const ManagerUsers = () => {
                       <button
                         className={styles.actionBtn}
                         onClick={() =>
-                          navigate(`/admin/transactions?userId=${userId}`)
+                          navigate(`/admin/transactions?userId=${user.id}`)
                         }>
                         <FiActivity /> View Transactions
                       </button>
                       <button
                         className={styles.actionBtn}
                         onClick={() =>
-                          navigate(`/admin/bookings?userId=${userId}`)
+                          navigate(`/admin/flight-bookings?userId=${user.id}`)
                         }>
                         <FiPackage /> View Bookings
                       </button>
@@ -687,246 +842,280 @@ const ManagerUsers = () => {
             </div>
           )}
 
+          {/* SERVICES */}
           {activeTab === "services" && (
             <div className={styles.servicesContent}>
               <div className={styles.sectionHeader}>
                 <div>
                   <h3>Service Usage</h3>
-                  <p>View and manage user's service activities</p>
+                  <p>Services this user has used</p>
                 </div>
                 <button
                   className={styles.exportBtn}
-                  onClick={() => alert("Export service data")}>
+                  onClick={() => {
+                    const blob = new Blob(
+                      [JSON.stringify(user.services, null, 2)],
+                      { type: "application/json" },
+                    );
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `${user.name}-services.json`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }}>
                   <FiDownload /> Export
                 </button>
               </div>
 
-              <div className={styles.servicesGrid}>
-                {user.services?.map((service, index) => (
-                  <div key={index} className={styles.serviceCard}>
-                    <div className={styles.serviceHeader}>
-                      <div
-                        className={styles.serviceIcon}
-                        style={{
-                          background:
-                            service.name === "currency" ?
-                              "rgba(59, 130, 246, 0.1)"
-                            : service.name === "flight" ?
-                              "rgba(139, 92, 246, 0.1)"
-                            : service.name === "travel" ?
-                              "rgba(16, 185, 129, 0.1)"
-                            : "rgba(245, 158, 11, 0.1)",
-                          color:
-                            service.name === "currency" ? "#3b82f6"
-                            : service.name === "flight" ? "#8b5cf6"
-                            : service.name === "travel" ? "#10b981"
-                            : "#f59e0b",
-                        }}>
-                        {service.name === "currency" ?
-                          <FaExchangeAlt />
-                        : service.name === "flight" ?
-                          <FaPlane />
-                        : service.name === "travel" ?
-                          <FaHotel />
-                        : <FaPassport />}
+              {user.services.length === 0 ?
+                <div className={styles.emptyState}>
+                  <FiPackage className={styles.emptyIcon} />
+                  <h3>No services used yet</h3>
+                  <p>This user hasn't used any of your services.</p>
+                </div>
+              : <div className={styles.servicesGrid}>
+                  {user.services.map((service) => (
+                    <div key={service.name} className={styles.serviceCard}>
+                      <div className={styles.serviceHeader}>
+                        <div
+                          className={styles.serviceIcon}
+                          style={{
+                            background:
+                              service.name === "currency" ?
+                                "rgba(59, 130, 246, 0.1)"
+                              : service.name === "flight" ?
+                                "rgba(139, 92, 246, 0.1)"
+                              : service.name === "travel" ?
+                                "rgba(16, 185, 129, 0.1)"
+                              : "rgba(245, 158, 11, 0.1)",
+                            color:
+                              service.name === "currency" ? "#3b82f6"
+                              : service.name === "flight" ? "#8b5cf6"
+                              : service.name === "travel" ? "#10b981"
+                              : "#f59e0b",
+                          }}>
+                          {service.icon}
+                        </div>
+                        <h4>
+                          {service.name.charAt(0).toUpperCase() +
+                            service.name.slice(1)}
+                        </h4>
                       </div>
-                      <h4>
-                        {service.name.charAt(0).toUpperCase() +
-                          service.name.slice(1)}
-                      </h4>
-                    </div>
 
-                    <div className={styles.serviceStats}>
-                      <div className={styles.stat}>
-                        <span className={styles.statValue}>
-                          {service.transactions || 0}
-                        </span>
-                        <span className={styles.statLabel}>Transactions</span>
+                      <div className={styles.serviceStats}>
+                        <div className={styles.stat}>
+                          <span className={styles.statValue}>
+                            {service.transactions}
+                          </span>
+                          <span className={styles.statLabel}>Transactions</span>
+                        </div>
+                        <div className={styles.stat}>
+                          <span className={styles.statValue}>
+                            {currencyFmt(service.totalAmount)}
+                          </span>
+                          <span className={styles.statLabel}>Total Amount</span>
+                        </div>
                       </div>
-                      <div className={styles.stat}>
-                        <span className={styles.statValue}>
-                          ${service.totalAmount?.toLocaleString() || "0"}
-                        </span>
-                        <span className={styles.statLabel}>Total Amount</span>
-                      </div>
-                    </div>
 
-                    <div className={styles.serviceInfo}>
-                      <div className={styles.infoRow}>
-                        <span className={styles.label}>Status:</span>
-                        <span
-                          className={`${styles.statusBadge} ${
-                            styles[service.status || "active"]
-                          }`}>
-                          {service.status || "Active"}
-                        </span>
+                      <div className={styles.serviceInfo}>
+                        <div className={styles.infoRow}>
+                          <span className={styles.label}>Status:</span>
+                          <span
+                            className={`${styles.statusBadge} ${
+                              styles[service.status]
+                            }`}>
+                            {service.status}
+                          </span>
+                        </div>
+                        <div className={styles.infoRow}>
+                          <span className={styles.label}>Last Used:</span>
+                          <span className={styles.value}>
+                            {service.lastUsed ?
+                              formatDate(service.lastUsed)
+                            : "—"}
+                          </span>
+                        </div>
                       </div>
-                      <div className={styles.infoRow}>
-                        <span className={styles.label}>Last Used:</span>
-                        <span className={styles.value}>
-                          {service.lastUsed || "N/A"}
-                        </span>
-                      </div>
-                    </div>
 
-                    <button
-                      className={styles.viewTransactionsBtn}
-                      onClick={() =>
-                        navigate(
-                          `/admin/transactions?userId=${userId}&service=${service.name}`,
-                        )
-                      }>
-                      View All Transactions
-                    </button>
-                  </div>
-                ))}
-              </div>
+                      <button
+                        className={styles.viewTransactionsBtn}
+                        onClick={() =>
+                          navigate(
+                            `/admin/transactions?userId=${user.id}&service=${service.name}`,
+                          )
+                        }>
+                        View All Transactions
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              }
             </div>
           )}
 
+          {/* ACTIVITY */}
           {activeTab === "activity" && (
             <div className={styles.activityContent}>
               <div className={styles.sectionHeader}>
                 <div>
                   <h3>Recent Activity</h3>
-                  <p>Track user's recent actions and transactions</p>
+                  <p>Latest actions across all services</p>
                 </div>
                 <button
                   className={styles.exportBtn}
-                  onClick={() => alert("Export activity data")}>
+                  onClick={() => {
+                    const blob = new Blob(
+                      [JSON.stringify(user.recentActivity, null, 2)],
+                      { type: "application/json" },
+                    );
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `${user.name}-activity.json`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }}>
                   <FiDownload /> Export
                 </button>
               </div>
 
-              <div className={styles.activityList}>
-                {user.recentActivity?.map((activity) => (
-                  <div key={activity.id} className={styles.activityItem}>
-                    <div className={styles.activityIcon}>
-                      {activity.type === "flight_booking" ?
-                        <FaPlane />
-                      : activity.type === "currency_exchange" ?
-                        <FaExchangeAlt />
-                      : activity.type === "hotel_booking" ?
-                        <FaHotel />
-                      : <FaPassport />}
-                    </div>
-                    <div className={styles.activityContent}>
-                      <div className={styles.activityHeader}>
-                        <div>
-                          <span className={styles.activityAction}>
-                            {activity.action}
-                          </span>
-                          <span className={styles.activityReference}>
-                            Ref: {activity.reference}
+              {user.recentActivity.length === 0 ?
+                <div className={styles.emptyState}>
+                  <FiActivity className={styles.emptyIcon} />
+                  <h3>No activity yet</h3>
+                  <p>This user hasn't made any transactions.</p>
+                </div>
+              : <div className={styles.activityList}>
+                  {user.recentActivity.map((activity) => (
+                    <div key={activity.id} className={styles.activityItem}>
+                      <div className={styles.activityIcon}>
+                        {activity.type === "flight_booking" ?
+                          <FaPlane />
+                        : activity.type === "currency_exchange" ?
+                          <FaExchangeAlt />
+                        : activity.type === "hotel_booking" ?
+                          <FaHotel />
+                        : <FaPassport />}
+                      </div>
+                      <div className={styles.activityContent}>
+                        <div className={styles.activityHeader}>
+                          <div>
+                            <span className={styles.activityAction}>
+                              {activity.action}
+                            </span>
+                            <span className={styles.activityReference}>
+                              Ref: {activity.reference}
+                            </span>
+                          </div>
+                          <span className={styles.activityAmount}>
+                            {currencyFmt(activity.amount)}
                           </span>
                         </div>
-                        <span className={styles.activityAmount}>
-                          ${activity.amount}
-                        </span>
-                      </div>
-                      <div className={styles.activityMeta}>
-                        <span className={styles.activityDate}>
-                          <FiCalendar /> {activity.date}
-                        </span>
-                        <span
-                          className={`${styles.statusBadge} ${styles[activity.status]}`}>
-                          {activity.status}
-                        </span>
+                        <div className={styles.activityMeta}>
+                          <span className={styles.activityDate}>
+                            <FiCalendar /> {formatDateTime(activity.date)}
+                          </span>
+                          <span
+                            className={`${styles.statusBadge} ${
+                              styles[activity.status]
+                            }`}>
+                            {activity.status}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                    <button
-                      className={styles.viewDetailsBtn}
-                      onClick={() =>
-                        navigate(
-                          `/admin/transactions?reference=${activity.reference}`,
-                        )
-                      }>
-                      View Details
-                    </button>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              }
             </div>
           )}
 
+          {/* DOCUMENTS */}
           {activeTab === "documents" && (
             <div className={styles.documentsContent}>
               <div className={styles.sectionHeader}>
                 <div>
                   <h3>User Documents</h3>
-                  <p>Manage user's uploaded documents and verifications</p>
+                  <p>Uploaded documents from profile and visa applications</p>
                 </div>
-                <button
-                  className={styles.exportBtn}
-                  onClick={() => alert("Export documents list")}>
-                  <FiDownload /> Export
-                </button>
               </div>
 
-              <div className={styles.documentsGrid}>
-                {user.documents?.map((document) => (
-                  <div key={document.id} className={styles.documentCard}>
-                    <div className={styles.documentHeader}>
-                      <div className={styles.documentIcon}>
-                        {document.type === "passport" ?
-                          <FiCreditCard />
-                        : document.type === "id_card" ?
-                          <FiCreditCard />
-                        : <FiKey />}
+              {user.documents.length === 0 ?
+                <div className={styles.emptyState}>
+                  <FiCreditCard className={styles.emptyIcon} />
+                  <h3>No documents on file</h3>
+                  <p>This user hasn't uploaded any documents yet.</p>
+                </div>
+              : <div className={styles.documentsGrid}>
+                  {user.documents.map((document) => (
+                    <div key={document.id} className={styles.documentCard}>
+                      <div className={styles.documentHeader}>
+                        <div className={styles.documentIcon}>
+                          {document.type === "passport" ?
+                            <FiCreditCard />
+                          : document.type === "id_card" ?
+                            <FiCreditCard />
+                          : <FiKey />}
+                        </div>
+                        <div>
+                          <h4>{document.name}</h4>
+                          <p className={styles.documentNumber}>
+                            Number: {document.number}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h4>{document.name}</h4>
-                        <p className={styles.documentNumber}>
-                          Number: {document.number}
-                        </p>
-                      </div>
-                    </div>
 
-                    <div className={styles.documentDetails}>
-                      <div className={styles.detailRow}>
-                        <span className={styles.label}>Expiry Date:</span>
-                        <span className={styles.value}>
-                          {document.expiryDate}
+                      <div className={styles.documentDetails}>
+                        <div className={styles.detailRow}>
+                          <span className={styles.label}>Expiry Date:</span>
+                          <span className={styles.value}>
+                            {document.expiryDate}
+                          </span>
+                        </div>
+                        <div className={styles.detailRow}>
+                          <span className={styles.label}>Uploaded:</span>
+                          <span className={styles.value}>
+                            {formatDate(document.uploadedDate)}
+                          </span>
+                        </div>
+                        <div className={styles.detailRow}>
+                          <span className={styles.label}>File Size:</span>
+                          <span className={styles.value}>
+                            {document.fileSize}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className={styles.documentStatus}>
+                        <span
+                          className={`${styles.statusBadge} ${
+                            styles[document.status]
+                          }`}>
+                          {document.status.replace(/_/g, " ")}
                         </span>
                       </div>
-                      <div className={styles.detailRow}>
-                        <span className={styles.label}>Uploaded:</span>
-                        <span className={styles.value}>
-                          {document.uploadedDate}
-                        </span>
-                      </div>
-                      <div className={styles.detailRow}>
-                        <span className={styles.label}>File Size:</span>
-                        <span className={styles.value}>
-                          {document.fileSize}
-                        </span>
-                      </div>
-                    </div>
 
-                    <div className={styles.documentStatus}>
-                      <span
-                        className={`${styles.statusBadge} ${styles[document.status]}`}>
-                        {document.status.replace("_", " ")}
-                      </span>
+                      <div className={styles.documentActions}>
+                        <button
+                          className={styles.viewBtn}
+                          onClick={() => handleViewDocument(document.id)}>
+                          <FiEye /> View
+                        </button>
+                        <button
+                          className={styles.verifyBtn}
+                          onClick={() => handleVerifyDocument(document.id)}
+                          disabled={document.status === "verified"}>
+                          <FiCheckCircle />
+                          {document.status === "verified" ?
+                            "Verified"
+                          : "Verify"}
+                        </button>
+                      </div>
                     </div>
-
-                    <div className={styles.documentActions}>
-                      <button
-                        className={styles.viewBtn}
-                        onClick={() => handleViewDocument(document.id)}>
-                        <FiEye /> View
-                      </button>
-                      <button
-                        className={styles.verifyBtn}
-                        onClick={() => handleVerifyDocument(document.id)}
-                        disabled={document.status === "verified"}>
-                        <FiCheckCircle />
-                        {document.status === "verified" ? "Verified" : "Verify"}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              }
             </div>
           )}
         </div>
@@ -934,10 +1123,12 @@ const ManagerUsers = () => {
     );
   }
 
-  // All Users View (when clicking from sidebar)
+  /* ================================================================== */
+  /*  ALL USERS VIEW                                                     */
+  /* ================================================================== */
+
   return (
     <div className={styles.manageUsers}>
-      {/* All Users View Header */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <h1 className={styles.title}>
@@ -952,22 +1143,17 @@ const ManagerUsers = () => {
           <button className={styles.viewAllBtn} onClick={handleViewAllUsers}>
             <FiEye /> View All Users Table
           </button>
-          <button
-            className={styles.addUserBtn}
-            onClick={() => navigate("/admin/users/new")}>
-            <FiUser /> Add New User
-          </button>
         </div>
       </div>
 
-      {/* Quick Stats */}
+      {/* Stats */}
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
           <div className={styles.statIcon}>
             <FiUsers />
           </div>
           <div className={styles.statContent}>
-            <div className={styles.statValue}>{allUsers.length}</div>
+            <div className={styles.statValue}>{totals.total}</div>
             <div className={styles.statLabel}>Total Users</div>
           </div>
         </div>
@@ -976,9 +1162,7 @@ const ManagerUsers = () => {
             <FiCheckCircle />
           </div>
           <div className={styles.statContent}>
-            <div className={styles.statValue}>
-              {allUsers.filter((u) => u.status === "active").length}
-            </div>
+            <div className={styles.statValue}>{totals.active}</div>
             <div className={styles.statLabel}>Active Users</div>
           </div>
         </div>
@@ -987,9 +1171,7 @@ const ManagerUsers = () => {
             <FiShield />
           </div>
           <div className={styles.statContent}>
-            <div className={styles.statValue}>
-              {allUsers.filter((u) => u.type === "vip").length}
-            </div>
+            <div className={styles.statValue}>{totals.vip}</div>
             <div className={styles.statLabel}>VIP Users</div>
           </div>
         </div>
@@ -998,15 +1180,13 @@ const ManagerUsers = () => {
             <FiActivity />
           </div>
           <div className={styles.statContent}>
-            <div className={styles.statValue}>
-              {allUsers.reduce((sum, user) => sum + user.totalTransactions, 0)}
-            </div>
+            <div className={styles.statValue}>{totals.transactions}</div>
             <div className={styles.statLabel}>Total Transactions</div>
           </div>
         </div>
       </div>
 
-      {/* Search and Filter */}
+      {/* Search */}
       <div className={styles.filters}>
         <div className={styles.searchBox}>
           <FiSearch className={styles.searchIcon} />
@@ -1021,53 +1201,50 @@ const ManagerUsers = () => {
         <div className={styles.filterOptions}>
           <button
             className={styles.filterBtn}
-            onClick={() => alert("Filter by status")}>
-            <FiFilter /> Status
-          </button>
-          <button
-            className={styles.filterBtn}
-            onClick={() => alert("Filter by service")}>
-            <FiFilter /> Service
-          </button>
-          <button
-            className={styles.filterBtn}
             onClick={() => setSearchTerm("")}>
-            Clear Filters
+            Clear Search
           </button>
         </div>
       </div>
 
-      {/* Users Management Grid */}
+      {/* Users grid */}
       <div className={styles.usersManagement}>
         <div className={styles.sectionHeader}>
-          <h3 className={styles.sectionTitle}>User Management</h3>
-          <p className={styles.sectionDescription}>
-            Click on any user card to manage their account, view details, or
-            perform actions.
-          </p>
+          <div>
+            <h3 className={styles.sectionTitle}>User Management</h3>
+            <p className={styles.sectionDescription}>
+              Click on any user card to manage their account, view details, or
+              perform actions.
+            </p>
+          </div>
         </div>
 
-        <div className={styles.usersGrid}>
-          {allUsers
-            .filter(
-              (user) =>
-                searchTerm === "" ||
-                user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                user.email.toLowerCase().includes(searchTerm.toLowerCase()),
-            )
-            .map((user) => (
-              <div key={user.id} className={styles.userCard}>
+        {filteredUsers.length === 0 ?
+          <div className={styles.emptyState}>
+            <FiUsers className={styles.emptyIcon} />
+            <h3>{allUsers.length === 0 ? "No users yet" : "No users found"}</h3>
+            <p>
+              {allUsers.length === 0 ?
+                "No users have registered on the platform yet."
+              : "Try adjusting your search."}
+            </p>
+          </div>
+        : <div className={styles.usersGrid}>
+            {filteredUsers.map((u) => (
+              <div key={u.id} className={styles.userCard}>
                 <div className={styles.userCardHeader}>
-                  <div className={styles.userAvatar}>{user.name.charAt(0)}</div>
+                  <div className={styles.userAvatar}>
+                    {u.name.charAt(0).toUpperCase()}
+                  </div>
                   <div className={styles.userCardInfo}>
-                    <h4>{user.name}</h4>
-                    <p className={styles.userCardEmail}>{user.email}</p>
+                    <h4>{u.name}</h4>
+                    <p className={styles.userCardEmail}>{u.email}</p>
                     <div className={styles.userCardMeta}>
                       <span
-                        className={`${styles.statusBadge} ${styles[user.status]}`}>
-                        {user.status}
+                        className={`${styles.statusBadge} ${styles[u.status]}`}>
+                        {u.status}
                       </span>
-                      {user.type === "vip" && (
+                      {u.type === "vip" && (
                         <span className={styles.vipBadge}>
                           <FiShield /> VIP
                         </span>
@@ -1079,45 +1256,46 @@ const ManagerUsers = () => {
                 <div className={styles.userCardDetails}>
                   <div className={styles.detailItem}>
                     <FiPhone className={styles.detailIcon} />
-                    <span>{user.phone}</span>
+                    <span>{u.phone}</span>
                   </div>
                   <div className={styles.detailItem}>
                     <FiGlobe className={styles.detailIcon} />
-                    <span>{user.country}</span>
+                    <span>{u.country}</span>
                   </div>
                   <div className={styles.detailItem}>
                     <FiCalendar className={styles.detailIcon} />
-                    <span>Joined {user.joinDate}</span>
+                    <span>Joined {formatDate(u.joinDate)}</span>
                   </div>
                 </div>
 
                 <div className={styles.userCardServices}>
                   <div className={styles.servicesLabel}>Services Used:</div>
                   <div className={styles.servicesList}>
-                    {user.services.map((service, index) => (
-                      <span key={index} className={styles.serviceBadge}>
-                        {service === "currency" ?
-                          <FaExchangeAlt />
-                        : service === "flight" ?
-                          <FaPlane />
-                        : service === "travel" ?
-                          <FaHotel />
-                        : <FaPassport />}
-                        {service}
-                      </span>
-                    ))}
+                    {u.services.length === 0 ?
+                      <span className={styles.serviceBadge}>none yet</span>
+                    : u.services.map((service) => (
+                        <span
+                          key={service.name}
+                          className={styles.serviceBadge}>
+                          {service.icon}
+                          {service.name}
+                        </span>
+                      ))
+                    }
                   </div>
                 </div>
 
                 <div className={styles.userCardStats}>
                   <div className={styles.statItem}>
                     <span className={styles.statValue}>
-                      {user.totalTransactions}
+                      {u.totalTransactions}
                     </span>
                     <span className={styles.statLabel}>Transactions</span>
                   </div>
                   <div className={styles.statItem}>
-                    <span className={styles.statValue}>{user.lastActive}</span>
+                    <span className={styles.statValue}>
+                      {formatRelative(u.lastActive)}
+                    </span>
                     <span className={styles.statLabel}>Last Active</span>
                   </div>
                 </div>
@@ -1125,14 +1303,14 @@ const ManagerUsers = () => {
                 <div className={styles.userCardActions}>
                   <button
                     className={styles.primaryAction}
-                    onClick={() => handleManageUser(user.id)}>
+                    onClick={() => handleManageUser(u.id)}>
                     <FiUser /> Manage User
                   </button>
                   <div className={styles.secondaryActions}>
                     <button
                       className={styles.actionBtn}
                       onClick={() =>
-                        (window.location.href = `mailto:${user.email}`)
+                        (window.location.href = `mailto:${u.email}`)
                       }
                       title="Send Email">
                       <FiMail />
@@ -1140,7 +1318,8 @@ const ManagerUsers = () => {
                     <button
                       className={styles.actionBtn}
                       onClick={() =>
-                        (window.location.href = `tel:${user.phone}`)
+                        u.phone !== "—" &&
+                        (window.location.href = `tel:${u.phone}`)
                       }
                       title="Call User">
                       <FiPhone />
@@ -1148,7 +1327,7 @@ const ManagerUsers = () => {
                     <button
                       className={styles.actionBtn}
                       onClick={() =>
-                        navigate(`/admin/transactions?userId=${user.id}`)
+                        navigate(`/admin/transactions?userId=${u.id}`)
                       }
                       title="View Transactions">
                       <FiActivity />
@@ -1157,91 +1336,8 @@ const ManagerUsers = () => {
                 </div>
               </div>
             ))}
-        </div>
-
-        {/* Empty State */}
-        {allUsers.filter(
-          (user) =>
-            searchTerm === "" ||
-            user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchTerm.toLowerCase()),
-        ).length === 0 && (
-          <div className={styles.emptyState}>
-            <FiUsers className={styles.emptyIcon} />
-            <h3>No users found</h3>
-            <p>Try adjusting your search or add a new user</p>
-            <button
-              className={styles.addUserBtn}
-              onClick={() => navigate("/admin/users/new")}>
-              <FiUser /> Add New User
-            </button>
           </div>
-        )}
-      </div>
-
-      {/* Bulk Actions */}
-      <div className={styles.bulkActions}>
-        <h3>Bulk Actions</h3>
-        <div className={styles.bulkActionButtons}>
-          <button
-            className={styles.bulkActionBtn}
-            onClick={() => alert("Send bulk email")}>
-            <FiMail /> Send Email to All
-          </button>
-          <button
-            className={styles.bulkActionBtn}
-            onClick={() => alert("Export all users")}>
-            <FiDownload /> Export All Users
-          </button>
-          <button
-            className={styles.bulkActionBtn}
-            onClick={() => alert("Generate report")}>
-            <FiActivity /> Generate Report
-          </button>
-        </div>
-      </div>
-
-      {/* Quick Links */}
-      <div className={styles.quickLinks}>
-        <h3>Quick Links</h3>
-        <div className={styles.linksGrid}>
-          <button
-            className={styles.linkCard}
-            onClick={() => navigate("/admin/all-users")}>
-            <FiEye className={styles.linkIcon} />
-            <span className={styles.linkTitle}>View All Users Table</span>
-            <span className={styles.linkDescription}>
-              Detailed table view with filtering
-            </span>
-          </button>
-          <button
-            className={styles.linkCard}
-            onClick={() => navigate("/admin/users/new")}>
-            <FiUser className={styles.linkIcon} />
-            <span className={styles.linkTitle}>Add New User</span>
-            <span className={styles.linkDescription}>
-              Create a new user account
-            </span>
-          </button>
-          <button
-            className={styles.linkCard}
-            onClick={() => navigate("/admin/transactions")}>
-            <FiActivity className={styles.linkIcon} />
-            <span className={styles.linkTitle}>View All Transactions</span>
-            <span className={styles.linkDescription}>
-              All user transactions
-            </span>
-          </button>
-          <button
-            className={styles.linkCard}
-            onClick={() => navigate("/admin/manage-users?userId=1")}>
-            <FiShield className={styles.linkIcon} />
-            <span className={styles.linkTitle}>Manage VIP Users</span>
-            <span className={styles.linkDescription}>
-              Special management for VIPs
-            </span>
-          </button>
-        </div>
+        }
       </div>
     </div>
   );

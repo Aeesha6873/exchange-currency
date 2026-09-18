@@ -327,7 +327,9 @@ function Login() {
               : "Sign in"}
             </button>
 
-            <div className={styles.loginOptions}>Or continue with</div>
+            <div className={styles.loginOptions}>
+              <span>Or continue with</span>
+            </div>
 
             <button
               type="button"

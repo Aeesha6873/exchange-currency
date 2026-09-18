@@ -8,127 +8,111 @@ import {
   FiSend,
   FiGlobe,
   FiChevronRight,
-  FiCheckCircle,
   FiClock,
   FiArrowUpRight,
   FiPackage,
   FiUsers,
   FiSmile,
-  FiCreditCard,
   FiList,
   FiNavigation,
   FiActivity,
 } from "react-icons/fi";
 
 import styles from "./Dashboard.module.css";
+import { authApi, bookingsApi, transactionsApi } from "../../services/api";
 
 function Dashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [stats, setStats] = useState(null);
+  const [recentActivities, setRecentActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+    const currentUser = authApi.getCurrentUser();
     if (!currentUser) {
       navigate("/login");
-    } else {
-      setUser(currentUser);
+      return;
     }
+    setUser(currentUser);
+
+    (async () => {
+      const [bookings, transactions] = await Promise.all([
+        bookingsApi.list(currentUser.id),
+        transactionsApi.list(currentUser.id),
+      ]);
+
+      const completedTxns = transactions.filter(
+        (t) => t.status === "completed",
+      ).length;
+      const inProgress =
+        bookings.filter((b) => b.status === "pending").length +
+        transactions.filter((t) => t.status === "pending").length;
+
+      setStats({
+        exchangeCount: transactions.length,
+        flightBookings: bookings.filter((b) => b.type === "flight").length,
+        travelBookings: bookings.filter((b) => b.type === "hotel").length,
+        visaApplications: 0,
+        totalTransactions: bookings.length + transactions.length,
+        completedTransactions: completedTxns,
+        inProgress,
+        successRate:
+          transactions.length === 0 ?
+            "—"
+          : `${Math.round((completedTxns / transactions.length) * 100)}%`,
+      });
+
+      const feed = [
+        ...transactions.map((t) => ({
+          id: t.id,
+          type: "exchange",
+          description: `${t.fromCurrency} to ${t.toCurrency} Exchange`,
+          amount: `${t.fromAmount} ${t.fromCurrency} → ${t.toAmount} ${t.toCurrency}`,
+          date: t.date,
+          status: t.status,
+          icon: <FiDollarSign />,
+          color: "#10b981",
+          processStep: t.status.charAt(0).toUpperCase() + t.status.slice(1),
+          category: "transactions",
+        })),
+        ...bookings.map((b) => ({
+          id: b.id,
+          type: b.type,
+          description: b.destination,
+          amount: `${b.currency} ${b.price}`,
+          date: b.date,
+          status: b.status,
+          icon: b.type === "flight" ? <FiSend /> : <FiMap />,
+          color: b.type === "flight" ? "#f97316" : "#8b5cf6",
+          processStep: b.status.charAt(0).toUpperCase() + b.status.slice(1),
+          category: "bookings",
+        })),
+      ].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      setRecentActivities(feed.slice(0, 5));
+      setLoading(false);
+    })();
 
     const timer = setInterval(() => setCurrentTime(new Date()), 60000);
     return () => clearInterval(timer);
   }, [navigate]);
 
-  const [stats] = useState({
-    exchangeCount: 12,
-    flightBookings: 5,
-    travelBookings: 3,
-    visaApplications: 2,
-    totalTransactions: 20,
-    completedTransactions: 18,
-    inProgress: 2,
-    successRate: "94%",
-  });
-
-  const formatTime = (date) => {
-    return date.toLocaleTimeString("en-US", {
+  const formatTime = (date) =>
+    date.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
     });
-  };
 
-  const formatDate = (date) => {
-    return date.toLocaleDateString("en-US", {
+  const formatDate = (date) =>
+    date.toLocaleDateString("en-US", {
       weekday: "long",
       year: "numeric",
       month: "long",
       day: "numeric",
     });
-  };
-
-  const recentActivities = [
-    {
-      id: 1,
-      type: "exchange",
-      description: "USD to EUR Exchange",
-      amount: "$500 → €460",
-      date: "Today, 10:30 AM",
-      status: "completed",
-      icon: <FiDollarSign />,
-      color: "#10b981",
-      processStep: "Completed",
-      category: "currency",
-    },
-    {
-      id: 2,
-      type: "flight",
-      description: "Paris Flight Booking",
-      amount: "$850",
-      date: "Yesterday, 2:45 PM",
-      status: "confirmed",
-      icon: <FiSend />,
-      color: "#f97316",
-      processStep: "Ticket Issued",
-      category: "travel",
-    },
-    {
-      id: 3,
-      type: "visa",
-      description: "UK Tourist Visa",
-      amount: "£450",
-      date: "2 days ago, 9:15 AM",
-      status: "processing",
-      icon: <FiGlobe />,
-      color: "#3b82f6",
-      processStep: "Document Review",
-      category: "visa",
-    },
-    {
-      id: 4,
-      type: "travel",
-      description: "Bali Resort Package",
-      amount: "$1,200",
-      date: "3 days ago, 4:30 PM",
-      status: "confirmed",
-      icon: <FiMap />,
-      color: "#8b5cf6",
-      processStep: "Confirmed",
-      category: "travel",
-    },
-    {
-      id: 5,
-      type: "exchange",
-      description: "GBP to JPY Exchange",
-      amount: "£800 → ¥148,000",
-      date: "1 week ago, 11:20 AM",
-      status: "completed",
-      icon: <FiDollarSign />,
-      color: "#10b981",
-      processStep: "Completed",
-      category: "currency",
-    },
-  ];
 
   const processStatus = [
     {
@@ -138,8 +122,8 @@ function Dashboard() {
       status: "active",
       icon: <FiDollarSign />,
       color: "#10b981",
-      count: 2,
-      statusText: "2 Active",
+      count: stats?.exchangeCount ?? 0,
+      statusText: `${stats?.exchangeCount ?? 0} total`,
     },
     {
       id: 2,
@@ -148,8 +132,8 @@ function Dashboard() {
       status: "upcoming",
       icon: <FiSend />,
       color: "#f97316",
-      count: 1,
-      statusText: "1 Upcoming",
+      count: stats?.flightBookings ?? 0,
+      statusText: `${stats?.flightBookings ?? 0} total`,
     },
     {
       id: 3,
@@ -158,8 +142,8 @@ function Dashboard() {
       status: "processing",
       icon: <FiGlobe />,
       color: "#3b82f6",
-      count: 1,
-      statusText: "In Review",
+      count: stats?.visaApplications ?? 0,
+      statusText: "In review",
     },
     {
       id: 4,
@@ -168,8 +152,8 @@ function Dashboard() {
       status: "completed",
       icon: <FiMap />,
       color: "#8b5cf6",
-      count: 0,
-      statusText: "All Complete",
+      count: stats?.travelBookings ?? 0,
+      statusText: "Booked",
     },
   ];
 
@@ -218,19 +202,21 @@ function Dashboard() {
   const getStatusColor = (status) => {
     switch (status) {
       case "completed":
-        return "#10b981";
       case "confirmed":
-        return "#f97316";
+        return "#10b981";
+      case "pending":
+        return "#f59e0b";
       case "processing":
         return "#3b82f6";
-      case "upcoming":
-        return "#8b5cf6";
+      case "cancelled":
+      case "failed":
+        return "#ef4444";
       default:
         return "#64748b";
     }
   };
 
-  if (!user) {
+  if (loading || !user || !stats) {
     return (
       <div className={styles.loadingContainer}>
         <div className={styles.loadingSpinner}></div>
@@ -242,7 +228,7 @@ function Dashboard() {
   return (
     <div className={styles.dashboardContainer}>
       <div className={styles.dashboardWrapper}>
-        {/* Header Section */}
+        {/* Header */}
         <div className={styles.dashboardHeader}>
           <div className={styles.headerContent}>
             <div className={styles.userGreeting}>
@@ -279,7 +265,7 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* Stats Cards Grid */}
+        {/* Stats Cards */}
         <div className={styles.statsGrid}>
           <div
             className={styles.statCard}
@@ -294,7 +280,7 @@ function Dashboard() {
               <h3>{stats.exchangeCount}</h3>
               <p>Currency Exchanges</p>
               <div className={styles.statTrend}>
-                <FiTrendingUp /> <span>+12% this month</span>
+                <FiTrendingUp /> <span>Updated live</span>
               </div>
             </div>
           </div>
@@ -312,7 +298,7 @@ function Dashboard() {
               <h3>{stats.flightBookings}</h3>
               <p>Flight Bookings</p>
               <div className={styles.statTrend}>
-                <FiCalendar /> <span>2 upcoming trips</span>
+                <FiCalendar /> <span>From your bookings</span>
               </div>
             </div>
           </div>
@@ -330,7 +316,7 @@ function Dashboard() {
               <h3>{stats.visaApplications}</h3>
               <p>Visa Applications</p>
               <div className={styles.statTrend}>
-                <FiClock /> <span>1 in review</span>
+                <FiClock /> <span>Coming soon</span>
               </div>
             </div>
           </div>
@@ -345,15 +331,14 @@ function Dashboard() {
               <h3>{stats.travelBookings}</h3>
               <p>Travel Packages</p>
               <div className={styles.statTrend}>
-                <FiPackage /> <span>3 active packages</span>
+                <FiPackage /> <span>Hotel bookings</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Main Content Grid */}
+        {/* Main Grid */}
         <div className={styles.contentGrid}>
-          {/* Left Column - Recent Activities */}
           <div className={styles.leftColumn}>
             <div className={styles.sectionCard}>
               <div className={styles.sectionHeader}>
@@ -369,59 +354,66 @@ function Dashboard() {
               </div>
 
               <div className={styles.activitiesList}>
-                {recentActivities.map((activity) => (
-                  <div key={activity.id} className={styles.activityCard}>
-                    <div className={styles.activityHeader}>
-                      <div
-                        className={styles.activityType}
-                        style={{ color: activity.color }}>
+                {recentActivities.length === 0 ?
+                  <p style={{ padding: "1rem", color: "#64748b" }}>
+                    No recent activity yet. Start by making a booking or an
+                    exchange.
+                  </p>
+                : recentActivities.map((activity) => (
+                    <div key={activity.id} className={styles.activityCard}>
+                      <div className={styles.activityHeader}>
                         <div
-                          className={styles.typeIcon}
-                          style={{ backgroundColor: activity.color }}>
-                          {activity.icon}
+                          className={styles.activityType}
+                          style={{ color: activity.color }}>
+                          <div
+                            className={styles.typeIcon}
+                            style={{ backgroundColor: activity.color }}>
+                            {activity.icon}
+                          </div>
+                          <span className={styles.typeName}>
+                            {activity.type.toUpperCase()}
+                          </span>
                         </div>
-                        <span className={styles.typeName}>
-                          {activity.type.toUpperCase()}
+                        <span className={styles.activityDate}>
+                          {activity.date}
                         </span>
                       </div>
-                      <span className={styles.activityDate}>
-                        {activity.date}
-                      </span>
-                    </div>
 
-                    <div className={styles.activityContent}>
-                      <h4>{activity.description}</h4>
-                      <div className={styles.activityDetails}>
-                        <span className={styles.amount}>{activity.amount}</span>
-                        <span
-                          className={styles.statusBadge}
-                          style={{
-                            backgroundColor: getStatusColor(activity.status),
-                          }}>
-                          {activity.status}
-                        </span>
+                      <div className={styles.activityContent}>
+                        <h4>{activity.description}</h4>
+                        <div className={styles.activityDetails}>
+                          <span className={styles.amount}>
+                            {activity.amount}
+                          </span>
+                          <span
+                            className={styles.statusBadge}
+                            style={{
+                              backgroundColor: getStatusColor(activity.status),
+                            }}>
+                            {activity.status}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className={styles.activityFooter}>
+                        <div className={styles.processInfo}>
+                          <FiNavigation />{" "}
+                          <span>Process: {activity.processStep}</span>
+                        </div>
+                        <button
+                          className={styles.detailsButton}
+                          onClick={() =>
+                            navigate(`/dashboard/${activity.category}`)
+                          }>
+                          View Details <FiArrowUpRight />
+                        </button>
                       </div>
                     </div>
-
-                    <div className={styles.activityFooter}>
-                      <div className={styles.processInfo}>
-                        <FiNavigation />{" "}
-                        <span>Process: {activity.processStep}</span>
-                      </div>
-                      <button
-                        className={styles.detailsButton}
-                        onClick={() =>
-                          navigate(`/dashboard/${activity.category}`)
-                        }>
-                        View Details <FiArrowUpRight />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                }
               </div>
             </div>
 
-            {/* Process Status */}
             <div className={styles.sectionCard}>
               <div className={styles.sectionHeader}>
                 <div>
@@ -459,9 +451,7 @@ function Dashboard() {
             </div>
           </div>
 
-          {/* Right Column - Quick Actions & Links */}
           <div className={styles.rightColumn}>
-            {/* Quick Actions */}
             <div className={styles.sectionCard}>
               <div className={styles.sectionHeader}>
                 <div>
@@ -537,7 +527,6 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* Quick Links */}
             <div className={styles.sectionCard}>
               <div className={styles.sectionHeader}>
                 <div>
@@ -567,7 +556,6 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* Upcoming Trips */}
             <div className={styles.sectionCard}>
               <div className={styles.sectionHeader}>
                 <div>
@@ -581,37 +569,38 @@ function Dashboard() {
                 </button>
               </div>
 
-              <div className={styles.tripCard}>
-                <div className={styles.tripContent}>
-                  <div className={styles.tripIcon}>
-                    <FiSend />
-                  </div>
-                  <div className={styles.tripInfo}>
-                    <h4>Paris, France</h4>
-                    <p>Dec 15-22, 2023 • Flight & Hotel</p>
-                  </div>
-                </div>
-                <div className={styles.tripActions}>
-                  <span className={styles.tripPrice}>$1,250</span>
-                  <button className={styles.tripButton}>Details</button>
-                </div>
-              </div>
-
-              <div className={styles.tripCard}>
-                <div className={styles.tripContent}>
-                  <div className={styles.tripIcon}>
-                    <FiMap />
-                  </div>
-                  <div className={styles.tripInfo}>
-                    <h4>Bali, Indonesia</h4>
-                    <p>Jan 10-20, 2024 • All-inclusive</p>
-                  </div>
-                </div>
-                <div className={styles.tripActions}>
-                  <span className={styles.tripPrice}>$1,800</span>
-                  <button className={styles.tripButton}>Details</button>
-                </div>
-              </div>
+              {(
+                recentActivities.filter((a) => a.category === "bookings")
+                  .length === 0
+              ) ?
+                <p style={{ padding: "1rem", color: "#64748b" }}>
+                  No upcoming trips.
+                </p>
+              : recentActivities
+                  .filter((a) => a.category === "bookings")
+                  .slice(0, 2)
+                  .map((b) => (
+                    <div key={b.id} className={styles.tripCard}>
+                      <div className={styles.tripContent}>
+                        <div className={styles.tripIcon}>{b.icon}</div>
+                        <div className={styles.tripInfo}>
+                          <h4>{b.description}</h4>
+                          <p>
+                            {b.date} • {b.status}
+                          </p>
+                        </div>
+                      </div>
+                      <div className={styles.tripActions}>
+                        <span className={styles.tripPrice}>{b.amount}</span>
+                        <button
+                          className={styles.tripButton}
+                          onClick={() => navigate("/dashboard/bookings")}>
+                          Details
+                        </button>
+                      </div>
+                    </div>
+                  ))
+              }
             </div>
           </div>
         </div>
