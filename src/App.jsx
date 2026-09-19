@@ -1,6 +1,8 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
+import ScrollToTop from "./components/ScrollToTop";
+
 import PublicLayout from "./layouts/PublicLayout";
 import UserLayout from "./layouts/UserLayout";
 import AdminLayout from "./layouts/AdminLayout";
@@ -41,8 +43,9 @@ import Visa from "./pages/admin/AdminVisa";
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
-        {/* ========== PUBLIC ROUTES ========== */}
+        {/* ========== PUBLIC ========== */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />

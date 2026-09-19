@@ -1,5 +1,5 @@
 .main {
-  padding-top: 72px; /* matches the fixed Navbar height */
+  padding-top: 72px;
   min-height: calc(100vh - 72px);
   background: #f8fafc;
 }
