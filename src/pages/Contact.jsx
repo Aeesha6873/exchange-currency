@@ -95,13 +95,13 @@ const Contact = () => {
     {
       icon: <FiPhone />,
       label: "Phone",
-      value: "+234 703 485 7569",
+      value: "+234 916 001 1585 | 7000048006",
       href: "tel:+234 703 485 7569",
     },
     {
       icon: <FiMapPin />,
       label: "Address",
-      value: "123 Main Street, New York, NY 10001",
+      value: "123 Main Street",
     },
     {
       icon: <FiClock />,

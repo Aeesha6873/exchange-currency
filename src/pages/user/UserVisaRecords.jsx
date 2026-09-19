@@ -18,8 +18,6 @@ import {
   FiDollarSign,
   FiInfo,
   FiChevronRight,
-  FiCheckSquare,
-  FiAlertTriangle,
   FiGlobe,
 } from "react-icons/fi";
 import { authApi, visaApi } from "../../services/api";
@@ -33,7 +31,7 @@ function UserVisaRecords() {
   const [visaApplications, setVisaApplications] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ---- Load this user's applications from the API ----
+  /* ---- Load this user's applications ---- */
   useEffect(() => {
     const currentUser = authApi.getCurrentUser();
     if (!currentUser) {
@@ -49,7 +47,6 @@ function UserVisaRecords() {
 
     load();
 
-    // Re-load when another tab writes to visaApplications
     const onStorage = (e) => {
       if (e.key === "visaApplications") load();
     };
@@ -57,7 +54,7 @@ function UserVisaRecords() {
     return () => window.removeEventListener("storage", onStorage);
   }, [navigate]);
 
-  // ---- Status helpers (unchanged) ----
+  /* ---- Status helpers ---- */
   const getStatusIcon = (status) => {
     switch (status) {
       case "approved":
@@ -101,8 +98,7 @@ function UserVisaRecords() {
     }
   };
 
-  // ---- Derive display fields from a stored application ----
-  // The wizard stores raw IDs; here we turn them into human labels.
+  /* ---- Display helpers ---- */
   const friendlyStatus = (status) => {
     switch (status) {
       case "approved":
@@ -167,8 +163,7 @@ function UserVisaRecords() {
     }
   };
 
-  // Build a view-model for each stored application so the JSX can stay
-  // mostly the same as before.
+  /* ---- View model ---- */
   const viewApplications = visaApplications.map((app) => {
     const status =
       app.status === "processing" ? "review" : app.status || "review";
@@ -196,9 +191,10 @@ function UserVisaRecords() {
       email: app.email || "—",
       passportNumber: app.passportNumber || "—",
       consulate: app.countryName ? `${app.countryName} Embassy` : "—",
-      officer: "—", // filled in by admin later
-      notes: "",
+      officer: app.assignedOfficer || "—",
+      notes: app.rejectionReason || "",
       nextSteps: [],
+      approvalFile: app.approvalFile || null,
       documents:
         app.passportFile ?
           [
@@ -336,22 +332,30 @@ function UserVisaRecords() {
 
         <div className={styles.filters}>
           <button
-            className={`${styles.filterBtn} ${filter === "all" ? styles.active : ""}`}
+            className={`${styles.filterBtn} ${
+              filter === "all" ? styles.active : ""
+            }`}
             onClick={() => setFilter("all")}>
             All Applications
           </button>
           <button
-            className={`${styles.filterBtn} ${filter === "review" ? styles.active : ""}`}
+            className={`${styles.filterBtn} ${
+              filter === "review" ? styles.active : ""
+            }`}
             onClick={() => setFilter("review")}>
             In Review
           </button>
           <button
-            className={`${styles.filterBtn} ${filter === "pending" ? styles.active : ""}`}
+            className={`${styles.filterBtn} ${
+              filter === "pending" ? styles.active : ""
+            }`}
             onClick={() => setFilter("pending")}>
             Pending
           </button>
           <button
-            className={`${styles.filterBtn} ${filter === "approved" ? styles.active : ""}`}
+            className={`${styles.filterBtn} ${
+              filter === "approved" ? styles.active : ""
+            }`}
             onClick={() => setFilter("approved")}>
             Approved
           </button>
@@ -475,11 +479,14 @@ function UserVisaRecords() {
                 <FiMessageSquare />
                 Support
               </button>
-              {visa.status === "approved" && (
-                <button className={styles.actionBtn}>
+              {visa.approvalFile?.dataUrl && (
+                <a
+                  href={visa.approvalFile.dataUrl}
+                  download={visa.approvalFile.name}
+                  className={styles.downloadBtn}>
                   <FiDownload />
-                  Download Visa
-                </button>
+                  Download Approval
+                </a>
               )}
             </div>
           </div>
@@ -534,7 +541,9 @@ function UserVisaRecords() {
               <div className={styles.modalSection}>
                 <div className={styles.statusOverview}>
                   <div
-                    className={`${styles.modalStatus} ${getStatusColor(selectedVisa.status)}`}>
+                    className={`${styles.modalStatus} ${getStatusColor(
+                      selectedVisa.status,
+                    )}`}>
                     {getStatusIcon(selectedVisa.status)}
                     <span>{selectedVisa.statusText}</span>
                   </div>
@@ -571,6 +580,34 @@ function UserVisaRecords() {
                 </div>
               </div>
 
+              {/* Approval document — download if available */}
+              {selectedVisa.approvalFile?.dataUrl && (
+                <div className={styles.modalSection}>
+                  <h3>
+                    <FiCheckCircle />
+                    Approval Document
+                  </h3>
+                  <div className={styles.approvalRow}>
+                    <div className={styles.approvalInfo}>
+                      <div className={styles.approvalName}>
+                        {selectedVisa.approvalFile.name}
+                      </div>
+                      <div className={styles.approvalMeta}>
+                        {selectedVisa.approvalFile.size} • Uploaded{" "}
+                        {formatDate(selectedVisa.approvalFile.uploadedAt)}
+                      </div>
+                    </div>
+                    <a
+                      href={selectedVisa.approvalFile.dataUrl}
+                      download={selectedVisa.approvalFile.name}
+                      className={styles.downloadBtn}>
+                      <FiDownload />
+                      Download
+                    </a>
+                  </div>
+                </div>
+              )}
+
               {/* Application Details */}
               <div className={styles.modalGrid}>
                 <div className={styles.detailCard}>
@@ -604,9 +641,26 @@ function UserVisaRecords() {
                       <span>Consulate:</span>
                       <span>{selectedVisa.consulate}</span>
                     </div>
+                    {selectedVisa.officer !== "—" && (
+                      <div className={styles.detailRow}>
+                        <span>Officer:</span>
+                        <span>{selectedVisa.officer}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
+
+              {/* Notes / rejection reason */}
+              {selectedVisa.notes && (
+                <div className={styles.modalSection}>
+                  <h3>
+                    <FiAlertCircle />
+                    Notes
+                  </h3>
+                  <p className={styles.notesText}>{selectedVisa.notes}</p>
+                </div>
+              )}
 
               {/* Documents */}
               {selectedVisa.documents && selectedVisa.documents.length > 0 && (
@@ -625,7 +679,9 @@ function UserVisaRecords() {
                           </span>
                         </div>
                         <div
-                          className={`${styles.documentStatus} ${styles[`doc${doc.status}`]}`}>
+                          className={`${styles.documentStatus} ${
+                            styles[`doc${doc.status}`]
+                          }`}>
                           {doc.status.charAt(0).toUpperCase() +
                             doc.status.slice(1)}
                           {doc.uploaded ? " ✓" : " ✗"}
@@ -646,7 +702,9 @@ function UserVisaRecords() {
                   {selectedVisa.timeline.map((step) => (
                     <div
                       key={step.step}
-                      className={`${styles.timelineStep} ${styles[step.status]}`}>
+                      className={`${styles.timelineStep} ${
+                        styles[step.status]
+                      }`}>
                       <div className={styles.timelineDot}></div>
                       <div className={styles.timelineContent}>
                         <div className={styles.timelineTitle}>{step.name}</div>
@@ -664,10 +722,15 @@ function UserVisaRecords() {
                 <FiMessageSquare />
                 Contact Support
               </button>
-              <button className={styles.modalBtn}>
-                <FiDownload />
-                Download Documents
-              </button>
+              {selectedVisa.approvalFile?.dataUrl && (
+                <a
+                  href={selectedVisa.approvalFile.dataUrl}
+                  download={selectedVisa.approvalFile.name}
+                  className={styles.modalBtn}>
+                  <FiDownload />
+                  Download Approval
+                </a>
+              )}
             </div>
           </div>
         </div>

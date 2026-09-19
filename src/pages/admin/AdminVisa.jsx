@@ -44,6 +44,25 @@ const write = (key, value) => {
   localStorage.setItem(key, JSON.stringify(value));
 };
 
+/* Download a data URL as a file */
+const downloadDataUrl = (dataUrl, filename) => {
+  const a = document.createElement("a");
+  a.href = dataUrl;
+  a.download = filename || "file";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+};
+
+/* Read a File into a base64 data URL */
+const readFileAsDataUrl = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
 const fmtDate = (iso) => {
   if (!iso) return "—";
   try {
@@ -222,7 +241,6 @@ const AdminVisa = () => {
       ...extra,
       lastUpdated: new Date().toISOString(),
     });
-    // Sync the modal if it's open
     setSelectedApplication((prev) =>
       prev && String(prev.id) === String(appId) ?
         { ...prev, status: newStatus, ...extra }
@@ -258,6 +276,57 @@ const AdminVisa = () => {
     a.download = `visa_applications_${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  /* ---------- passport + approval handlers ---------- */
+
+  const handleDownloadPassport = (app) => {
+    if (!app.passportFile?.dataUrl) {
+      alert(
+        "The passport file was not saved with content. Ask the applicant to re-upload.",
+      );
+      return;
+    }
+    downloadDataUrl(
+      app.passportFile.dataUrl,
+      `passport-${app.applicationId || app.id}-${app.passportFile.name}`,
+    );
+  };
+
+  const handleUploadApproval = async (app, file) => {
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      alert("File size must be less than 10MB");
+      return;
+    }
+    const dataUrl = await readFileAsDataUrl(file);
+    const approvalFile = {
+      name: file.name,
+      size: (file.size / 1024 / 1024).toFixed(2) + " MB",
+      type: file.type,
+      dataUrl,
+      uploadedAt: new Date().toISOString(),
+    };
+    updateApplication(app.id, {
+      approvalFile,
+      status: "approved",
+      approvedAt: new Date().toISOString(),
+    });
+    setSelectedApplication((prev) =>
+      prev && String(prev.id) === String(app.id) ?
+        { ...prev, approvalFile, status: "approved" }
+      : prev,
+    );
+  };
+
+  const handleRemoveApproval = (app) => {
+    if (!window.confirm("Remove the approval document?")) return;
+    updateApplication(app.id, { approvalFile: null });
+    setSelectedApplication((prev) =>
+      prev && String(prev.id) === String(app.id) ?
+        { ...prev, approvalFile: null }
+      : prev,
+    );
   };
 
   /* ---------- country CRUD ---------- */
@@ -506,7 +575,7 @@ const AdminVisa = () => {
           ))}
         </div>
 
-        {/* Search + Filters — only for applications tab */}
+        {/* Search + Filters */}
         {activeTab === "applications" && (
           <div className="search-filters">
             <div className="search-container">
@@ -680,9 +749,15 @@ const AdminVisa = () => {
                             </div>
                             <div
                               className={`payment-status ${
-                                app.status === "approved" ? "paid" : "pending"
+                                app.paymentStatus === "pending" ? "pending"
+                                : app.status === "approved" ? "paid"
+                                : "pending"
                               }`}>
-                              {app.status === "approved" ? "Paid" : "Pending"}
+                              {app.paymentStatus === "pending" ?
+                                "Payment pending"
+                              : app.status === "approved" ?
+                                "Paid"
+                              : "Pending"}
                             </div>
                           </div>
                         </td>
@@ -701,6 +776,14 @@ const AdminVisa = () => {
                               title="Email">
                               <FaEnvelope />
                             </button>
+                            {app.passportFile?.dataUrl && (
+                              <button
+                                className="action-btn download"
+                                onClick={() => handleDownloadPassport(app)}
+                                title="Download passport">
+                                <FaFileExport />
+                              </button>
+                            )}
                             <button
                               className="action-btn edit"
                               onClick={() => handleAssignOfficer(app.id)}
@@ -1118,6 +1201,100 @@ const AdminVisa = () => {
                         </div>
                       )}
                     </div>
+                  </div>
+
+                  {/* Passport file */}
+                  <div className="modal-section">
+                    <h3 className="section-title">
+                      <FaPassport /> Passport Document
+                    </h3>
+                    {selectedApplication.passportFile ?
+                      <div className="fileRow">
+                        <div className="fileMeta">
+                          <div className="fileName">
+                            {selectedApplication.passportFile.name}
+                          </div>
+                          <div className="fileSub">
+                            {selectedApplication.passportFile.size} •{" "}
+                            {selectedApplication.passportFile.type
+                              ?.split("/")[1]
+                              ?.toUpperCase()}
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          className="btn-secondary"
+                          onClick={() =>
+                            handleDownloadPassport(selectedApplication)
+                          }>
+                          <FaFileExport /> Download
+                        </button>
+                      </div>
+                    : <p className="mutedText">No passport uploaded.</p>}
+                  </div>
+
+                  {/* Approval document */}
+                  <div className="modal-section">
+                    <h3 className="section-title">
+                      <FaCheckCircle /> Approval Document
+                    </h3>
+
+                    {selectedApplication.approvalFile ?
+                      <div className="fileRow">
+                        <div className="fileMeta">
+                          <div className="fileName">
+                            {selectedApplication.approvalFile.name}
+                          </div>
+                          <div className="fileSub">
+                            Uploaded{" "}
+                            {fmtDate(
+                              selectedApplication.approvalFile.uploadedAt,
+                            )}
+                          </div>
+                        </div>
+                        <div className="fileActions">
+                          <button
+                            type="button"
+                            className="btn-secondary"
+                            onClick={() =>
+                              downloadDataUrl(
+                                selectedApplication.approvalFile.dataUrl,
+                                selectedApplication.approvalFile.name,
+                              )
+                            }>
+                            <FaFileExport /> Download
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-danger"
+                            onClick={() =>
+                              handleRemoveApproval(selectedApplication)
+                            }>
+                            <FaTrash />
+                          </button>
+                        </div>
+                      </div>
+                    : <div className="uploadApproval">
+                        <p className="mutedText">
+                          Upload the visa approval (grant letter, PDF or image).
+                          The applicant can download it from their dashboard.
+                        </p>
+                        <label className="uploadBtn">
+                          <FaFileExport /> Choose file
+                          <input
+                            type="file"
+                            accept="image/*,application/pdf"
+                            onChange={(e) => {
+                              const f = e.target.files?.[0];
+                              if (f)
+                                handleUploadApproval(selectedApplication, f);
+                              e.target.value = "";
+                            }}
+                            hidden
+                          />
+                        </label>
+                      </div>
+                    }
                   </div>
                 </div>
               </div>

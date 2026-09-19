@@ -1,22 +1,16 @@
-/* ==================================================================
-   BASE
-   ================================================================== */
 .admin-visa-manager {
   padding: 1.5rem;
   min-height: 100vh;
   background: #f8fafc;
   --admin-green: #10b981;
   --admin-green-dark: #059669;
-  --admin-text: #10b981;
+  /* --admin-text: #10b981; */
   --admin-muted: #64748b;
   --admin-line: #e5e7eb;
   --admin-surface: #ffffff;
   --admin-soft: #f9fafb;
 }
 
-/* ==================================================================
-   HEADER
-   ================================================================== */
 .admin-header {
   background: var(--admin-surface);
   border-radius: 12px;
@@ -277,7 +271,7 @@
 }
 
 .filter-chip.active {
-  background: var(--admin-text);
+  /* background: var(--admin-text); */
   color: #ffffff;
   border-color: var(--admin-text);
 }
@@ -1261,7 +1255,7 @@
 }
 
 .btn-primary {
-  background: var(--admin-text);
+  /* background: var(--admin-text); */
   color: #ffffff;
 }
 
@@ -1391,7 +1385,7 @@
 
 .btn-add-tag {
   padding: 0.5rem 0.875rem;
-  background: var(--admin-text);
+  /* background: var(--admin-text); */
   color: #ffffff;
   border: none;
   border-radius: 8px;
@@ -1717,4 +1711,86 @@
   .loading-spinner {
     animation: none;
   }
+}
+
+.fileRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.875rem 1rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.fileMeta {
+  min-width: 0;
+  flex: 1;
+}
+
+.fileName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #064e3b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fileSub {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-top: 0.125rem;
+}
+
+.fileActions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.uploadApproval {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.uploadBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  background: #064e3b;
+  color: #ffffff;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: fit-content;
+  transition: background 0.15s ease;
+}
+
+.uploadBtn:hover {
+  background: #053b2c;
+}
+
+.mutedText {
+  font-size: 0.8125rem;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.55;
+}
+
+.action-btn.download {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.action-btn.download:hover {
+  background: rgba(16, 185, 129, 0.2);
+}
+
+.payment-status.pending {
+  color: #b45309;
 }

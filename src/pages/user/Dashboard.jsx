@@ -13,13 +13,22 @@ import {
   FiPackage,
   FiUsers,
   FiSmile,
-  FiList,
-  FiNavigation,
   FiActivity,
 } from "react-icons/fi";
 
 import styles from "./Dashboard.module.css";
 import { authApi, bookingsApi, transactionsApi } from "../../services/api";
+
+const VISA_KEY = "visaApplications";
+
+const readLocal = (key, fallback = []) => {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
+};
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -29,6 +38,23 @@ function Dashboard() {
   const [recentActivities, setRecentActivities] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  /* ------------------------------------------------------------------ */
+  /* Load everything the dashboard needs                                 */
+  /* ------------------------------------------------------------------ */
+  const loadAll = async (userId) => {
+    const [bookings, transactions] = await Promise.all([
+      bookingsApi.list(userId),
+      transactionsApi.list(userId),
+    ]);
+
+    // visaApplications isn't in the API yet — read it directly
+    const visaApps = readLocal(VISA_KEY, []).filter(
+      (v) => String(v.userId) === String(userId),
+    );
+
+    return { bookings, transactions, visaApps };
+  };
+
   useEffect(() => {
     const currentUser = authApi.getCurrentUser();
     if (!currentUser) {
@@ -37,25 +63,31 @@ function Dashboard() {
     }
     setUser(currentUser);
 
-    (async () => {
-      const [bookings, transactions] = await Promise.all([
-        bookingsApi.list(currentUser.id),
-        transactionsApi.list(currentUser.id),
-      ]);
-
+    const buildAndSet = ({ bookings, transactions, visaApps }) => {
       const completedTxns = transactions.filter(
         (t) => t.status === "completed",
       ).length;
+      const approvedVisas = visaApps.filter(
+        (v) => v.status === "approved",
+      ).length;
+
       const inProgress =
         bookings.filter((b) => b.status === "pending").length +
-        transactions.filter((t) => t.status === "pending").length;
+        transactions.filter((t) => t.status === "pending").length +
+        visaApps.filter(
+          (v) => v.status === "pending" || v.status === "processing",
+        ).length;
 
       setStats({
         exchangeCount: transactions.length,
         flightBookings: bookings.filter((b) => b.type === "flight").length,
-        travelBookings: bookings.filter((b) => b.type === "hotel").length,
-        visaApplications: 0,
-        totalTransactions: bookings.length + transactions.length,
+        travelBookings: bookings.filter(
+          (b) => b.type === "hotel" || b.type === "tour" || b.type === "car",
+        ).length,
+        visaApplications: visaApps.length,
+        approvedVisas,
+        totalTransactions:
+          bookings.length + transactions.length + visaApps.length,
         completedTransactions: completedTxns,
         inProgress,
         successRate:
@@ -64,40 +96,96 @@ function Dashboard() {
           : `${Math.round((completedTxns / transactions.length) * 100)}%`,
       });
 
+      // Build the activity feed from all three sources
       const feed = [
         ...transactions.map((t) => ({
           id: t.id,
           type: "exchange",
           description: `${t.fromCurrency} to ${t.toCurrency} Exchange`,
-          amount: `${t.fromAmount} ${t.fromCurrency} → ${t.toAmount} ${t.toCurrency}`,
-          date: t.date,
+          amount: `${t.fromAmount ?? t.amount} ${t.fromCurrency} → ${
+            t.toAmount ?? ""
+          } ${t.toCurrency}`,
+          date: t.date || t.createdAt,
           status: t.status,
           icon: <FiDollarSign />,
           color: "#10b981",
-          processStep: t.status.charAt(0).toUpperCase() + t.status.slice(1),
+          processStep:
+            (t.status || "pending").charAt(0).toUpperCase() +
+            (t.status || "pending").slice(1),
           category: "transactions",
         })),
+
         ...bookings.map((b) => ({
           id: b.id,
           type: b.type,
-          description: b.destination,
-          amount: `${b.currency} ${b.price}`,
-          date: b.date,
+          description: b.destination || b.hotel || b.carModel || "Booking",
+          amount: `${b.currency || "USD"} ${b.price || 0}`,
+          date: b.date || b.bookingDate || b.createdAt,
           status: b.status,
-          icon: b.type === "flight" ? <FiSend /> : <FiMap />,
-          color: b.type === "flight" ? "#f97316" : "#8b5cf6",
-          processStep: b.status.charAt(0).toUpperCase() + b.status.slice(1),
+          icon:
+            b.type === "flight" ? <FiSend />
+            : b.type === "hotel" ? <FiMap />
+            : b.type === "car" ? <FiMap />
+            : <FiPackage />,
+          color:
+            b.type === "flight" ? "#f97316"
+            : b.type === "hotel" ? "#8b5cf6"
+            : b.type === "car" ? "#0ea5e9"
+            : "#8b5cf6",
+          processStep:
+            (b.status || "pending").charAt(0).toUpperCase() +
+            (b.status || "pending").slice(1),
           category: "bookings",
         })),
-      ].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        ...visaApps.map((v) => ({
+          id: v.id,
+          type: "visa",
+          description: `${v.countryName || "Visa"} — ${
+            v.durationLabel || "Application"
+          }`,
+          amount: `${v.countryCurrency || "$"}${v.amountPaid ?? 0}`,
+          date: v.submittedAt,
+          status: v.status,
+          icon: <FiGlobe />,
+          color: "#3b82f6",
+          processStep:
+            (v.status || "processing").charAt(0).toUpperCase() +
+            (v.status || "processing").slice(1),
+          category: "my-visa",
+        })),
+      ].sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
 
       setRecentActivities(feed.slice(0, 5));
       setLoading(false);
+    };
+
+    // Initial load
+    (async () => {
+      const bundle = await loadAll(currentUser.id);
+      buildAndSet(bundle);
     })();
 
+    // Live updates: if another tab writes to any of these keys, refresh
+    const onStorage = (e) => {
+      if (["bookings", "transactions", VISA_KEY].includes(e.key)) {
+        (async () => {
+          const bundle = await loadAll(currentUser.id);
+          buildAndSet(bundle);
+        })();
+      }
+    };
+    window.addEventListener("storage", onStorage);
+
     const timer = setInterval(() => setCurrentTime(new Date()), 60000);
-    return () => clearInterval(timer);
+
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      clearInterval(timer);
+    };
   }, [navigate]);
+
+  /* ------------------------------------------------------------------ */
 
   const formatTime = (date) =>
     date.toLocaleTimeString("en-US", {
@@ -143,7 +231,10 @@ function Dashboard() {
       icon: <FiGlobe />,
       color: "#3b82f6",
       count: stats?.visaApplications ?? 0,
-      statusText: "In review",
+      statusText:
+        stats?.visaApplications > 0 ?
+          `${stats?.visaApplications ?? 0} submitted`
+        : "No applications yet",
     },
     {
       id: 4,
@@ -153,7 +244,7 @@ function Dashboard() {
       icon: <FiMap />,
       color: "#8b5cf6",
       count: stats?.travelBookings ?? 0,
-      statusText: "Booked",
+      statusText: `${stats?.travelBookings ?? 0} total`,
     },
   ];
 
@@ -180,7 +271,7 @@ function Dashboard() {
       description: "Track visa status",
       icon: <FiGlobe />,
       color: "#f97316",
-      path: "/dashboard/visa",
+      path: "/dashboard/my-visa",
     },
     {
       id: 4,
@@ -203,12 +294,13 @@ function Dashboard() {
     switch (status) {
       case "completed":
       case "confirmed":
+      case "approved":
         return "#10b981";
       case "pending":
-        return "#f59e0b";
       case "processing":
-        return "#3b82f6";
+        return "#f59e0b";
       case "cancelled":
+      case "rejected":
       case "failed":
         return "#ef4444";
       default:
@@ -316,7 +408,12 @@ function Dashboard() {
               <h3>{stats.visaApplications}</h3>
               <p>Visa Applications</p>
               <div className={styles.statTrend}>
-                <FiClock /> <span>Coming soon</span>
+                <FiClock />{" "}
+                <span>
+                  {stats.approvedVisas > 0 ?
+                    `${stats.approvedVisas} approved`
+                  : "Track your visa"}
+                </span>
               </div>
             </div>
           </div>
@@ -331,7 +428,7 @@ function Dashboard() {
               <h3>{stats.travelBookings}</h3>
               <p>Travel Packages</p>
               <div className={styles.statTrend}>
-                <FiPackage /> <span>Hotel bookings</span>
+                <FiPackage /> <span>All your bookings</span>
               </div>
             </div>
           </div>
@@ -356,8 +453,8 @@ function Dashboard() {
               <div className={styles.activitiesList}>
                 {recentActivities.length === 0 ?
                   <p style={{ padding: "1rem", color: "#64748b" }}>
-                    No recent activity yet. Start by making a booking or an
-                    exchange.
+                    No recent activity yet. Start by making a booking, a visa
+                    application, or an exchange.
                   </p>
                 : recentActivities.map((activity) => (
                     <div key={activity.id} className={styles.activityCard}>
@@ -397,7 +494,7 @@ function Dashboard() {
 
                       <div className={styles.activityFooter}>
                         <div className={styles.processInfo}>
-                          <FiNavigation />{" "}
+                          <FiActivity />{" "}
                           <span>Process: {activity.processStep}</span>
                         </div>
                         <button

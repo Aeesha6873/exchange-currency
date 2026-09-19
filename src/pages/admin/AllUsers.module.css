@@ -679,6 +679,8 @@
 
   .headerRight {
     width: 100%;
+    display: flex;
+    flex-direction: row;
   }
 
   .exportBtn,
@@ -809,10 +811,6 @@
 
 /* Extra small phone — 400 and below */
 @media (max-width: 400px) {
-  .headerRight {
-    flex-direction: column;
-  }
-
   .exportBtn,
   .addBtn {
     width: 100%;

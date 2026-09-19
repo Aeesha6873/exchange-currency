@@ -1233,14 +1233,7 @@ select.formInput {
     gap: 10px;
   }
 
-  .paymentSelector {
-    /* flex-direction: column; */
-  }
-
   .paymentMethod {
-    /* flex-direction: row; */
-    /* justify-content: flex-start; */
-    /* text-align: left; */
     gap: 12px;
   }
 

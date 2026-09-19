@@ -94,7 +94,9 @@ const Help = () => {
             <div className={styles.contactDesc}>support@travelfin.com</div>
           </div>
         </a>
-        <a href="tel:+234 703 485 7569" className={styles.contactCard}>
+        <a
+          href="tel: +234 916 001 1585 | 7000048006"
+          className={styles.contactCard}>
           <div className={styles.contactIcon}>
             <FiPhone />
           </div>

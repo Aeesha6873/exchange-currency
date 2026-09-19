@@ -28,6 +28,20 @@ import {
 } from "react-icons/fa";
 import "./VisaService.css";
 
+/* ========== BANK ACCOUNT DETAILS ==========
+   Edit these once to match your real bank account. */
+const BANK_DETAILS = {
+  bankName: "TravelFin Partners Bank",
+  accountName: "TravelFin Ltd",
+  accountNumber: "0123456789",
+  sortCode: "00-00-00",
+  swift: "TRVLGB2L",
+  iban: "GB00 TRVL 0000 0000 0123 45",
+  reference: "Use your full name as the payment reference",
+  instructions:
+    "Transfer the exact amount shown above. Your application will be processed once we receive the funds — usually within 1 business day.",
+};
+
 export default function VisaServicePage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [applicationData, setApplicationData] = useState({
@@ -43,7 +57,6 @@ export default function VisaServicePage() {
     passportFile: null,
   });
 
-  // Payment state
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [paymentData, setPaymentData] = useState({
     cardNumber: "",
@@ -51,19 +64,17 @@ export default function VisaServicePage() {
     expiry: "",
     cvv: "",
   });
+  const [copiedField, setCopiedField] = useState(null);
 
   const [isAnimating, setIsAnimating] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
-  // Country dropdown (portal)
   const [countryDropdownOpen, setCountryDropdownOpen] = useState(false);
   const [countrySearch, setCountrySearch] = useState("");
   const [dropdownRect, setDropdownRect] = useState(null);
   const triggerRef = useRef(null);
 
-  // Countries — loaded from localStorage (shared with admin)
   const [countries, setCountries] = useState([]);
-
   const fileInputRef = useRef(null);
 
   /* ============ CONFIG ============ */
@@ -92,7 +103,7 @@ export default function VisaServicePage() {
     },
   ];
 
-  /* ============ LOAD COUNTRIES FROM STORAGE ============ */
+  /* ============ LOAD COUNTRIES ============ */
   useEffect(() => {
     const loadCountries = () => {
       try {
@@ -212,6 +223,16 @@ export default function VisaServicePage() {
   const calculateTotalPrice = () =>
     getCountry(applicationData.country)?.price || 0;
 
+  const copyToClipboard = async (label, value) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopiedField(label);
+      setTimeout(() => setCopiedField(null), 1800);
+    } catch {
+      alert(`Copy this: ${value}`);
+    }
+  };
+
   /* ============ NAV ============ */
   const goToStep = (n) => {
     setIsAnimating(true);
@@ -248,16 +269,22 @@ export default function VisaServicePage() {
       alert("File size must be less than 10MB");
       return;
     }
-    setApplicationData((prev) => ({
-      ...prev,
-      passportFile: {
-        name: file.name,
-        size: (file.size / 1024 / 1024).toFixed(2) + " MB",
-        type: file.type,
-        url: URL.createObjectURL(file),
-      },
-    }));
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setApplicationData((prev) => ({
+        ...prev,
+        passportFile: {
+          name: file.name,
+          size: (file.size / 1024 / 1024).toFixed(2) + " MB",
+          type: file.type,
+          dataUrl: reader.result,
+        },
+      }));
+    };
+    reader.readAsDataURL(file);
   };
+
   const handlePassportUpload = (e) => processUpload(e.target.files[0]);
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -270,9 +297,6 @@ export default function VisaServicePage() {
     processUpload(e.dataTransfer.files[0]);
   };
   const handleRemovePassport = () => {
-    if (applicationData.passportFile?.url) {
-      URL.revokeObjectURL(applicationData.passportFile.url);
-    }
     setApplicationData((prev) => ({ ...prev, passportFile: null }));
   };
   const handleUploadSubmit = () => {
@@ -335,6 +359,9 @@ export default function VisaServicePage() {
 
     setIsAnimating(true);
 
+    const paymentStatus =
+      paymentMethod === "bank_transfer" ? "pending" : "paid";
+
     try {
       await visaApi.create(currentUser.id, {
         countryId: applicationData.country,
@@ -357,10 +384,12 @@ export default function VisaServicePage() {
               name: applicationData.passportFile.name,
               size: applicationData.passportFile.size,
               type: applicationData.passportFile.type,
+              dataUrl: applicationData.passportFile.dataUrl,
             }
           : null,
         amountPaid: calculateTotalPrice(),
         paymentMethod,
+        paymentStatus,
       });
     } catch (err) {
       console.error(err);
@@ -390,6 +419,7 @@ export default function VisaServicePage() {
       });
       setPaymentMethod("card");
       setPaymentData({ cardNumber: "", cardName: "", expiry: "", cvv: "" });
+      setCopiedField(null);
       setIsAnimating(false);
     }, 400);
   };
@@ -1018,21 +1048,21 @@ export default function VisaServicePage() {
 
             <label
               className={`paymentMethodItem ${
-                paymentMethod === "paypal" ? "selected" : ""
+                paymentMethod === "bank_transfer" ? "selected" : ""
               }`}
-              onClick={() => setPaymentMethod("paypal")}>
+              onClick={() => setPaymentMethod("bank_transfer")}>
               <input
                 type="radio"
                 name="payment"
-                checked={paymentMethod === "paypal"}
-                onChange={() => setPaymentMethod("paypal")}
+                checked={paymentMethod === "bank_transfer"}
+                onChange={() => setPaymentMethod("bank_transfer")}
               />
               <div className="paymentMethodIcon">
                 <FaGlobe />
               </div>
               <div className="paymentMethodInfo">
-                <span className="paymentMethodName">PayPal</span>
-                <span className="paymentMethodDesc">Secure checkout</span>
+                <span className="paymentMethodName">Bank Transfer</span>
+                <span className="paymentMethodDesc">Direct to our account</span>
               </div>
             </label>
           </div>
@@ -1103,6 +1133,60 @@ export default function VisaServicePage() {
           </div>
         )}
 
+        {paymentMethod === "bank_transfer" && (
+          <motion.div
+            className="visaBankPanel"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25 }}>
+            <div className="visaBankNotice">
+              <span className="visaBankNoticeIcon">🏦</span>
+              <div>
+                <div className="visaBankNoticeTitle">Pay via bank transfer</div>
+                <p className="visaBankNoticeText">
+                  Transfer{" "}
+                  <strong>
+                    {getCountryCurrency()}
+                    {calculateTotalPrice()}
+                  </strong>{" "}
+                  to the account below. Your application will be processed once
+                  the payment is received.
+                </p>
+              </div>
+            </div>
+
+            <div className="visaBankGrid">
+              {[
+                { label: "Bank name", value: BANK_DETAILS.bankName },
+                { label: "Account name", value: BANK_DETAILS.accountName },
+                { label: "Account number", value: BANK_DETAILS.accountNumber },
+                { label: "Sort code", value: BANK_DETAILS.sortCode },
+                { label: "SWIFT / BIC", value: BANK_DETAILS.swift },
+                { label: "IBAN", value: BANK_DETAILS.iban },
+              ].map((row) => (
+                <div key={row.label} className="visaBankRow">
+                  <div className="visaBankLabel">{row.label}</div>
+                  <div className="visaBankValueWrap">
+                    <span className="visaBankValue">{row.value}</span>
+                    <button
+                      type="button"
+                      className="visaBankCopyBtn"
+                      onClick={() => copyToClipboard(row.label, row.value)}>
+                      {copiedField === row.label ? "✓ Copied" : "Copy"}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="visaBankReference">
+              <strong>Payment reference:</strong> {BANK_DETAILS.reference}
+            </div>
+
+            <p className="visaBankInstructions">{BANK_DETAILS.instructions}</p>
+          </motion.div>
+        )}
+
         <div className="paymentTotal">
           <span>Total Amount</span>
           <div className="paymentAmount">
@@ -1119,8 +1203,10 @@ export default function VisaServicePage() {
         <button
           className="visaBtn visaBtnPrimary"
           onClick={handlePaymentSubmit}>
-          <FaCreditCard /> Pay {getCountryCurrency()}
-          {calculateTotalPrice()}
+          <FaCreditCard />
+          {paymentMethod === "bank_transfer" ?
+            "Submit Application"
+          : `Pay ${getCountryCurrency()}${calculateTotalPrice()}`}
         </button>
       </div>
     </div>
@@ -1153,7 +1239,9 @@ export default function VisaServicePage() {
           <strong>{getCountryProcessing()}</strong>
         </div>
         <div className="visaCompleteItem">
-          <span>Amount Paid</span>
+          <span>
+            {paymentMethod === "bank_transfer" ? "Amount Due" : "Amount Paid"}
+          </span>
           <strong>
             {getCountryCurrency()}
             {calculateTotalPrice()}
