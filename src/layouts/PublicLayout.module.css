@@ -1,0 +1,19 @@
+.main {
+  padding-top: 72px; /* matches the fixed Navbar height */
+  min-height: calc(100vh - 72px);
+  background: #f8fafc;
+}
+
+@media (max-width: 992px) {
+  .main {
+    padding-top: 64px;
+    min-height: calc(100vh - 64px);
+  }
+}
+
+@media (max-width: 480px) {
+  .main {
+    padding-top: 60px;
+    min-height: calc(100vh - 60px);
+  }
+}

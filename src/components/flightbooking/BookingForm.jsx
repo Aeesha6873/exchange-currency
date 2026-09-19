@@ -368,7 +368,7 @@ const BookingForm = ({ flight, onComplete, onBack }) => {
                                 });
                               }}
                               required
-                              placeholder="+1 (555) 123-4567"
+                              placeholder="+234 000 000 0000"
                             />
                           </div>
 
@@ -418,9 +418,9 @@ const BookingForm = ({ flight, onComplete, onBack }) => {
                       <motion.div
                         key={method.id}
                         className={`${styles.paymentMethod} ${
-                          formData.paymentMethod === method.id
-                            ? styles.active
-                            : ""
+                          formData.paymentMethod === method.id ?
+                            styles.active
+                          : ""
                         }`}
                         onClick={() =>
                           setFormData({ ...formData, paymentMethod: method.id })

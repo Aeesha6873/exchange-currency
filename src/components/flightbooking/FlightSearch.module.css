@@ -1,4 +1,6 @@
-/* FlightSearch.module.css - FINAL Perfect Design */
+/* ==================================================================
+   VARIABLES + BASE
+   ================================================================== */
 .flightSearch {
   --dark-green: #064e3b;
   --green: #10b981;
@@ -7,11 +9,7 @@
   --off-white: #f8fafc;
   --gray: #64748b;
   --gray-light: #cbd5e1;
-}
 
-.flightSearch {
-  min-height: 100vh;
-  /* background: linear-gradient(135deg, var(--off-white) 0%, #f0f7f4 100%); */
   font-family:
     "Inter",
     -apple-system,
@@ -20,102 +18,30 @@
   color: var(--gray);
   position: relative;
   overflow-x: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* padding: 20px; */
+  width: 100%;
 }
 
-/* Background Elements */
-/* .backgroundElements {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.gridLines {
-  position: absolute;
-  inset: 0;
-  background-image: linear-gradient(
-      rgba(16, 185, 129, 0.05) 1px,
-      transparent 1px
-    ),
-    linear-gradient(90deg, rgba(16, 185, 129, 0.05) 1px, transparent 1px);
-  background-size: 50px 50px;
-  mask-image: radial-gradient(circle at center, black 20%, transparent 70%);
-}
-
-.floatingOrbs {
-  position: absolute;
-  inset: 0;
-}
-
-.orb1,
-.orb2,
-.orb3 {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(40px);
-  opacity: 0.1;
-  animation: float 20s infinite ease-in-out;
-}
-
-.orb1 {
-  width: 300px;
-  height: 300px;
-  background: linear-gradient(45deg, var(--green), var(--dark-green));
-  top: 10%;
-  left: 10%;
-  animation-delay: 0s;
-}
-
-.orb2 {
-  width: 200px;
-  height: 200px;
-  background: linear-gradient(45deg, var(--green), var(--dark-green));
-  bottom: 20%;
-  right: 15%;
-  animation-delay: -5s;
-}
-
-.orb3 {
-  width: 150px;
-  height: 150px;
-  background: linear-gradient(45deg, var(--green), var(--dark-green));
-  top: 50%;
-  left: 80%;
-  animation-delay: -10s;
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-  33% {
-    transform: translate(30px, -50px) scale(1.1);
-  }
-  66% {
-    transform: translate(-20px, 20px) scale(0.9);
-  }
-} */
-
-/* Main Content */
+/* ==================================================================
+   LAYOUT WRAPPER
+   ================================================================== */
 .contentWrapper {
   position: relative;
   z-index: 1;
   width: 100%;
   max-width: 1200px;
+  margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 60px;
   align-items: center;
 }
 
-/* Left Side - Welcome */
+/* ==================================================================
+   WELCOME (left column)
+   ================================================================== */
 .welcomeSection {
   padding-right: 20px;
+  min-width: 0;
 }
 
 .welcomeTag {
@@ -136,7 +62,7 @@
   font-size: 42px;
   font-weight: 700;
   color: var(--dark-green);
-  margin-bottom: 16px;
+  margin: 0 0 16px 0;
   line-height: 1.1;
 }
 
@@ -149,10 +75,10 @@
   font-size: 17px;
   color: var(--gray);
   line-height: 1.6;
-  margin-bottom: 40px;
+  margin: 0 0 40px 0;
 }
 
-/* Features List */
+/* Features */
 .featuresList {
   display: flex;
   flex-direction: column;
@@ -186,6 +112,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-width: 0;
 }
 
 .featureTitle {
@@ -197,31 +124,45 @@
 .featureDesc {
   font-size: 13px;
   color: var(--gray);
+  line-height: 1.45;
 }
 
-/* Form Card */
+/* ==================================================================
+   FORM CARD (right column)
+   ================================================================== */
+.searchForm {
+  min-width: 0;
+  width: 100%;
+}
+
 .formCard {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 24px;
-  padding: 40px;
-
+  padding: 32px;
   border: 1px solid rgba(16, 185, 129, 0.15);
   backdrop-filter: blur(20px);
+  box-shadow: 0 20px 40px -12px rgba(6, 78, 59, 0.08);
+  width: 100%;
+  box-sizing: border-box;
 }
 
-/* Trip Type */
+/* ==================================================================
+   TRIP TYPE
+   ================================================================== */
 .tripType {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 30px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 24px;
   background: rgba(16, 185, 129, 0.04);
   padding: 6px;
   border-radius: 14px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .tripButton {
-  flex: 1;
-  padding: 14px 16px;
+  padding: 12px 8px;
   background: transparent;
   border: 1px solid transparent;
   border-radius: 10px;
@@ -229,27 +170,35 @@
   font-weight: 600;
   color: var(--gray);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .tripButton.active {
   background: var(--white);
   color: var(--dark-green);
   border-color: var(--green);
-  /* box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1); */
 }
 
-/* Route Section */
+/* ==================================================================
+   ROUTE
+   ================================================================== */
 .routeSection {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   gap: 12px;
   margin-bottom: 24px;
   align-items: end;
+  width: 100%;
 }
 
 .inputGroup {
   position: relative;
+  min-width: 0;
+  width: 100%;
 }
 
 .inputLabel {
@@ -259,28 +208,28 @@
   margin-bottom: 8px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .input {
-  /* width: 100%; */
-  padding: 14px 16px;
+  width: 100%;
+  padding: 12px 14px;
   background: var(--white);
   border: 1px solid var(--gray-light);
   border-radius: 12px;
   font-size: 15px;
   color: var(--dark-green);
-  transition: all 0.3s ease;
+  transition: border-color 0.2s ease;
   font-weight: 500;
+  box-sizing: border-box;
+  font-family: inherit;
 }
 
 .input:focus {
   outline: none;
   border-color: var(--green);
-  /* box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); */
 }
 
-/* Swap Button */
 .swapButton {
   width: 44px;
   height: 44px;
@@ -293,8 +242,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  align-self: center;
+  align-self: end;
   flex-shrink: 0;
+  margin-bottom: 2px;
 }
 
 .swapButton:hover {
@@ -304,17 +254,20 @@
   transform: rotate(180deg);
 }
 
-/* Dates Section */
+/* ==================================================================
+   DATES
+   ================================================================== */
 .datesSection {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 12px;
   margin-bottom: 24px;
+  width: 100%;
 }
 
 .dateInput {
-  width: 88%;
-  padding: 14px 16px;
+  width: 100%;
+  padding: 12px 14px;
   background: var(--white);
   border: 1px solid var(--gray-light);
   border-radius: 12px;
@@ -322,22 +275,24 @@
   color: var(--dark-green);
   cursor: pointer;
   font-weight: 500;
+  box-sizing: border-box;
+  font-family: inherit;
 }
 
 .dateInput:focus {
   outline: none;
   border-color: var(--green);
-  /* box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); */
 }
 
-/* Travelers Container */
+/* ==================================================================
+   TRAVELERS TRIGGER
+   ================================================================== */
 .travelersContainer {
   position: relative;
   width: 100%;
   margin-bottom: 20px;
 }
 
-/* Travelers Trigger */
 .travelersTrigger {
   width: 100%;
   padding: 12px 14px;
@@ -345,10 +300,12 @@
   border: 1px solid var(--gray-light);
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
+  box-sizing: border-box;
 }
 
 .travelersTrigger:hover {
@@ -360,6 +317,7 @@
   align-items: center;
   gap: 10px;
   flex: 1;
+  min-width: 0;
 }
 
 .triggerIcon {
@@ -379,6 +337,7 @@
   flex-direction: column;
   gap: 3px;
   min-width: 0;
+  text-align: left;
 }
 
 .travelersCount {
@@ -400,6 +359,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  width: fit-content;
 }
 
 .dropdownArrow {
@@ -409,28 +369,31 @@
   justify-content: center;
   transition: transform 0.2s ease;
   flex-shrink: 0;
-  margin-left: 8px;
 }
 
 .travelersTrigger.active .dropdownArrow {
   transform: rotate(180deg);
 }
 
+/* ==================================================================
+   TRAVELERS DROPDOWN
+   ================================================================== */
 .travelersDropdown {
   position: absolute;
-  top: calc(10% + 6px);
+  top: calc(100% + 6px);
   right: 0;
-  width: 500px;
-  max-height: 380px;
+  width: 480px;
+  max-width: calc(100vw - 32px);
+  max-height: 420px;
   background: var(--white);
   border: 1px solid var(--gray-light);
   border-radius: 14px;
   z-index: 1000;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   animation: slideDown 0.2s ease-out;
   overflow: hidden;
+  box-shadow: 0 12px 32px -8px rgba(6, 78, 59, 0.15);
 }
 
 @keyframes slideDown {
@@ -445,7 +408,7 @@
 }
 
 .dropdownHeader {
-  padding: 12px;
+  padding: 12px 16px;
   background: var(--dark-green);
   color: var(--white);
   display: flex;
@@ -466,48 +429,109 @@
 }
 
 .closeButton {
-  background: var(--dark-green);
+  background: transparent;
   border: none;
   width: 30px;
   height: 30px;
-  border-radius: 5px;
+  border-radius: 6px;
   color: var(--white);
   cursor: pointer;
   display: flex;
-
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: center;
   padding: 0;
   flex-shrink: 0;
-  font-size: 12px;
+  transition: background 0.15s ease;
+}
+
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .dropdownContent {
   padding: 16px;
-  display: flex;
-
-  gap: 24px;
-  overflow: visible;
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 20px;
+  overflow-y: auto;
   flex: 1;
 }
 
-/* Passengers Section - COMPACT */
+.dropdownFooter {
+  padding: 12px 16px;
+  border-top: 1px solid var(--gray-light);
+  background: rgba(16, 185, 129, 0.02);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.totalInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.totalLabel {
+  font-size: 11px;
+  color: var(--gray);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.totalValue {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--dark-green);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.applyButton {
+  padding: 8px 20px;
+  background: linear-gradient(135deg, var(--dark-green), var(--green));
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.applyButton:hover {
+  transform: translateY(-1px);
+}
+
+/* ==================================================================
+   PASSENGERS
+   ================================================================== */
 .passengersSection {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  min-width: 0;
 }
 
 .sectionHeader {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
+  gap: 6px;
 }
 
 .sectionTitle {
   font-size: 12px;
   font-weight: 600;
   color: var(--dark-green);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   white-space: nowrap;
 }
 
@@ -521,11 +545,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
   padding: 10px 12px;
   background: rgba(16, 185, 129, 0.04);
   border-radius: 8px;
   border: 1px solid transparent;
-  transition: all 0.2s ease;
+  transition: border-color 0.15s ease;
 }
 
 .passengerItem:hover {
@@ -546,7 +571,7 @@
   color: var(--dark-green);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   white-space: nowrap;
 }
 
@@ -559,7 +584,7 @@
 .passengerControls {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-shrink: 0;
 }
 
@@ -577,7 +602,7 @@
   align-items: center;
   justify-content: center;
   padding: 0;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   flex-shrink: 0;
 }
 
@@ -588,12 +613,12 @@
 }
 
 .counterButton:disabled {
-  opacity: 0.3;
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
 .passengerValue {
-  min-width: 18px;
+  min-width: 16px;
   text-align: center;
   font-weight: 600;
   color: var(--dark-green);
@@ -601,21 +626,24 @@
   flex-shrink: 0;
 }
 
-/* Cabin Class Section - COMPACT HORIZONTAL GRID */
+/* ==================================================================
+   CABIN CLASS
+   ================================================================== */
 .cabinSection {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  min-width: 0;
 }
 
 .cabinGrid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2 columns for better space use */
+  grid-template-columns: repeat(2, 1fr);
   gap: 8px;
 }
 
 .cabinOption {
-  padding: 12px;
+  padding: 10px;
   background: rgba(16, 185, 129, 0.04);
   border: 1px solid transparent;
   border-radius: 8px;
@@ -623,11 +651,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   text-align: center;
-  transition: all 0.2s ease;
-  min-height: 70px; /* Fixed height */
+  transition: all 0.15s ease;
+  min-height: 72px;
   justify-content: center;
+  min-width: 0;
 }
 
 .cabinOption:hover {
@@ -649,7 +678,6 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  margin-bottom: 2px;
 }
 
 .cabinOption.active .cabinIcon {
@@ -661,6 +689,7 @@
   flex-direction: column;
   gap: 2px;
   width: 100%;
+  min-width: 0;
 }
 
 .cabinName {
@@ -672,243 +701,159 @@
 }
 
 .cabinDesc {
-  font-size: 11px;
-  opacity: 0.9;
+  font-size: 10px;
+  opacity: 0.85;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Dropdown Footer */
-.dropdownFooter {
-  padding: 14px 16px;
-  border-top: 1px solid var(--gray-light);
-  background: rgba(16, 185, 129, 0.02);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-shrink: 0;
+/* ==================================================================
+   SEARCH BUTTON
+   ================================================================== */
+.searchButtonContainer {
+  width: 100%;
 }
 
-.totalInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-  flex: 1;
-}
-
-.totalLabel {
-  font-size: 11px;
-  color: var(--gray);
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.totalValue {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--dark-green);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.applyButton {
-  padding: 6px 16px;
-  background: var(--dark-green);
-  color: var(--white);
-  border: none;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.applyButton:hover {
-  background: var(--green);
-}
-
-@media (max-width: 768px) {
-  .travelersDropdown {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90%;
-    max-width: 340px;
-    max-height: 320px;
-    margin: 0;
-  }
-
-  .dropdownContent {
-    padding: 12px;
-    gap: 12px;
-  }
-
-  .passengerItem {
-    padding: 8px 10px;
-  }
-
-  .cabinOption {
-    padding: 10px;
-    min-height: 65px;
-  }
-
-  .cabinGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
-  }
-
-  .dropdownHeader,
-  .dropdownFooter {
-    padding: 12px 14px;
-  }
-}
-
-@media (max-width: 480px) {
-  .travelersTrigger {
-    padding: 10px 12px;
-  }
-
-  .triggerIcon {
-    width: 28px;
-    height: 28px;
-  }
-
-  .travelersCount {
-    font-size: 13px;
-  }
-
-  .cabinClass {
-    font-size: 11px;
-    padding: 2px 6px;
-  }
-
-  .travelersDropdown {
-    width: 92%;
-    max-width: 320px;
-    max-height: 300px;
-  }
-
-  .cabinGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .passengerLabel {
-    font-size: 12px;
-  }
-
-  .passengerAge {
-    font-size: 10px;
-  }
-
-  .counterButton {
-    width: 22px;
-    height: 22px;
-    font-size: 11px;
-  }
-
-  .applyButton {
-    padding: 5px 14px;
-    font-size: 12px;
-  }
-}
-.totalInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.totalLabel {
-  font-size: 13px;
-  color: var(--gray);
-  font-weight: 500;
-}
-
-.totalValue {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--dark-green);
-}
-
-.applyButton {
-  padding: 12px 32px;
-  background: linear-gradient(135deg, var(--dark-green), var(--green));
-  color: var(--white);
-  border: none;
-  border-radius: 12px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.applyButton:hover {
-  transform: translateY(-2px);
-  /* box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3); */
-}
-
-/* Search Button */
 .searchButton {
   width: 100%;
-  padding: 18px;
+  padding: 16px;
   background: linear-gradient(135deg, var(--dark-green), var(--green));
   color: var(--white);
   border: none;
   border-radius: 14px;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: transform 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  letter-spacing: 0.5px;
+  gap: 10px;
+  letter-spacing: 0.3px;
+  box-sizing: border-box;
 }
 
 .searchButton:hover {
   transform: translateY(-2px);
-  /* box-shadow: 0 12px 32px rgba(16, 185, 129, 0.3); */
 }
 
-/* Responsive Design */
+/* ==================================================================
+   SUGGESTIONS
+   ================================================================== */
+.suggestions {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--white);
+  border: 1px solid var(--gray-light);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px -8px rgba(6, 78, 59, 0.15);
+  z-index: 100;
+  overflow: hidden;
+  animation: slideDown 0.15s ease-out;
+}
+
+.suggestionItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  font-size: 14px;
+}
+
+.suggestionItem:hover {
+  background: rgba(16, 185, 129, 0.06);
+}
+
+.suggestionCity {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--dark-green);
+  font-weight: 500;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.suggestionCode {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--green);
+  background: rgba(16, 185, 129, 0.1);
+  padding: 2px 8px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+/* ==================================================================
+   RESPONSIVE
+   ================================================================== */
+
+/* Large tablet / small desktop — single column, centered */
 @media (max-width: 1024px) {
   .contentWrapper {
     grid-template-columns: 1fr;
     gap: 40px;
-    max-width: 600px;
+    max-width: 640px;
+    padding: 0 4px;
   }
 
   .welcomeSection {
     text-align: center;
+    padding-right: 0;
+  }
+
+  .welcomeTitle {
+    font-size: 34px;
+  }
+
+  .featuresList {
+    text-align: left;
   }
 
   .travelersDropdown {
-    width: 600px;
+    width: 100%;
+    max-width: 100%;
+    right: 0;
+    top: calc(100% + 6px);
+  }
+
+  .dropdownContent {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
+/* Phones */
 @media (max-width: 768px) {
-  .formCard {
+  .contentWrapper {
+    max-width: 100%;
+    gap: 32px;
     padding: 0;
   }
 
   .welcomeTitle {
-    font-size: 32px;
+    font-size: 30px;
   }
 
-  .routeSection {
-    /* grid-template-columns: 1fr; */
+  .welcomeSubtitle {
+    font-size: 15px;
   }
 
-  .swapButton {
-    /* justify-self: center;
-    margin: 8px 0; */
+  .formCard {
+    padding: 24px 20px;
+    border-radius: 20px;
+  }
+
+  .tripButton {
+    padding: 10px 6px;
+    font-size: 13px;
   }
 
   .datesSection {
@@ -919,59 +864,176 @@
     position: fixed;
     top: 50%;
     left: 50%;
+    right: auto;
     transform: translate(-50%, -50%);
-    width: 90%;
-    max-width: 400px;
-    max-height: 80vh;
-    overflow-y: auto;
+    width: calc(100vw - 32px);
+    max-width: 440px;
+    max-height: 85vh;
   }
 
   .dropdownContent {
     grid-template-columns: 1fr;
-    flex-direction: column;
-    gap: 24px;
+    gap: 16px;
+    padding: 14px;
   }
 
   .passengersSection {
-    padding-right: 0;
-    border-right: none;
+    padding-bottom: 14px;
     border-bottom: 1px solid var(--gray-light);
-    padding-bottom: 24px;
   }
 
-  .cabinSection {
-    padding-left: 0;
+  .searchButton {
+    font-size: 15px;
+    padding: 14px;
   }
 }
 
+/* Small phones */
 @media (max-width: 480px) {
+  .welcomeTag {
+    font-size: 12px;
+    padding: 6px 14px;
+    margin-bottom: 20px;
+  }
+
   .welcomeTitle {
-    font-size: 28px;
+    font-size: 26px;
+  }
+
+  .welcomeSubtitle {
+    font-size: 14px;
+    margin-bottom: 28px;
+  }
+
+  .featureItem {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .featureIcon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .featureTitle {
+    font-size: 14px;
+  }
+
+  .featureDesc {
+    font-size: 12px;
   }
 
   .formCard {
-    /* padding: 24px 20px; */
-    border: 0;
+    padding: 20px 16px;
+    border-radius: 16px;
+  }
+
+  .tripType {
+    gap: 4px;
+    padding: 4px;
   }
 
   .tripButton {
-    padding: 12px 10px;
-    font-size: 13px;
+    padding: 9px 4px;
+    font-size: 12px;
+    letter-spacing: 0;
   }
 
   .input,
   .dateInput {
-    padding: 10px 6px;
-    font-size: 12px;
+    padding: 10px 12px;
+    font-size: 14px;
   }
 
-  .featureItem {
-    padding: 14px;
+  .routeSection {
+    gap: 12px;
+  }
+
+  .swapButton {
+    align-self: center;
+    margin: 0 auto;
+    width: 40px;
+    height: 40px;
+  }
+
+  .travelersDropdown {
+    width: calc(100vw - 24px);
+    max-height: 90vh;
   }
 
   .dropdownHeader,
-  .dropdownContent,
   .dropdownFooter {
-    padding: 20px;
+    padding: 10px 12px;
+  }
+
+  .counterButton {
+    width: 22px;
+    height: 22px;
+    font-size: 11px;
+  }
+
+  .passengerLabel {
+    font-size: 12px;
+  }
+
+  .passengerAge {
+    font-size: 10px;
+  }
+
+  .cabinOption {
+    padding: 8px 4px;
+    min-height: 60px;
+  }
+
+  .cabinName {
+    font-size: 11px;
+  }
+
+  .cabinDesc {
+    font-size: 9px;
+  }
+
+  .searchButton {
+    padding: 13px;
+    font-size: 14px;
+    gap: 8px;
+  }
+}
+
+/* ==================================================================
+   MOTION PREFERENCES
+   ================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .swapButton,
+  .searchButton,
+  .tripButton,
+  .cabinOption,
+  .travelersDropdown,
+  .suggestions {
+    transition: none;
+    animation: none;
+  }
+
+  .swapButton:hover,
+  .searchButton:hover {
+    transform: none;
+  }
+}
+
+/* Touch devices — disable sticky hovers */
+@media (hover: none) and (pointer: coarse) {
+  .swapButton:hover {
+    background: var(--white);
+    color: var(--green);
+    border-color: var(--gray-light);
+    transform: none;
+  }
+
+  .searchButton:hover {
+    transform: none;
+  }
+
+  .cabinOption:hover {
+    border-color: transparent;
   }
 }

@@ -1,4 +1,12 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import {
+  FiGlobe,
+  FiTwitter,
+  FiFacebook,
+  FiLinkedin,
+  FiInstagram,
+} from "react-icons/fi";
 import "./footer.css";
 
 function Footer() {
@@ -9,25 +17,25 @@ function Footer() {
       <div className="footer-container">
         <div className="footer-section">
           <div className="footer-logo">
-            <i className="fas fa-money-bill-wave"></i>
-            <span>Currency</span>
+            <FiGlobe />
+            <span>TravelFin</span>
           </div>
           <p className="footer-description">
-            Fast, secure, and reliable currency exchange platform for
+            Fast, secure, and reliable travel and finance platform for
             individuals and businesses worldwide.
           </p>
           <div className="social-links">
-            <a href="#" className="social-link">
-              <i className="fab fa-twitter"></i>
+            <a href="#" className="social-link" aria-label="Twitter">
+              <FiTwitter />
             </a>
-            <a href="#" className="social-link">
-              <i className="fab fa-facebook-f"></i>
+            <a href="#" className="social-link" aria-label="Facebook">
+              <FiFacebook />
             </a>
-            <a href="#" className="social-link">
-              <i className="fab fa-linkedin-in"></i>
+            <a href="#" className="social-link" aria-label="LinkedIn">
+              <FiLinkedin />
             </a>
-            <a href="#" className="social-link">
-              <i className="fab fa-instagram"></i>
+            <a href="#" className="social-link" aria-label="Instagram">
+              <FiInstagram />
             </a>
           </div>
         </div>
@@ -36,19 +44,19 @@ function Footer() {
           <h3 className="footer-heading">Quick Links</h3>
           <ul className="footer-links">
             <li>
-              <a href="/">Home</a>
+              <Link to="/">Home</Link>
             </li>
             <li>
-              <a href="/exchange">Exchange</a>
+              <Link to="/exchange">Exchange</Link>
             </li>
             <li>
-              <a href="/rates">Exchange Rates</a>
+              <Link to="/rates">Exchange Rates</Link>
             </li>
             <li>
-              <a href="/calculator">Calculator</a>
+              <Link to="/calculator">Calculator</Link>
             </li>
             <li>
-              <a href="/about">About Us</a>
+              <Link to="/about">About Us</Link>
             </li>
           </ul>
         </div>
@@ -57,13 +65,16 @@ function Footer() {
           <h3 className="footer-heading">Services</h3>
           <ul className="footer-links">
             <li>
-              <a href="/personal">Exchange Currency</a>
+              <Link to="/exchange">Exchange Currency</Link>
             </li>
             <li>
-              <a href="/personal">Travel Agency</a>
+              <Link to="/travel-agency">Travel Agency</Link>
             </li>
             <li>
-              <a href="/personal">Book a flight</a>
+              <Link to="/flight">Book a Flight</Link>
+            </li>
+            <li>
+              <Link to="/visa">Visa Services</Link>
             </li>
           </ul>
         </div>
@@ -72,19 +83,19 @@ function Footer() {
           <h3 className="footer-heading">Support</h3>
           <ul className="footer-links">
             <li>
-              <a href="/help">Help Center</a>
+              <Link to="/help">Help Center</Link>
             </li>
             <li>
-              <a href="/contact">Contact Us</a>
+              <Link to="/contact">Contact Us</Link>
             </li>
             <li>
-              <a href="/faq">FAQ</a>
+              <Link to="/help#faq">FAQ</Link>
             </li>
             <li>
-              <a href="/security">Security</a>
+              <Link to="/security">Security</Link>
             </li>
             <li>
-              <a href="/privacy">Privacy Policy</a>
+              <Link to="/privacy">Privacy Policy</Link>
             </li>
           </ul>
         </div>
@@ -93,14 +104,14 @@ function Footer() {
       <div className="footer-bottom">
         <div className="footer-bottom-container">
           <div className="copyright">
-            &copy; {currentYear} Currency. All rights reserved.
+            &copy; {currentYear} TravelFin. All rights reserved.
           </div>
           <div className="legal-links">
-            <a href="/terms">Terms of Service</a>
+            <Link to="/terms">Terms of Service</Link>
             <span className="separator">|</span>
-            <a href="/privacy">Privacy Policy</a>
+            <Link to="/privacy">Privacy Policy</Link>
             <span className="separator">|</span>
-            <a href="/cookies">Cookie Policy</a>
+            <Link to="/cookies">Cookie Policy</Link>
           </div>
         </div>
       </div>

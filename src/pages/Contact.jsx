@@ -95,8 +95,8 @@ const Contact = () => {
     {
       icon: <FiPhone />,
       label: "Phone",
-      value: "+1 (555) 123-4567",
-      href: "tel:+15551234567",
+      value: "+234 703 485 7569",
+      href: "tel:+234 703 485 7569",
     },
     {
       icon: <FiMapPin />,
@@ -245,7 +245,7 @@ const Contact = () => {
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    placeholder="+1 555 000 0000"
+                    placeholder="+234 000 000 000"
                   />
                 </div>
 
